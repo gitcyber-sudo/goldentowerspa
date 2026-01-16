@@ -40,7 +40,7 @@
             },
             backgroundImage: {
               'hero-pattern': "url('https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?q=80&w=2070&auto=format&fit=crop')",
-              'texture': "url('https://www.transparenttextures.com/patterns/cream-paper.png')" // Subtle noise texture
+              'texture': "url('https://www.transparenttextures.com/patterns/cream-paper.png')"
             }
           }
         }
@@ -48,42 +48,30 @@
     </script>
 
     <style>
-      /* Smooth scrolling for anchor links */
-      html {
-        scroll-behavior: smooth;
-      }
-      body {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #F9F7F2; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #C5A059; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #997B3D; 
-      }
+      html { scroll-behavior: smooth; }
+      body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: #F9F7F2; }
+      ::-webkit-scrollbar-thumb { background: #C5A059; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #997B3D; }
     </style>
-  <script type="importmap">
+
+    <script type="importmap">
 {
   "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "lucide-react": "https://esm.sh/lucide-react@0.460.0",
+    "gsap": "https://esm.sh/gsap@3.12.5",
+    "gsap/ScrollTrigger": "https://esm.sh/gsap@3.12.5/ScrollTrigger",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "gsap/": "https://esm.sh/gsap@^3.14.2/",
-    "gsap": "https://esm.sh/gsap@^3.14.2"
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "gsap/": "https://esm.sh/gsap@^3.14.2/"
   }
 }
 </script>
-</head>
+  </head>
   <body class="bg-cream text-charcoal font-sans antialiased selection:bg-gold selection:text-white">
     <div id="root"></div>
   </body>
