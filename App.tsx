@@ -7,11 +7,11 @@ import Footer from './components/Footer';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
 
 const App: React.FC = () => {
-  // Initialize GSAP Animations via custom hook
+  // Initialize GSAP Animations
   const containerRef = useScrollAnimation();
 
   return (
-    <div ref={containerRef} className="bg-cream min-h-screen w-full overflow-x-hidden">
+    <div ref={containerRef} className="bg-cream min-h-screen w-full overflow-x-hidden selection:bg-gold selection:text-white">
       <Header />
       <main>
         <Hero />
