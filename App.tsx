@@ -1,7 +1,9 @@
+
 import React from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Philosophy from './components/Philosophy';
+import VisualJourney from './components/VisualJourney';
 import Services from './components/Services';
 import Footer from './components/Footer';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
@@ -15,8 +17,17 @@ const App: React.FC = () => {
       <Header />
       <main>
         <Hero />
-        <Philosophy />
-        <Services />
+        {/* Added section-reveal class for polished GSAP scale/fade entry */}
+        <div className="section-reveal will-change-transform">
+          <Philosophy />
+        </div>
+        
+        {/* New Scroll-Driven Animation Section */}
+        <VisualJourney />
+        
+        <div className="section-reveal will-change-transform">
+          <Services />
+        </div>
       </main>
       <Footer />
     </div>
