@@ -5,6 +5,7 @@ import Hero from './components/Hero';
 import Philosophy from './components/Philosophy';
 import VisualJourney from './components/VisualJourney';
 import Services from './components/Services';
+import Therapists from './components/Therapists';
 import Footer from './components/Footer';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
 
@@ -22,12 +23,15 @@ const App: React.FC = () => {
           <Philosophy />
         </div>
         
-        {/* New Scroll-Driven Animation Section */}
+        {/* Scroll-Driven Animation Section */}
         <VisualJourney />
         
         <div className="section-reveal will-change-transform">
           <Services />
         </div>
+
+        {/* Therapists Section with Dual Animation Logic (Desktop vs Mobile) */}
+        <Therapists />
       </main>
       <Footer />
     </div>
