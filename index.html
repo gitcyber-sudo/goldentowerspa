@@ -11,47 +11,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS (CDN for simplicity in this setup) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              gold: {
-                light: '#D4AF37',
-                DEFAULT: '#C5A059',
-                dark: '#997B3D',
-              },
-              cream: {
-                DEFAULT: '#F9F7F2',
-                dark: '#EBE5D9',
-              },
-              charcoal: {
-                light: '#2C2C2C',
-                DEFAULT: '#1A1A1A',
-                dark: '#0F0F0F',
-              }
-            },
-            fontFamily: {
-              serif: ['"Playfair Display"', 'serif'],
-              sans: ['"Inter"', 'sans-serif'],
-            },
-            backgroundImage: {
-              'hero-pattern': "url('https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?q=80&w=2070&auto=format&fit=crop')",
-            }
-          }
-        }
-      }
-    </script>
-    
+    <!-- Custom Styling Essentials -->
     <style>
+       :root {
+         --color-gold: #C5A059;
+         --color-cream: #F9F7F2;
+         --color-charcoal: #1A1A1A;
+       }
        html { scroll-behavior: smooth; }
-       body { background-color: #F9F7F2; }
+       body { background-color: var(--color-cream); color: var(--color-charcoal); }
+       
        /* Custom Scrollbar */
        ::-webkit-scrollbar { width: 8px; }
-       ::-webkit-scrollbar-track { background: #F9F7F2; }
-       ::-webkit-scrollbar-thumb { background: #C5A059; border-radius: 4px; }
+       ::-webkit-scrollbar-track { background: var(--color-cream); }
+       ::-webkit-scrollbar-thumb { background: var(--color-gold); border-radius: 4px; }
     </style>
   <script type="importmap">
 {
