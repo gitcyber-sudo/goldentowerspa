@@ -1,82 +1,166 @@
-import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowRight, Loader2, Sparkles, Crown } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface ServiceItem {
+  id: string;
   title: string;
   description: string;
-  image: string;
+  image_url: string;
   duration: string;
-  price?: string;
+  price: number;
+  category?: string;
 }
 
-const services: ServiceItem[] = [
-  {
-    title: "Traditional Hilot Massage",
-    description: "An ancient Filipino healing art that uses banana leaves and virgin coconut oil to detect ailments and restore balance to the body's energy.",
-    image: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=2787&auto=format&fit=crop",
-    duration: "90 min"
-  },
-  {
-    title: "Golden Glow Facial",
-    description: "Our signature facial using 24k gold-infused serums to boost collagen, reduce inflammation, and leave your skin with a radiant, youthful shimmer.",
-    image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=2070&auto=format&fit=crop",
-    duration: "60 min"
-  },
-  {
-    title: "Tower Ritual Foot Spa",
-    description: "A grounding ritual beginning with a warm soak in minerals and essential oils, followed by a reflexology massage to release tension from the soles up.",
-    image: "https://images.unsplash.com/photo-1519415387722-a1c3bbef716c?q=80&w=2070&auto=format&fit=crop",
-    duration: "45 min"
-  }
-];
+interface ServicesProps {
+  onBookClick: (id: string) => void;
+}
 
-const Services: React.FC = () => {
+const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('services')
+          .select('*')
+          .order('title', { ascending: true });
+
+        if (error) throw error;
+        if (data) setServices(data);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  const signatureTreatments = services.filter(s =>
+    s.category === 'signature' || s.title.toLowerCase().includes('signature')
+  );
+
+  const luxuryPackages = services.filter(s =>
+    s.category === 'package' || s.title.toLowerCase().includes('package')
+  );
+
+  const regularServices = services.filter(s =>
+    !signatureTreatments.includes(s) && !luxuryPackages.includes(s)
+  );
+
   return (
-    <section id="services" className="py-24 bg-white relative">
+    <section id="services" className="py-24 bg-white relative overflow-hidden">
+      {/* Custom Styles */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @keyframes border-rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes shine {
+          0% { left: -100%; top: -100%; }
+          20% { left: 100%; top: 100%; }
+          100% { left: 100%; top: 100%; }
+        }
+        .signature-card::before {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          background: conic-gradient(from 0deg, #C5A059, #F9F7F2, #997B3D, #F9F7F2, #C5A059);
+          border-radius: 1.25rem;
+          animation: border-rotate 4s linear infinite;
+          z-index: -1;
+        }
+        .shimmer-effect::after {
+          content: '';
+          position: absolute;
+          width: 50%;
+          height: 200%;
+          background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+          transform: rotate(45deg);
+          animation: shine 6s ease-in-out infinite;
+        }
+      `}} />
+
       <div className="container mx-auto px-6 md:px-12">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16 fade-up">
-            <div>
-                <span className="text-gold text-sm uppercase tracking-widest font-bold mb-2 block">Curated Menu</span>
-                <h2 className="font-serif text-4xl md:text-5xl text-charcoal">Signature Treatments</h2>
+        {/* --- SIGNATURE SECTION --- */}
+        <div className="mb-24">
+          <div className="flex flex-col mb-12 fade-up">
+            <span className="text-gold text-sm uppercase tracking-widest font-bold mb-2 block">The Art of Healing</span>
+            <h2 className="font-serif text-4xl md:text-5xl text-charcoal">Signature Massages</h2>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-10"><Loader2 className="animate-spin text-gold" size={32} /></div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...signatureTreatments, ...regularServices].map((service) => (
+                <div
+                  key={service.id}
+                  className={`group cursor-pointer transition-all duration-700 relative ${service.title.toLowerCase().includes('signature')
+                    ? 'signature-card bg-white rounded-2xl p-4 shadow-xl scale-105 z-10'
+                    : 'bg-cream/30 p-4 rounded-2xl border border-gold/10'
+                    }`}
+                  onClick={() => onBookClick(service.id)}
+                >
+                  <div className={`relative h-[300px] w-full overflow-hidden mb-6 rounded-lg ${service.title.toLowerCase().includes('signature') ? 'shimmer-effect' : ''}`}>
+                    <img src={service.image_url} alt={service.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                    <div className="absolute bottom-4 right-4 bg-gold text-white px-3 py-1 text-sm font-bold shadow-md">P {service.price}</div>
+                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] uppercase font-bold tracking-widest">{service.duration}</div>
+                  </div>
+                  <h3 className="font-serif text-2xl text-charcoal mb-2 group-hover:text-gold transition-colors">{service.title}</h3>
+                  <p className="text-charcoal-light text-sm font-light mb-4 line-clamp-2 italic">
+                    {service.description.toLowerCase().charAt(0).toUpperCase() + service.description.toLowerCase().slice(1)}
+                  </p>
+                  <span className="text-gold text-xs font-bold uppercase tracking-widest flex items-center">Book Massage <ArrowRight size={14} className="ml-2" /></span>
+                </div>
+              ))}
             </div>
-            <a href="#" className="hidden md:flex items-center text-charcoal hover:text-gold transition-colors mt-4 md:mt-0 group">
-                <span className="uppercase tracking-widest text-sm mr-2">View Full Menu</span>
-                <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
-            </a>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-container">
-          {services.map((service, index) => (
-            <div key={index} className="stagger-item group cursor-pointer">
-              <div className="relative h-[400px] w-full overflow-hidden mb-6">
-                <div className="absolute inset-0 bg-charcoal/20 group-hover:bg-charcoal/0 transition-all duration-500 z-10" />
-                <img 
-                  src={service.image} 
-                  alt={service.title}
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                />
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-xs uppercase tracking-wider z-20">
-                    {service.duration}
+        {/* --- PACKAGES SECTION --- */}
+        <div id="packages" className="pt-24 border-t border-gold/10">
+          <div className="flex flex-col mb-12 fade-up text-center">
+            <span className="text-gold text-sm uppercase tracking-widest font-bold mb-2 block">Exclusive Bundles</span>
+            <h2 className="font-serif text-4xl md:text-5xl text-charcoal">Luxury Packages</h2>
+            <p className="text-charcoal-light mt-4 max-w-2xl mx-auto">Experience more for less. Our packages are designed to provide a holistic journey of rebirth and relaxation.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {luxuryPackages.map((pkg) => (
+              <div
+                key={pkg.id}
+                className="bg-[#Fdfbf7] border-2 border-sepia-200/30 rounded-3xl overflow-hidden hover:border-gold/50 transition-all duration-500 group cursor-pointer shadow-sm hover:shadow-xl p-8 flex flex-col justify-between min-h-[300px]"
+                onClick={() => onBookClick(pkg.id)}
+              >
+                <div>
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <span className="text-gold text-[10px] uppercase font-black tracking-[0.3em] mb-2 block">Value Bundle</span>
+                      <h3 className="font-serif text-3xl text-sepia-900">{pkg.title}</h3>
+                    </div>
+                    <div className="bg-gold/10 text-gold px-4 py-2 rounded-xl font-bold">
+                      P{pkg.price}
+                    </div>
+                  </div>
+                  <p className="text-charcoal-light text-lg italic mb-6 whitespace-pre-line leading-relaxed border-l-2 border-gold/20 pl-6">
+                    {pkg.description.toLowerCase().charAt(0).toUpperCase() + pkg.description.toLowerCase().slice(1)}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between mt-auto pt-6 border-t border-gold/10">
+                  <span className="text-[10px] uppercase tracking-widest text-charcoal/50 font-bold">{pkg.duration} Total Duration</span>
+                  <div className="text-gold text-xs font-bold uppercase tracking-widest flex items-center group-hover:translate-x-1 transition-transform">
+                    Select Package <ArrowRight size={14} className="ml-2" />
+                  </div>
                 </div>
               </div>
-              
-              <h3 className="font-serif text-2xl text-charcoal mb-3 group-hover:text-gold transition-colors">
-                {service.title}
-              </h3>
-              <p className="text-charcoal-light font-light leading-relaxed mb-4 text-sm md:text-base border-l-2 border-transparent group-hover:border-gold pl-0 group-hover:pl-4 transition-all duration-300">
-                {service.description}
-              </p>
-              <span className="inline-flex items-center text-xs uppercase tracking-widest font-medium text-gold opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                Book Treatment <ArrowRight size={12} className="ml-2" />
-              </span>
-            </div>
-          ))}
-        </div>
-        
-        <div className="mt-12 text-center md:hidden">
-            <button className="text-charcoal border border-charcoal/20 px-8 py-3 uppercase text-sm tracking-widest hover:bg-charcoal hover:text-white transition-colors">
-                View Full Menu
-            </button>
+            ))}
+          </div>
         </div>
       </div>
     </section>
