@@ -105,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.warn("Global Auth timeout hit. Unsticking UI.");
                 setLoading(false);
             }
-        }, 8000);
+        }, 4500);
 
         return () => {
             mounted = false;

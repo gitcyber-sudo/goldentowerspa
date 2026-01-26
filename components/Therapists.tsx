@@ -29,7 +29,6 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    // Wait for auth to settle (can be signed in or not)
     if (authLoading) return;
 
     let mounted = true;
@@ -37,9 +36,10 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
     const fetchTherapists = async (retryCount = 0) => {
       if (!mounted) return;
 
-      if (retryCount === 0) setLoading(true);
+      setLoading(true);
 
       try {
+        console.log(`Therapists: Fetch attempt ${retryCount + 1}...`);
         const { data, error } = await supabase
           .from('therapists')
           .select('*')
@@ -47,22 +47,24 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
 
         if (error) throw error;
 
-        // If we got no data, retry once after a delay to 'wait out' any sync lag
         if ((!data || data.length === 0) && retryCount < 1) {
-          console.log(`Therapists: No data found, retrying in 1.5s (attempt ${retryCount + 1})...`);
-          setTimeout(() => fetchTherapists(retryCount + 1), 1500);
+          console.log("Therapists: No data yet, retrying in 2s...");
+          setTimeout(() => fetchTherapists(retryCount + 1), 2000);
           return;
         }
 
-        if (data && mounted) setTeam(data);
+        if (data && mounted) {
+          console.log(`Therapists: Loaded ${data.length} specialists`);
+          setTeam(data);
+        }
       } catch (error) {
-        console.error('Error fetching therapists:', error);
+        console.error('Therapists fetch error:', error);
         if (retryCount < 1) {
-          setTimeout(() => fetchTherapists(retryCount + 1), 1500);
+          setTimeout(() => fetchTherapists(retryCount + 1), 2000);
           return;
         }
       } finally {
-        if (mounted && (retryCount >= 1 || (team.length > 0))) {
+        if (mounted) {
           setLoading(false);
         }
       }

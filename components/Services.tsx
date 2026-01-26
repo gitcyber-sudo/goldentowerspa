@@ -23,7 +23,8 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
   const { loading: authLoading, user } = useAuth();
 
   useEffect(() => {
-    // Wait for auth to settle (can be signed in or not)
+    // Wait for auth to settle to prevent unnecessary dual-fetches 
+    // during initial app load, but don't block forever
     if (authLoading) return;
 
     let mounted = true;
@@ -31,10 +32,11 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
     const fetchServices = async (retryCount = 0) => {
       if (!mounted) return;
 
-      // If this is a retry, don't set global loading yet, just try again
-      if (retryCount === 0) setLoading(true);
+      // Ensure spinner is visible on every fetch attempt
+      setLoading(true);
 
       try {
+        console.log(`Services: Fetch attempt ${retryCount + 1}...`);
         const { data, error } = await supabase
           .from('services')
           .select('*')
@@ -42,27 +44,26 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
 
         if (error) throw error;
 
-        // If we got no data but we're logged in, there might be a sync delay
-        // Retry once after 1.5 seconds (the 'Dashbord Trick')
+        // If no data returned, it might be a Supabase sync delay
         if ((!data || data.length === 0) && retryCount < 1) {
-          console.log(`Services: No data found, retrying in 1.5s (attempt ${retryCount + 1})...`);
-          setTimeout(() => fetchServices(retryCount + 1), 1500);
+          console.log("Services: No data yet, retrying in 2s...");
+          setTimeout(() => fetchServices(retryCount + 1), 2000);
           return;
         }
 
-        if (data && mounted) setServices(data);
+        if (data && mounted) {
+          console.log(`Services: Loaded ${data.length} items`);
+          setServices(data);
+        }
       } catch (error) {
-        console.error('Error fetching services:', error);
-        // Also retry on error
+        console.error('Services fetch error:', error);
+        // Try a retry even on error (e.g. network blip during sync)
         if (retryCount < 1) {
-          setTimeout(() => fetchServices(retryCount + 1), 1500);
+          setTimeout(() => fetchServices(retryCount + 1), 2000);
           return;
         }
       } finally {
-        if (mounted && retryCount >= 1) {
-          setLoading(false);
-        } else if (mounted && services.length > 0) {
-          // If we already have data from a previous success, ensure loading is off
+        if (mounted) {
           setLoading(false);
         }
       }
@@ -70,23 +71,23 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
 
     fetchServices();
     return () => { mounted = false; };
-  }, [authLoading]); // Re-fetch when auth settle status changes
+  }, [authLoading]);
 
-  const processedServices = services.map(s => ({
+  const processedServices = (services || []).map(s => ({
     ...s
   }));
 
   const signatureTreatments = processedServices
-    .filter(s => s.category === 'signature' || s.title.toLowerCase().includes('signature'))
-    .sort((a, b) => a.title.localeCompare(b.title));
+    .filter(s => s && (s.category === 'signature' || (s.title && s.title.toLowerCase().includes('signature'))))
+    .sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 
   const luxuryPackages = processedServices
-    .filter(s => s.title.toUpperCase().includes('PACKAGE'))
-    .sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
+    .filter(s => s && s.title && s.title.toUpperCase().includes('PACKAGE'))
+    .sort((a, b) => (a.title || "").localeCompare(b.title || "", undefined, { numeric: true }));
 
   const regularServices = processedServices.filter(s =>
-    !signatureTreatments.some(st => st.id === s.id) && !luxuryPackages.some(lp => lp.id === s.id)
-  ).sort((a, b) => a.title.localeCompare(b.title));
+    s && !signatureTreatments.some(st => st.id === s.id) && !luxuryPackages.some(lp => lp.id === s.id)
+  ).sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 
   return (
     <section id="services" className="py-24 bg-white relative overflow-hidden">
@@ -172,38 +173,42 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
             <p className="text-charcoal-light mt-4 max-w-2xl mx-auto">Experience more for less. Our packages are designed to provide a holistic journey of rebirth and relaxation.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {luxuryPackages.map((pkg) => (
-              <div
-                key={pkg.id}
-                className="bg-[#Fdfbf7] border-2 border-sepia-200/30 rounded-3xl overflow-hidden hover:border-gold/50 transition-all duration-500 group shadow-sm hover:shadow-xl p-8 flex flex-col justify-between min-h-[300px]"
-              >
-                <div>
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <span className="text-gold text-[10px] uppercase font-black tracking-[0.3em] mb-2 block">Value Bundle</span>
-                      <h3 className="font-serif text-3xl text-sepia-900">{pkg.title}</h3>
+          {loading ? (
+            <div className="flex justify-center py-20"><Loader2 className="animate-spin text-gold" size={32} /></div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {luxuryPackages.map((pkg) => (
+                <div
+                  key={pkg.id}
+                  className="bg-[#Fdfbf7] border-2 border-sepia-200/30 rounded-3xl overflow-hidden hover:border-gold/50 transition-all duration-500 group shadow-sm hover:shadow-xl p-8 flex flex-col justify-between min-h-[300px]"
+                >
+                  <div>
+                    <div className="flex justify-between items-start mb-6">
+                      <div>
+                        <span className="text-gold text-[10px] uppercase font-black tracking-[0.3em] mb-2 block">Value Bundle</span>
+                        <h3 className="font-serif text-3xl text-sepia-900">{pkg.title}</h3>
+                      </div>
+                      <div className="bg-gold/10 text-gold px-4 py-2 rounded-xl font-bold">
+                        P{pkg.price}
+                      </div>
                     </div>
-                    <div className="bg-gold/10 text-gold px-4 py-2 rounded-xl font-bold">
-                      P{pkg.price}
-                    </div>
+                    <p className="text-charcoal-light text-lg italic mb-6 whitespace-pre-line leading-relaxed border-l-2 border-gold/20 pl-6">
+                      {pkg.description.toLowerCase().charAt(0).toUpperCase() + pkg.description.toLowerCase().slice(1)}
+                    </p>
                   </div>
-                  <p className="text-charcoal-light text-lg italic mb-6 whitespace-pre-line leading-relaxed border-l-2 border-gold/20 pl-6">
-                    {pkg.description.toLowerCase().charAt(0).toUpperCase() + pkg.description.toLowerCase().slice(1)}
-                  </p>
+                  <div className="flex items-center justify-between mt-auto pt-6 border-t border-gold/10">
+                    <span className="text-[10px] uppercase tracking-widest text-charcoal/50 font-bold">{pkg.duration} Total Duration</span>
+                    <button
+                      onClick={() => onBookClick(pkg.id)}
+                      className="text-gold text-xs font-bold uppercase tracking-widest flex items-center group-hover:translate-x-1 transition-transform cursor-pointer"
+                    >
+                      Select Package <ArrowRight size={14} className="ml-2" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between mt-auto pt-6 border-t border-gold/10">
-                  <span className="text-[10px] uppercase tracking-widest text-charcoal/50 font-bold">{pkg.duration} Total Duration</span>
-                  <button
-                    onClick={() => onBookClick(pkg.id)}
-                    className="text-gold text-xs font-bold uppercase tracking-widest flex items-center group-hover:translate-x-1 transition-transform cursor-pointer"
-                  >
-                    Select Package <ArrowRight size={14} className="ml-2" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>
