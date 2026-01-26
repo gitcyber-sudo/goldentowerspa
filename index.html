@@ -1,49 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Golden Tower Spa</title>
-    <meta name="description" content="A luxury, high-end spa experience featuring traditional Hilot massage and premium wellness treatments." />
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
-    <!-- Custom Styling Essentials -->
-    <style>
-       :root {
-         --color-gold: #C5A059;
-         --color-cream: #F9F7F2;
-         --color-charcoal: #1A1A1A;
-       }
-       html { scroll-behavior: smooth; }
-       body { background-color: var(--color-cream); color: var(--color-charcoal); }
-       
-       /* Custom Scrollbar */
-       ::-webkit-scrollbar { width: 8px; }
-       ::-webkit-scrollbar-track { background: var(--color-cream); }
-       ::-webkit-scrollbar-thumb { background: var(--color-gold); border-radius: 4px; }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "gsap": "https://esm.sh/gsap@^3.14.2",
-    "gsap/": "https://esm.sh/gsap@^3.14.2/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
-  }
-}
-</script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Golden Tower Spa</title>
+  <meta name="description"
+    content="A luxury, high-end spa experience featuring traditional Hilot massage and premium wellness treatments." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+    rel="stylesheet">
+
+  <!-- Custom Styling Essentials -->
+  <style>
+    :root {
+      --color-gold: #C5A059;
+      --color-cream: #F9F7F2;
+      --color-charcoal: #1A1A1A;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--color-cream);
+      color: var(--color-charcoal);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--color-cream);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--color-gold);
+      border-radius: 4px;
+    }
+  </style>
 </head>
-  <body class="bg-cream text-charcoal font-sans antialiased">
-    <div id="root"></div>
-    <!-- Vite Entry Point -->
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<body class="bg-cream text-charcoal font-sans antialiased">
+  <div id="root"></div>
+  <!-- Vite Entry Point -->
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>
