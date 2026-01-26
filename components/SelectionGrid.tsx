@@ -35,12 +35,12 @@ const SelectionGrid: React.FC<SelectionGridProps> = ({ options, selectedId, onSe
                             }
             `}
                     >
-                        {option.imageUrl && (
+                        {option.imageUrl && !option.title.toUpperCase().includes('PACKAGE') && (
                             <div className="w-16 h-16 rounded-lg bg-gray-200 overflow-hidden flex-shrink-0 border border-gold/10">
                                 <img src={option.imageUrl} alt={option.title} className="w-full h-full object-cover" />
                             </div>
                         )}
-                        <div className="flex-1 min-w-0">
+                        <div className={`flex-1 min-w-0 ${!option.imageUrl || option.title.toUpperCase().includes('PACKAGE') ? 'py-1' : ''}`}>
                             <div className="flex justify-between items-start capitalize">
                                 <h4 className={`font-serif text-base font-bold ${selectedId === option.id ? 'text-charcoal' : 'text-charcoal/80'}`}>
                                     {option.title.toLowerCase()}

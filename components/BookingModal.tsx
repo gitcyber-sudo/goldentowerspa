@@ -49,18 +49,26 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
     }, [isOpen, user]);
 
     const fetchData = async () => {
-        const { data: s } = await supabase.from('services').select('*').order('title');
+        const { data: s } = await supabase.from('services').select('*');
         const { data: t } = await supabase.from('therapists').select('*').order('name');
 
         if (s) {
-            // Apply image fixes as seen in Services.tsx
-            const processedServices = s.map(service => ({
-                ...service,
-                image_url: service.title === 'Shiatsu Massage'
-                    ? 'https://images.unsplash.com/photo-1611077544192-fa35438177e7?q=80&w=2070'
-                    : service.image_url
-            }));
-            setServices(processedServices);
+            const sortedServices = [...s].sort((a, b) => {
+                const aTitle = a.title.toUpperCase();
+                const bTitle = b.title.toUpperCase();
+                const aIsSignature = a.category === 'signature' || aTitle.includes('SIGNATURE');
+                const bIsSignature = b.category === 'signature' || bTitle.includes('SIGNATURE');
+                const aIsPackage = aTitle.includes('PACKAGE');
+                const bIsPackage = bTitle.includes('PACKAGE');
+
+                if (aIsSignature && !bIsSignature) return -1;
+                if (!aIsSignature && bIsSignature) return 1;
+                if (aIsPackage && !bIsPackage) return 1;
+                if (!aIsPackage && bIsPackage) return -1;
+                if (aIsPackage && bIsPackage) return aTitle.localeCompare(bTitle, undefined, { numeric: true });
+                return aTitle.localeCompare(bTitle);
+            });
+            setServices(sortedServices);
         }
         if (t) setTherapists(t);
     };

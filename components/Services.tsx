@@ -54,7 +54,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
 
     fetchServices();
     return () => { mounted = false; };
-  }, [user]); // Re-fetch if user changes (e.g. login/logout)
+  }, []); // Only fetch once on mount to prevent "stuck" loading during auth shifts
 
   const processedServices = services.map(s => ({
     ...s,
@@ -63,23 +63,17 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
       : s.image_url
   }));
 
-  const signatureTreatments = processedServices.filter(s =>
-    s.category === 'signature' || s.title.toLowerCase().includes('signature')
-  );
+  const signatureTreatments = processedServices
+    .filter(s => s.category === 'signature' || s.title.toLowerCase().includes('signature'))
+    .sort((a, b) => a.title.localeCompare(b.title));
 
-  const targetPackages = [
-    'PACKAGE 1',
-    'PACKAGE 2',
-    'PACKAGE 3',
-    'PACKAGE 4'
-  ];
   const luxuryPackages = processedServices
-    .filter(s => targetPackages.includes(s.title))
-    .sort((a, b) => targetPackages.indexOf(a.title) - targetPackages.indexOf(b.title));
+    .filter(s => s.title.toUpperCase().includes('PACKAGE'))
+    .sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
 
   const regularServices = processedServices.filter(s =>
     !signatureTreatments.some(st => st.id === s.id) && !luxuryPackages.some(lp => lp.id === s.id)
-  );
+  ).sort((a, b) => a.title.localeCompare(b.title));
 
   return (
     <section id="services" className="py-24 bg-white relative overflow-hidden">

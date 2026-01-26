@@ -27,21 +27,24 @@ interface Booking {
 }
 
 const UserDashboard: React.FC = () => {
-    const { user, profile, signOut } = useAuth();
+    const { user, profile, signOut, loading: authLoading } = useAuth();
     const navigate = useNavigate();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'current' | 'past'>('current');
 
     useEffect(() => {
-        if (user) {
+        if (!authLoading && user) {
             fetchBookings();
+        } else if (!authLoading && !user) {
+            setLoading(false);
         }
-    }, [user]);
+    }, [user, authLoading]);
 
-    const fetchBookings = async () => {
+    const fetchBookings = async (retryCount = 0) => {
         setLoading(true);
         try {
+            console.log("Dashboard: Fetching for user:", user?.id);
             const { data, error } = await supabase
                 .from('bookings')
                 .select(`
@@ -53,7 +56,17 @@ const UserDashboard: React.FC = () => {
                 .order('booking_date', { ascending: false });
 
             if (error) throw error;
-            if (data) setBookings(data as any);
+
+            if (data) {
+                console.log("Dashboard: Found bookings:", data.length);
+                setBookings(data as any);
+
+                // If zero records found but user is sure they have some, 
+                // it might be a transient Supabase sync issue. Retry once.
+                if (data.length === 0 && retryCount < 1) {
+                    setTimeout(() => fetchBookings(retryCount + 1), 2000);
+                }
+            }
         } catch (err) {
             console.error('Error fetching bookings:', err);
         } finally {
@@ -150,6 +163,17 @@ const UserDashboard: React.FC = () => {
         </div>
     );
 
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-cream flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gold/20 border-t-gold mb-4" />
+                    <p className="font-serif text-xl text-charcoal">Restoring your session...</p>
+                </div>
+            </div>
+        );
+    }
+
     if (!user) {
         return (
             <div className="min-h-screen bg-cream flex items-center justify-center">
@@ -237,8 +261,8 @@ const UserDashboard: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('current')}
                         className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeTab === 'current'
-                                ? 'text-gold'
-                                : 'text-charcoal/40 hover:text-charcoal/60'
+                            ? 'text-gold'
+                            : 'text-charcoal/40 hover:text-charcoal/60'
                             }`}
                     >
                         Current Bookings
@@ -249,8 +273,8 @@ const UserDashboard: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('past')}
                         className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeTab === 'past'
-                                ? 'text-gold'
-                                : 'text-charcoal/40 hover:text-charcoal/60'
+                            ? 'text-gold'
+                            : 'text-charcoal/40 hover:text-charcoal/60'
                             }`}
                     >
                         <History size={16} className="inline mr-2" />

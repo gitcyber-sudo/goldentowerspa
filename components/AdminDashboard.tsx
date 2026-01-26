@@ -146,8 +146,25 @@ const AdminDashboard: React.FC = () => {
     };
 
     const fetchServices = async () => {
-        const { data } = await supabase.from('services').select('*').order('title');
-        if (data) setServices(data);
+        const { data } = await supabase.from('services').select('*');
+        if (data) {
+            const sorted = [...data].sort((a, b) => {
+                const aTitle = a.title.toUpperCase();
+                const bTitle = b.title.toUpperCase();
+                const aIsSignature = a.category === 'signature' || aTitle.includes('SIGNATURE');
+                const bIsSignature = b.category === 'signature' || bTitle.includes('SIGNATURE');
+                const aIsPackage = aTitle.includes('PACKAGE');
+                const bIsPackage = bTitle.includes('PACKAGE');
+
+                if (aIsSignature && !bIsSignature) return -1;
+                if (!aIsSignature && bIsSignature) return 1;
+                if (aIsPackage && !bIsPackage) return 1;
+                if (!aIsPackage && bIsPackage) return -1;
+                if (aIsPackage && bIsPackage) return aTitle.localeCompare(bTitle, undefined, { numeric: true });
+                return aTitle.localeCompare(bTitle);
+            });
+            setServices(sorted);
+        }
     };
 
     const handleManualBooking = async (e: React.FormEvent) => {
