@@ -52,10 +52,10 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
   );
 
   const targetPackages = [
-    'Radiance & Relaxation Ritual',
-    'Golden Tower Signature Bliss',
-    'Royal Hilot Heritage',
-    'Elite Rebirth Experience'
+    'PACKAGE 1',
+    'PACKAGE 2',
+    'PACKAGE 3',
+    'PACKAGE 4'
   ];
   const luxuryPackages = processedServices
     .filter(s => targetPackages.includes(s.title))
