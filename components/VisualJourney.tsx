@@ -7,22 +7,22 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const cloudImages = [
-  // Top Left
-  { src: "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?q=80&w=600&auto=format&fit=crop", top: "10%", left: "10%", xDir: -150, yDir: -150 },
-  // Top Right
-  { src: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600&auto=format&fit=crop", top: "10%", left: "90%", xDir: 150, yDir: -150 },
-  // Bottom Left
-  { src: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=600&auto=format&fit=crop", top: "90%", left: "10%", xDir: -150, yDir: 150 },
-  // Bottom Right
-  { src: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=600&auto=format&fit=crop", top: "90%", left: "90%", xDir: 150, yDir: 150 },
-  // Top Center
-  { src: "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=600&auto=format&fit=crop", top: "5%", left: "50%", xDir: 0, yDir: -200 },
-  // Bottom Center (Hero/Treatment vibe)
-  { src: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format&fit=crop", top: "95%", left: "50%", xDir: 0, yDir: 200 },
-  // Left Mid
-  { src: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=600&auto=format&fit=crop", top: "50%", left: "5%", xDir: -200, yDir: 0 },
-  // Right Mid
-  { src: "https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=600&auto=format&fit=crop", top: "50%", left: "95%", xDir: 200, yDir: 0 },
+  // Top Center (12 o'clock)
+  { src: "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=600&auto=format&fit=crop", top: "18%", left: "50%", xDir: 0, yDir: -150 },
+  // Top Right (1:30)
+  { src: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600&auto=format&fit=crop", top: "28%", left: "72%", xDir: 120, yDir: -120 },
+  // Right Mid (3 o'clock)
+  { src: "https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=600&auto=format&fit=crop", top: "50%", left: "82%", xDir: 150, yDir: 0 },
+  // Bottom Right (4:30)
+  { src: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=600&auto=format&fit=crop", top: "72%", left: "72%", xDir: 120, yDir: 120 },
+  // Bottom Center (6 o'clock)
+  { src: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format&fit=crop", top: "82%", left: "50%", xDir: 0, yDir: 150 },
+  // Bottom Left (7:30)
+  { src: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=600&auto=format&fit=crop", top: "72%", left: "28%", xDir: -120, yDir: 120 },
+  // Left Mid (9 o'clock)
+  { src: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=600&auto=format&fit=crop", top: "50%", left: "18%", xDir: -150, yDir: 0 },
+  // Top Left (10:30)
+  { src: "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?q=80&w=600&auto=format&fit=crop", top: "28%", left: "28%", xDir: -120, yDir: -120 },
 ];
 
 const VisualJourney: React.FC = () => {
