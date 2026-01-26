@@ -100,18 +100,18 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] overflow-y-auto flex items-start md:items-center justify-center p-4">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-charcoal/80 backdrop-blur-md"
+                className="fixed inset-0 bg-charcoal/80 backdrop-blur-md"
                 onClick={onClose}
             />
 
             {/* Content */}
-            <div className="modal-content relative bg-cream w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl border border-gold/20">
+            <div className="modal-content relative bg-cream w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl border border-gold/20 my-auto">
                 <button
                     onClick={onClose}
-                    className="absolute top-6 right-6 text-charcoal/50 hover:text-gold transition-colors z-10"
+                    className="absolute top-6 right-6 text-charcoal/50 hover:text-gold transition-colors z-50"
                 >
                     <X size={24} />
                 </button>
@@ -135,16 +135,20 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                 ) : (
                     <div className="flex flex-col md:flex-row h-full">
                         {/* Left Decor */}
-                        <div className="hidden md:block w-1/3 bg-gold/10 p-8 border-r border-gold/10">
-                            <Sparkles className="text-gold mb-6" size={32} />
-                            <h3 className="font-serif text-2xl text-charcoal mb-4 italic">Tailor Your Ritual</h3>
-                            <p className="text-sm text-charcoal-light leading-relaxed">
+                        <div className="hidden md:flex w-full md:w-[300px] bg-gold/5 p-10 border-r border-gold/10 flex-col justify-center">
+                            <Sparkles className="text-gold mb-6" size={40} />
+                            <h3 className="font-serif text-3xl text-charcoal mb-4 italic leading-tight">Tailor Your Ritual</h3>
+                            <p className="text-charcoal-light leading-relaxed">
                                 Experience the heritage of Hilot and the luxury of gold in a sanctuary designed for your rebirth.
                             </p>
+                            <div className="mt-8 pt-8 border-t border-gold/10">
+                                <p className="text-[10px] uppercase font-bold tracking-[0.3em] text-gold">Premium Care</p>
+                                <p className="text-xs text-charcoal/50 mt-1">Our specialists are dedicated to your holistic wellness.</p>
+                            </div>
                         </div>
 
                         {/* Form Side */}
-                        <div className="flex-1 p-8 md:p-12 max-h-[90vh] overflow-y-auto">
+                        <div className="flex-1 p-8 md:p-12">
                             <form onSubmit={handleBooking} className="space-y-6">
                                 <div className="bg-gold/10 border border-gold/20 rounded-lg p-4 mb-6">
                                     <div className="flex items-center gap-2 text-charcoal">
