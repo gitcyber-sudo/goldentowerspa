@@ -251,8 +251,8 @@ const AdminDashboard: React.FC = () => {
 
     const renderManualBookingModal = () => (
         showManualBooking && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
-                <div className="bg-white w-full max-w-lg rounded-2xl p-8 shadow-2xl overflow-hidden animate-fade-in relative">
+            <div className="fixed inset-0 z-50 overflow-y-auto flex justify-center items-start md:items-center p-6 bg-charcoal/80 backdrop-blur-sm">
+                <div className="bg-white w-full max-w-lg rounded-2xl p-8 shadow-2xl animate-fade-in relative my-auto">
                     <button
                         onClick={() => setShowManualBooking(false)}
                         className="absolute top-4 right-4 text-charcoal/40 hover:text-gold"
