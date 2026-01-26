@@ -1,0 +1,78 @@
+<!-- Golden Tower Spa - Email Confirmation Template -->
+<!-- Copy this into Supabase: Authentication > Email Templates > Confirm signup -->
+
+<div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; background-color: #F9F7F2; padding: 40px 20px;">
+  
+  <!-- Header with Gold Accent -->
+  <div style="text-align: center; border-bottom: 2px solid #997B3D; padding-bottom: 20px; margin-bottom: 30px;">
+    <h1 style="color: #997B3D; font-size: 32px; margin: 0; letter-spacing: 2px;">
+      Golden Tower
+    </h1>
+    <p style="color: #997B3D; font-size: 12px; text-transform: uppercase; letter-spacing: 4px; margin: 5px 0 0 0;">
+      Spa & Wellness
+    </p>
+  </div>
+
+  <!-- Main Content -->
+  <div style="background: white; padding: 40px 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(153, 123, 61, 0.1);">
+    
+    <h2 style="color: #2C2C2C; font-size: 24px; margin-top: 0;">
+      Welcome to Your Sanctuary
+    </h2>
+    
+    <p style="color: #666; font-size: 16px; line-height: 1.6;">
+      Dear Valued Guest,
+    </p>
+    
+    <p style="color: #666; font-size: 16px; line-height: 1.6;">
+      Thank you for joining the Golden Tower Spa family. We're delighted to have you begin your journey toward relaxation and rejuvenation.
+    </p>
+    
+    <p style="color: #666; font-size: 16px; line-height: 1.6;">
+      To complete your registration and start booking your personalized wellness rituals, please confirm your email address by clicking the button below:
+    </p>
+    
+    <!-- Confirm Button -->
+    <div style="text-align: center; margin: 40px 0;">
+      <a href="{{ .ConfirmationURL }}" 
+         style="display: inline-block; background-color: #997B3D; color: white; padding: 16px 48px; text-decoration: none; border-radius: 50px; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 4px 12px rgba(153, 123, 61, 0.3);">
+        Confirm Email
+      </a>
+    </div>
+    
+    <p style="color: #999; font-size: 14px; line-height: 1.6; margin-top: 30px;">
+      If the button doesn't work, copy and paste this link into your browser:
+    </p>
+    <p style="color: #997B3D; font-size: 12px; word-break: break-all;">
+      {{ .ConfirmationURL }}
+    </p>
+    
+    <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #E5E5E5;">
+      <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 0;">
+        After confirmation, you can:
+      </p>
+      <ul style="color: #666; font-size: 14px; line-height: 1.8; margin: 10px 0;">
+        <li>Book your preferred massage and spa treatments</li>
+        <li>Choose your favorite therapist</li>
+        <li>Track your booking history</li>
+        <li>Manage your wellness journey</li>
+      </ul>
+    </div>
+    
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #997B3D;">
+    <p style="color: #997B3D; font-size: 14px; margin: 5px 0;">
+      <strong>Golden Tower Spa & Wellness</strong>
+    </p>
+    <p style="color: #666; font-size: 12px; margin: 5px 0;">
+      Your sanctuary of tranquility and rejuvenation
+    </p>
+    <p style="color: #999; font-size: 11px; margin: 15px 0 5px 0;">
+      This email was sent because you created an account at Golden Tower Spa.<br>
+      If you didn't create this account, please ignore this email.
+    </p>
+  </div>
+
+</div>

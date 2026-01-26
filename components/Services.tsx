@@ -40,15 +40,23 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
     fetchServices();
   }, []);
 
-  const signatureTreatments = services.filter(s =>
+  const processedServices = services.map(s => ({
+    ...s,
+    image_url: s.title === 'Shiatsu Massage'
+      ? 'https://images.unsplash.com/photo-1611077544192-fa35438177e7?q=80&w=2070'
+      : s.image_url
+  })).filter(s => s.price !== 2500 || !s.title.toLowerCase().includes('signature'));
+
+  const signatureTreatments = processedServices.filter(s =>
     s.category === 'signature' || s.title.toLowerCase().includes('signature')
   );
 
-  const luxuryPackages = services.filter(s =>
-    s.category === 'package' || s.title.toLowerCase().includes('package')
-  );
+  const targetPackages = ['PACKAGE 1', 'PACKAGE 2', 'PACKAGE 3', 'PACKAGE 4'];
+  const luxuryPackages = processedServices
+    .filter(s => targetPackages.includes(s.title))
+    .sort((a, b) => targetPackages.indexOf(a.title) - targetPackages.indexOf(b.title));
 
-  const regularServices = services.filter(s =>
+  const regularServices = processedServices.filter(s =>
     !signatureTreatments.includes(s) && !luxuryPackages.includes(s)
   );
 
@@ -83,6 +91,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
           background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
           transform: rotate(45deg);
           animation: shine 6s ease-in-out infinite;
+          pointer-events: none;
         }
       `}} />
 
@@ -101,11 +110,10 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
               {[...signatureTreatments, ...regularServices].map((service) => (
                 <div
                   key={service.id}
-                  className={`group cursor-pointer transition-all duration-700 relative ${service.title.toLowerCase().includes('signature')
+                  className={`group transition-all duration-700 relative ${service.title.toLowerCase().includes('signature')
                     ? 'signature-card bg-white rounded-2xl p-4 shadow-xl scale-105 z-10'
                     : 'bg-cream/30 p-4 rounded-2xl border border-gold/10'
                     }`}
-                  onClick={() => onBookClick(service.id)}
                 >
                   <div className={`relative h-[300px] w-full overflow-hidden mb-6 rounded-lg ${service.title.toLowerCase().includes('signature') ? 'shimmer-effect' : ''}`}>
                     <img src={service.image_url} alt={service.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
@@ -116,7 +124,12 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                   <p className="text-charcoal-light text-sm font-light mb-4 line-clamp-2 italic">
                     {service.description.toLowerCase().charAt(0).toUpperCase() + service.description.toLowerCase().slice(1)}
                   </p>
-                  <span className="text-gold text-xs font-bold uppercase tracking-widest flex items-center">Book Massage <ArrowRight size={14} className="ml-2" /></span>
+                  <button
+                    onClick={() => onBookClick(service.id)}
+                    className="text-gold text-xs font-bold uppercase tracking-widest flex items-center hover:text-gold-dark transition-colors"
+                  >
+                    Book Massage <ArrowRight size={14} className="ml-2" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -135,8 +148,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
             {luxuryPackages.map((pkg) => (
               <div
                 key={pkg.id}
-                className="bg-[#Fdfbf7] border-2 border-sepia-200/30 rounded-3xl overflow-hidden hover:border-gold/50 transition-all duration-500 group cursor-pointer shadow-sm hover:shadow-xl p-8 flex flex-col justify-between min-h-[300px]"
-                onClick={() => onBookClick(pkg.id)}
+                className="bg-[#Fdfbf7] border-2 border-sepia-200/30 rounded-3xl overflow-hidden hover:border-gold/50 transition-all duration-500 group shadow-sm hover:shadow-xl p-8 flex flex-col justify-between min-h-[300px]"
               >
                 <div>
                   <div className="flex justify-between items-start mb-6">
@@ -154,9 +166,12 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                 </div>
                 <div className="flex items-center justify-between mt-auto pt-6 border-t border-gold/10">
                   <span className="text-[10px] uppercase tracking-widest text-charcoal/50 font-bold">{pkg.duration} Total Duration</span>
-                  <div className="text-gold text-xs font-bold uppercase tracking-widest flex items-center group-hover:translate-x-1 transition-transform">
+                  <button
+                    onClick={() => onBookClick(pkg.id)}
+                    className="text-gold text-xs font-bold uppercase tracking-widest flex items-center group-hover:translate-x-1 transition-transform cursor-pointer"
+                  >
                     Select Package <ArrowRight size={14} className="ml-2" />
-                  </div>
+                  </button>
                 </div>
               </div>
             ))}

@@ -1,0 +1,116 @@
+<!-- Golden Tower Spa - Booking Confirmation Email -->
+<!-- This is a custom template you can use for booking confirmations -->
+<!-- You'd need to implement this via Supabase Edge Functions or your backend -->
+
+<div
+    style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; background-color: #F9F7F2; padding: 40px 20px;">
+
+    <!-- Header -->
+    <div style="text-align: center; border-bottom: 2px solid #997B3D; padding-bottom: 20px; margin-bottom: 30px;">
+        <h1 style="color: #997B3D; font-size: 32px; margin: 0; letter-spacing: 2px;">
+            Golden Tower
+        </h1>
+        <p style="color: #997B3D; font-size: 12px; text-transform: uppercase; letter-spacing: 4px; margin: 5px 0 0 0;">
+            Spa & Wellness
+        </p>
+    </div>
+
+    <!-- Main Content -->
+    <div
+        style="background: white; padding: 40px 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(153, 123, 61, 0.1);">
+
+        <h2 style="color: #2C2C2C; font-size: 24px; margin-top: 0;">
+            Your Ritual is Confirmed ✨
+        </h2>
+
+        <p style="color: #666; font-size: 16px; line-height: 1.6;">
+            Dear {{ user_name }},
+        </p>
+
+        <p style="color: #666; font-size: 16px; line-height: 1.6;">
+            We're delighted to confirm your upcoming wellness experience at Golden Tower Spa.
+        </p>
+
+        <!-- Booking Details Card -->
+        <div
+            style="background: #F9F7F2; padding: 25px; border-radius: 8px; border-left: 4px solid #997B3D; margin: 30px 0;">
+
+            <h3
+                style="color: #997B3D; font-size: 18px; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 1px;">
+                Booking Details
+            </h3>
+
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0; color: #666; font-size: 14px; font-weight: bold;">Service:</td>
+                    <td style="padding: 8px 0; color: #2C2C2C; font-size: 14px;">{{ service_name }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #666; font-size: 14px; font-weight: bold;">Therapist:</td>
+                    <td style="padding: 8px 0; color: #997B3D; font-size: 14px; font-style: italic;">{{ therapist_name
+                        }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #666; font-size: 14px; font-weight: bold;">Date:</td>
+                    <td style="padding: 8px 0; color: #2C2C2C; font-size: 14px;">{{ booking_date }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #666; font-size: 14px; font-weight: bold;">Time:</td>
+                    <td style="padding: 8px 0; color: #2C2C2C; font-size: 14px;">{{ booking_time }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #666; font-size: 14px; font-weight: bold;">Status:</td>
+                    <td style="padding: 8px 0;">
+                        <span
+                            style="background: #D4AF37; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            {{ status }}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+
+        <!-- Preparation Tips -->
+        <div style="background: #FFF9E6; padding: 20px; border-radius: 8px; margin: 30px 0;">
+            <h4 style="color: #997B3D; font-size: 16px; margin: 0 0 15px 0;">
+                Preparing for Your Visit:
+            </h4>
+            <ul style="color: #666; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
+                <li>Arrive 10 minutes early to check in and relax</li>
+                <li>Wear comfortable clothing</li>
+                <li>Hydrate well before your session</li>
+                <li>Inform us of any health concerns or allergies</li>
+            </ul>
+        </div>
+
+        <p style="color: #666; font-size: 14px; line-height: 1.6; margin-top: 30px;">
+            Need to reschedule or have questions? Simply reply to this email or contact us at
+            <a href="mailto:concierge@goldentowerspa.ph"
+                style="color: #997B3D; text-decoration: none;">concierge@goldentowerspa.ph</a>
+        </p>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="{{ dashboard_url }}"
+                style="display: inline-block; background-color: #997B3D; color: white; padding: 14px 40px; text-decoration: none; border-radius: 50px; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">
+                View My Bookings
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #997B3D;">
+        <p style="color: #997B3D; font-size: 14px; margin: 5px 0;">
+            <strong>Golden Tower Spa & Wellness</strong>
+        </p>
+        <p style="color: #666; font-size: 12px; margin: 5px 0;">
+            📍 123 Wellness Avenue, Manila, Philippines<br>
+            📞 +63 (2) 8888-XXXX | 📧 concierge@goldentowerspa.ph
+        </p>
+        <p style="color: #999; font-size: 11px; margin: 15px 0 5px 0;">
+            We look forward to welcoming you to your sanctuary of tranquility
+        </p>
+    </div>
+
+</div>

@@ -42,7 +42,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
           Luxury Wellness in Mansalay
         </span>
 
-        <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-charcoal mb-8 leading-[1.1] hero-title-trigger">
+        <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-charcoal mb-8 leading-[1.1] hero-title-trigger drop-shadow-2xl">
           <div className="block overflow-hidden">
             <SplitText text="Golden Tower" />
           </div>
@@ -51,7 +51,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
           </div>
         </h1>
 
-        <p className="fade-up text-charcoal-light text-lg md:text-xl font-light mb-12 max-w-2xl mx-auto leading-relaxed drop-shadow-md md:drop-shadow-none">
+        <p className="fade-up text-charcoal text-lg md:text-xl font-medium mb-12 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
           Escape the ordinary and ascend to a state of pure tranquility.
           Experience the golden touch of traditional healing.
         </p>

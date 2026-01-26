@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, User, Sparkles, CheckCircle2, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import gsap from 'gsap';
 
 interface BookingModalProps {
     isOpen: boolean;
     onClose: () => void;
     initialServiceId?: string;
+    onAuthRequired: () => void;
 }
 
-const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialServiceId }) => {
+const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialServiceId, onAuthRequired }) => {
+    const { user, profile } = useAuth();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -18,7 +21,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
     const [therapists, setTherapists] = useState<any[]>([]);
 
     const [formData, setFormData] = useState({
-        email: '',
         service_id: initialServiceId || '',
         therapist_id: '',
         date: '',
@@ -27,6 +29,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
 
     useEffect(() => {
         if (isOpen) {
+            // Check if user is authenticated
+            if (!user) {
+                onAuthRequired();
+                onClose();
+                return;
+            }
+
             document.body.style.overflow = 'hidden';
             fetchData();
             gsap.fromTo('.modal-content',
@@ -36,7 +45,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
         } else {
             document.body.style.overflow = 'unset';
         }
-    }, [isOpen]);
+    }, [isOpen, user]);
 
     const fetchData = async () => {
         const { data: s } = await supabase.from('services').select('*');
@@ -47,13 +56,21 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
 
     const handleBooking = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!user) {
+            alert('Please sign in to book');
+            onAuthRequired();
+            return;
+        }
+
         setLoading(true);
 
         try {
             const { error } = await supabase.from('bookings').insert([{
-                user_email: formData.email,
+                user_id: user.id,
+                user_email: user.email,
                 service_id: formData.service_id,
-                therapist_id: formData.therapist_id,
+                therapist_id: formData.therapist_id || null,
                 booking_date: formData.date,
                 booking_time: formData.time,
                 status: 'pending'
@@ -95,7 +112,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                         </div>
                         <h2 className="font-serif text-4xl text-charcoal mb-4">Reservation Confirmed</h2>
                         <p className="text-charcoal-light mb-8 max-w-sm mx-auto">
-                            Your ritual at Golden Tower Spa has been requested. We will send a confirmation to {formData.email} shortly.
+                            Your ritual at Golden Tower Spa has been requested. We will send a confirmation to {user?.email} shortly.
                         </p>
                         <button
                             onClick={onClose}
@@ -118,18 +135,14 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                         {/* Form Side */}
                         <div className="flex-1 p-8 md:p-12 max-h-[90vh] overflow-y-auto">
                             <form onSubmit={handleBooking} className="space-y-6">
-                                <div>
-                                    <label className="block text-xs uppercase tracking-widest font-bold text-gold mb-2 flex items-center">
-                                        <User size={14} className="mr-2" /> Your Email
-                                    </label>
-                                    <input
-                                        required
-                                        type="email"
-                                        placeholder="name@example.com"
-                                        className="w-full bg-white border border-gold/20 p-4 rounded-lg focus:outline-none focus:border-gold transition-colors"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    />
+                                <div className="bg-gold/10 border border-gold/20 rounded-lg p-4 mb-6">
+                                    <div className="flex items-center gap-2 text-charcoal">
+                                        <User size={16} className="text-gold" />
+                                        <div>
+                                            <p className="text-xs uppercase tracking-widest font-bold text-gold">Booking for</p>
+                                            <p className="text-sm font-medium">{profile?.full_name || user?.email}</p>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
