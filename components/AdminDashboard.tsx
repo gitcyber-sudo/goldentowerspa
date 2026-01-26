@@ -58,9 +58,37 @@ const AdminDashboard: React.FC = () => {
     });
 
     useEffect(() => {
-        if (!authLoading && (!user || role !== 'admin')) {
-            navigate('/');
-        }
+        const checkAdmin = async () => {
+            console.log("AdminDashboard: Checking access...", { user: !!user, role, authLoading });
+
+            if (authLoading) return;
+
+            if (!user) {
+                console.log("AdminDashboard: No user found, redirecting...");
+                navigate('/');
+                return;
+            }
+
+            if (role !== 'admin') {
+                // Check if profile is still being fetched (role null but user exists)
+                if (role === null) {
+                    console.log("AdminDashboard: User exists but role is null, waiting...");
+                    // Give it a bit more time before giving up
+                    const timeout = setTimeout(() => {
+                        if (role !== 'admin') {
+                            console.log("AdminDashboard: Still not admin after wait, redirecting...");
+                            navigate('/');
+                        }
+                    }, 2000);
+                    return () => clearTimeout(timeout);
+                } else {
+                    console.log("AdminDashboard: Role is not admin, redirecting...", role);
+                    navigate('/');
+                }
+            }
+        };
+
+        checkAdmin();
     }, [user, role, authLoading, navigate]);
 
     useEffect(() => {

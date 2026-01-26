@@ -29,7 +29,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
 
         try {
             // Handle shorthand for admin login
-            let loginEmail = formData.email;
+            let loginEmail = formData.email.trim();
             if (loginEmail.toLowerCase() === 'admin') {
                 loginEmail = 'admin@goldentowerspa.ph';
             }
@@ -179,8 +179,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
                         <div className="relative">
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gold" size={18} />
                             <input
-                                type="email"
-                                placeholder="Email Address"
+                                type="text"
+                                placeholder="Email or 'admin'"
                                 required
                                 className="w-full bg-white border border-gold/20 pl-12 pr-4 py-3 rounded-xl focus:outline-none focus:border-gold transition-colors"
                                 value={formData.email}
