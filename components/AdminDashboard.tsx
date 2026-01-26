@@ -203,15 +203,26 @@ const AdminDashboard: React.FC = () => {
 
     const handleManualBooking = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // VALIDATION: Ensure service is selected
+        if (!manualBookingData.service_id) {
+            alert("Please select a service first.");
+            return;
+        }
+
         setLoading(true);
         try {
+            // Fix: Explicitly handle empty strings for UUID columns
+            const serviceId = manualBookingData.service_id;
+            const therapistId = manualBookingData.therapist_id === "" ? null : manualBookingData.therapist_id;
+
             const { error } = await supabase.from('bookings').insert([{
                 user_id: null,
                 guest_name: manualBookingData.guest_name,
                 guest_email: manualBookingData.guest_email || null,
                 guest_phone: manualBookingData.guest_phone,
-                service_id: manualBookingData.service_id,
-                therapist_id: manualBookingData.therapist_id || null,
+                service_id: serviceId,
+                therapist_id: therapistId,
                 booking_date: manualBookingData.date,
                 booking_time: manualBookingData.time,
                 status: 'confirmed',
