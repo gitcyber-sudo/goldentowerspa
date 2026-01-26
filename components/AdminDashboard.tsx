@@ -334,7 +334,7 @@ const AdminDashboard: React.FC = () => {
                     {renderSidebarItem('bookings', <ClipboardList size={20} />, 'Bookings')}
                 </nav>
                 <div className="p-6 border-t border-white/10">
-                    <button onClick={() => navigate('/')} className="w-full flex items-center gap-3 px-4 py-3 text-white/60"><ArrowLeft size={20} />Back to Site</button>
+                    <button onClick={() => navigate('/')} className="w-full flex items-center gap-3 px-4 py-3 bg-white/5 text-gold hover:bg-white/10 rounded-xl transition-all mb-2"><ArrowLeft size={20} />Back to Site</button>
                     <button onClick={async () => { await signOut(); navigate('/'); }} className="w-full flex items-center gap-3 px-4 py-3 text-rose-400"><LogOut size={20} />Sign Out</button>
                 </div>
             </aside>

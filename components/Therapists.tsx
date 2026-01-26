@@ -3,6 +3,7 @@ import React, { useRef, useLayoutEffect, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -21,12 +22,17 @@ interface TherapistsProps {
 }
 
 const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
+  const { loading: authLoading } = useAuth();
   const [team, setTeam] = useState<TherapistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
+    // Wait for auth to settle (can be signed in or not)
+    // This prevents race conditions with Supabase session recovery
+    if (authLoading) return;
+
     let mounted = true;
     const fetchTherapists = async () => {
       // Safety timeout: don't wait forever
@@ -57,7 +63,7 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
 
     fetchTherapists();
     return () => { mounted = false; };
-  }, []);
+  }, [authLoading]);
 
   useLayoutEffect(() => {
     if (loading) return;

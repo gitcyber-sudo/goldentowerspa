@@ -166,9 +166,9 @@ const UserDashboard: React.FC = () => {
                 <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                     <button
                         onClick={() => navigate('/')}
-                        className="flex items-center gap-2 bg-gold/5 hover:bg-gold/10 text-gold px-5 py-2.5 rounded-full transition-all border border-gold/10 font-bold uppercase tracking-widest text-[10px]"
+                        className="flex items-center gap-2 bg-gold hover:bg-gold-dark text-white px-8 py-3.5 rounded-full transition-all shadow-lg hover:shadow-gold/30 font-bold uppercase tracking-widest text-[11px] transform hover:-translate-x-1"
                     >
-                        <ArrowLeft size={16} />
+                        <ArrowLeft size={18} />
                         <span>Return to Home</span>
                     </button>
                     <div className="flex flex-col md:flex-row items-center gap-6">

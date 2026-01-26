@@ -20,10 +20,13 @@ interface ServicesProps {
 const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const { user } = useAuth();
+  const { loading: authLoading } = useAuth();
 
   useEffect(() => {
+    // Wait for auth to settle (can be signed in or not)
+    // This prevents race conditions with Supabase session recovery
+    if (authLoading) return;
+
     let mounted = true;
     const fetchServices = async () => {
       // Set a safety timeout - if fetch takes > 5s, something is wrong
@@ -54,7 +57,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
 
     fetchServices();
     return () => { mounted = false; };
-  }, []); // Only fetch once on mount to prevent "stuck" loading during auth shifts
+  }, [authLoading]); // Re-fetch when auth settle status changes
 
   const processedServices = services.map(s => ({
     ...s,

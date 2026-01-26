@@ -172,7 +172,7 @@ const TherapistDashboard: React.FC = () => {
                     </p>
                     <button
                         onClick={() => navigate('/')}
-                        className="bg-gold text-white px-6 py-3 rounded-full font-bold"
+                        className="bg-gold hover:bg-gold-dark text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm shadow-xl transition-all"
                     >
                         Return Home
                     </button>
@@ -189,7 +189,7 @@ const TherapistDashboard: React.FC = () => {
                     <p className="text-sm text-charcoal/40 mb-6">Please contact administration</p>
                     <button
                         onClick={() => navigate('/')}
-                        className="bg-gold text-white px-6 py-3 rounded-full font-bold"
+                        className="bg-gold hover:bg-gold-dark text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm shadow-xl transition-all"
                     >
                         Return Home
                     </button>
@@ -271,8 +271,8 @@ const TherapistDashboard: React.FC = () => {
                     <button
                         onClick={() => setActiveFilter('upcoming')}
                         className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeFilter === 'upcoming'
-                                ? 'text-gold'
-                                : 'text-charcoal/40 hover:text-charcoal/60'
+                            ? 'text-gold'
+                            : 'text-charcoal/40 hover:text-charcoal/60'
                             }`}
                     >
                         Upcoming Sessions
@@ -283,8 +283,8 @@ const TherapistDashboard: React.FC = () => {
                     <button
                         onClick={() => setActiveFilter('completed')}
                         className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeFilter === 'completed'
-                                ? 'text-gold'
-                                : 'text-charcoal/40 hover:text-charcoal/60'
+                            ? 'text-gold'
+                            : 'text-charcoal/40 hover:text-charcoal/60'
                             }`}
                     >
                         Past Sessions
