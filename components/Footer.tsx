@@ -16,17 +16,11 @@ const Footer: React.FC = () => {
             </h2>
             <p className="text-white/60 font-light max-w-sm">
               An oasis of calm where French elegance meets Filipino hospitality.
-              Reconnect with your inner self in Mansalay.
+              Reconnect with your inner self in Quezon City.
             </p>
             <div className="flex space-x-4 pt-4">
-              <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-gold hover:border-gold transition-all duration-300 group">
-                <Instagram size={18} className="text-white group-hover:text-white" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-gold hover:border-gold transition-all duration-300 group">
+              <a href="https://www.facebook.com/profile.php?id=100063262268519" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-gold hover:border-gold transition-all duration-300 group">
                 <Facebook size={18} className="text-white group-hover:text-white" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-gold hover:border-gold transition-all duration-300 group">
-                <Twitter size={18} className="text-white group-hover:text-white" />
               </a>
             </div>
           </div>
@@ -48,15 +42,11 @@ const Footer: React.FC = () => {
             <ul className="space-y-6 font-light text-white/80">
               <li className="flex items-start">
                 <MapPin className="mr-4 text-gold mt-1 flex-shrink-0" size={18} />
-                <span>Mansalay, Oriental Mindoro,<br />Philippines 5213</span>
-              </li>
-              <li className="flex items-center">
-                <Phone className="mr-4 text-gold flex-shrink-0" size={18} />
-                <span>+63 912 345 6789</span>
+                <span>#1 C2 Road 9, Project 6,<br />Quezon City, Philippines</span>
               </li>
               <li className="flex items-center">
                 <Mail className="mr-4 text-gold flex-shrink-0" size={18} />
-                <span>concierge@goldentowerspa.ph</span>
+                <span>gtowerspa@gmail.com</span>
               </li>
             </ul>
           </div>

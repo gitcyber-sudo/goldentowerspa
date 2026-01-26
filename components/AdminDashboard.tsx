@@ -269,6 +269,7 @@ const AdminDashboard: React.FC = () => {
                 <div className="bg-white w-full max-w-md rounded-2xl p-8 shadow-2xl text-center">
                     <Users className="text-gold mx-auto mb-4" size={32} />
                     <h2 className="font-serif text-2xl text-charcoal mb-2">Assign Specialist</h2>
+                    <p className="text-sm text-charcoal/60 mt-1">Manage and monitor client treatments</p>
                     <p className="text-sm text-charcoal/60 mb-6">Select a therapist for <b>{assigningBooking.user_email}</b></p>
                     <div className="space-y-3 mb-8 max-h-[40vh] overflow-y-auto">
                         {therapists.map(t => (
@@ -339,7 +340,7 @@ const AdminDashboard: React.FC = () => {
             </aside>
             <main className="flex-1 overflow-y-auto h-screen">
                 <header className="bg-white border-b border-gold/10 p-6 flex justify-between items-center">
-                    <h1 className="text-2xl font-serif">{activeTab === 'dashboard' ? 'Overview' : 'Rituals'}</h1>
+                    <h1 className="text-2xl font-serif">{activeTab === 'dashboard' ? 'Overview' : 'Treatments'}</h1>
                     <div className="flex gap-3">
                         <input type="text" placeholder="Search..." className="px-4 py-2 border rounded-xl" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                         <button onClick={() => fetchBookings()} className="p-2 border rounded-xl"><Clock3 /></button>

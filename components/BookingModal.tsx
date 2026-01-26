@@ -29,6 +29,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
     });
 
     useEffect(() => {
+        if (isOpen && initialServiceId) {
+            setFormData(prev => ({ ...prev, service_id: initialServiceId }));
+        }
+    }, [isOpen, initialServiceId]);
+
+    useEffect(() => {
         if (isOpen) {
             // Check if user is authenticated
             if (!user) {
@@ -170,7 +176,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
 
                                 <div className="space-y-6">
                                     <SelectionGrid
-                                        label="Select Ritual"
+                                        label="Select Treatment"
                                         options={services.map(s => ({
                                             id: s.id,
                                             title: s.title,

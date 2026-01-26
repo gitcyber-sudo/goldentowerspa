@@ -108,7 +108,7 @@ const VisualJourney: React.FC = () => {
             />
             {/* Overlay Text inside the circle */}
             <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-              <h3 className="text-white font-serif text-3xl md:text-5xl italic opacity-90 drop-shadow-md">The Ritual</h3>
+              <h3 className="text-white font-serif text-3xl md:text-5xl italic opacity-90 drop-shadow-md">The Experience</h3>
             </div>
           </div>
 

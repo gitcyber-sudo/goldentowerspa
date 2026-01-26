@@ -209,7 +209,7 @@ const UserDashboard: React.FC = () => {
                             <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center"><Sparkles className="text-gold" size={20} /></div>
                             <div>
                                 <p className="text-2xl font-serif text-charcoal">{bookings.length}</p>
-                                <p className="text-xs uppercase tracking-widest text-charcoal/60">Total Rituals</p>
+                                <p className="text-xs uppercase tracking-widest text-charcoal/60">Total Treatments</p>
                             </div>
                         </div>
                     </div>
@@ -230,7 +230,7 @@ const UserDashboard: React.FC = () => {
                 {loading ? (
                     <div className="text-center py-12">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gold/20 border-t-gold" />
-                        <p className="text-charcoal/40 mt-4 italic">Loading your rituals...</p>
+                        <p className="text-charcoal/40 mt-4 italic">Loading your treatments...</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -239,7 +239,7 @@ const UserDashboard: React.FC = () => {
                                 <div className="col-span-full text-center py-16">
                                     <Sparkles className="text-gold/20 mx-auto mb-4" size={48} />
                                     <p className="text-charcoal/40 italic mb-4">No active bookings</p>
-                                    <button onClick={() => navigate('/')} className="bg-gold text-white px-6 py-3 rounded-full font-bold uppercase tracking-widest hover:bg-gold-dark transition-all">Book a Ritual</button>
+                                    <button onClick={() => navigate('/')} className="bg-gold text-white px-6 py-3 rounded-full font-bold uppercase tracking-widest hover:bg-gold-dark transition-all">Book a Treatment</button>
                                 </div>
                             ) : (
                                 currentBookings.map(renderBookingCard)

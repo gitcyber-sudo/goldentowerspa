@@ -39,7 +39,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-16 md:mt-0">
         <span className="fade-up inline-block bg-black/60 backdrop-blur-md px-6 py-2 rounded-full text-white text-sm md:text-base font-bold uppercase tracking-[0.4em] mb-6 shadow-xl border border-gold/30">
-          Luxury Wellness in Mansalay
+          Luxury Wellness in Quezon City
         </span>
 
         <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-charcoal mb-8 leading-[1.1] hero-title-trigger drop-shadow-2xl">

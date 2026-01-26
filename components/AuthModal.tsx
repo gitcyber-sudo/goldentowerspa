@@ -139,7 +139,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
                             {isSignUp ? 'Join the Sanctuary' : 'Welcome Back'}
                         </h2>
                         <p className="text-charcoal/60 text-sm">
-                            {isSignUp ? 'Begin your journey to relaxation' : 'Sign in to manage your rituals'}
+                            {isSignUp ? 'Begin your journey to relaxation' : 'Sign in to manage your experiences'}
                         </p>
                     </div>
 
