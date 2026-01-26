@@ -45,19 +45,24 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
     image_url: s.title === 'Shiatsu Massage'
       ? 'https://images.unsplash.com/photo-1611077544192-fa35438177e7?q=80&w=2070'
       : s.image_url
-  })).filter(s => s.price !== 2500 || !s.title.toLowerCase().includes('signature'));
+  }));
 
   const signatureTreatments = processedServices.filter(s =>
     s.category === 'signature' || s.title.toLowerCase().includes('signature')
   );
 
-  const targetPackages = ['PACKAGE 1', 'PACKAGE 2', 'PACKAGE 3', 'PACKAGE 4'];
+  const targetPackages = [
+    'Radiance & Relaxation Ritual',
+    'Golden Tower Signature Bliss',
+    'Royal Hilot Heritage',
+    'Elite Rebirth Experience'
+  ];
   const luxuryPackages = processedServices
     .filter(s => targetPackages.includes(s.title))
     .sort((a, b) => targetPackages.indexOf(a.title) - targetPackages.indexOf(b.title));
 
   const regularServices = processedServices.filter(s =>
-    !signatureTreatments.includes(s) && !luxuryPackages.includes(s)
+    !signatureTreatments.some(st => st.id === s.id) && !luxuryPackages.some(lp => lp.id === s.id)
   );
 
   return (
@@ -98,7 +103,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
       <div className="container mx-auto px-6 md:px-12">
         {/* --- SIGNATURE SECTION --- */}
         <div className="mb-24">
-          <div className="flex flex-col mb-12 fade-up">
+          <div className="flex flex-col mb-12">
             <span className="text-gold text-sm uppercase tracking-widest font-bold mb-2 block">The Art of Healing</span>
             <h2 className="font-serif text-4xl md:text-5xl text-charcoal">Signature Massages</h2>
           </div>
@@ -138,7 +143,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
 
         {/* --- PACKAGES SECTION --- */}
         <div id="packages" className="pt-24 border-t border-gold/10">
-          <div className="flex flex-col mb-12 fade-up text-center">
+          <div className="flex flex-col mb-12 text-center">
             <span className="text-gold text-sm uppercase tracking-widest font-bold mb-2 block">Exclusive Bundles</span>
             <h2 className="font-serif text-4xl md:text-5xl text-charcoal">Luxury Packages</h2>
             <p className="text-charcoal-light mt-4 max-w-2xl mx-auto">Experience more for less. Our packages are designed to provide a holistic journey of rebirth and relaxation.</p>
