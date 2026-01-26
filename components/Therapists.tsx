@@ -22,7 +22,7 @@ interface TherapistsProps {
 }
 
 const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
-  const { loading: authLoading } = useAuth();
+  const { loading: authLoading, user } = useAuth();
   const [team, setTeam] = useState<TherapistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
@@ -30,18 +30,14 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
 
   useEffect(() => {
     // Wait for auth to settle (can be signed in or not)
-    // This prevents race conditions with Supabase session recovery
     if (authLoading) return;
 
     let mounted = true;
-    const fetchTherapists = async () => {
-      // Safety timeout: don't wait forever
-      const timeout = setTimeout(() => {
-        if (mounted) {
-          console.warn("Therapist fetch timeout - unsticking UI");
-          setLoading(false);
-        }
-      }, 5000);
+
+    const fetchTherapists = async (retryCount = 0) => {
+      if (!mounted) return;
+
+      if (retryCount === 0) setLoading(true);
 
       try {
         const { data, error } = await supabase
@@ -50,13 +46,24 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
           .order('name', { ascending: true });
 
         if (error) throw error;
+
+        // If we got no data, retry once after a delay to 'wait out' any sync lag
+        if ((!data || data.length === 0) && retryCount < 1) {
+          console.log(`Therapists: No data found, retrying in 1.5s (attempt ${retryCount + 1})...`);
+          setTimeout(() => fetchTherapists(retryCount + 1), 1500);
+          return;
+        }
+
         if (data && mounted) setTeam(data);
       } catch (error) {
         console.error('Error fetching therapists:', error);
+        if (retryCount < 1) {
+          setTimeout(() => fetchTherapists(retryCount + 1), 1500);
+          return;
+        }
       } finally {
-        if (mounted) {
+        if (mounted && (retryCount >= 1 || (team.length > 0))) {
           setLoading(false);
-          clearTimeout(timeout);
         }
       }
     };

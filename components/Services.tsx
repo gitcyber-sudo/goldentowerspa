@@ -20,22 +20,19 @@ interface ServicesProps {
 const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { loading: authLoading } = useAuth();
+  const { loading: authLoading, user } = useAuth();
 
   useEffect(() => {
     // Wait for auth to settle (can be signed in or not)
-    // This prevents race conditions with Supabase session recovery
     if (authLoading) return;
 
     let mounted = true;
-    const fetchServices = async () => {
-      // Set a safety timeout - if fetch takes > 5s, something is wrong
-      const timeout = setTimeout(() => {
-        if (mounted) {
-          console.warn("Service fetch timed out, forcing loading to false");
-          setLoading(false);
-        }
-      }, 5000);
+
+    const fetchServices = async (retryCount = 0) => {
+      if (!mounted) return;
+
+      // If this is a retry, don't set global loading yet, just try again
+      if (retryCount === 0) setLoading(true);
 
       try {
         const { data, error } = await supabase
@@ -44,13 +41,29 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
           .order('title', { ascending: true });
 
         if (error) throw error;
+
+        // If we got no data but we're logged in, there might be a sync delay
+        // Retry once after 1.5 seconds (the 'Dashbord Trick')
+        if ((!data || data.length === 0) && retryCount < 1) {
+          console.log(`Services: No data found, retrying in 1.5s (attempt ${retryCount + 1})...`);
+          setTimeout(() => fetchServices(retryCount + 1), 1500);
+          return;
+        }
+
         if (data && mounted) setServices(data);
       } catch (error) {
         console.error('Error fetching services:', error);
+        // Also retry on error
+        if (retryCount < 1) {
+          setTimeout(() => fetchServices(retryCount + 1), 1500);
+          return;
+        }
       } finally {
-        if (mounted) {
+        if (mounted && retryCount >= 1) {
           setLoading(false);
-          clearTimeout(timeout);
+        } else if (mounted && services.length > 0) {
+          // If we already have data from a previous success, ensure loading is off
+          setLoading(false);
         }
       }
     };
