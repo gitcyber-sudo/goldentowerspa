@@ -81,6 +81,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     }, []);
 
+    // --- INACTIVITY TIMER ---
+    useEffect(() => {
+        if (!user) return;
+
+        const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 Minutes
+        let timeoutId: any;
+
+        const resetTimer = () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                console.warn("Auto-logging out due to inactivity");
+                signOut();
+            }, INACTIVITY_LIMIT);
+        };
+
+        // Events to listen for activity
+        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+        events.forEach(event => document.addEventListener(event, resetTimer));
+
+        resetTimer(); // Initialize timer
+
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            events.forEach(event => document.removeEventListener(event, resetTimer));
+        };
+    }, [user]);
+
     const fetchProfile = async (userId: string) => {
         try {
             console.log("Fetching profile for:", userId);
@@ -113,27 +140,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const signOut = async () => {
         setLoading(true);
         try {
-            console.log("Signing out...");
-            // 1. Sign out from Supabase
-            const { error } = await supabase.auth.signOut();
-            if (error) throw error;
+            console.log("Initiating foolproof sign out...");
 
-            // 2. Clear local state explicitly
-            setSession(null);
+            // 1. Clear state immediately for UI responsiveness
             setUser(null);
+            setSession(null);
             setProfile(null);
+
+            // 2. Clear all browser storage to prevent "stuck" sessions
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // 3. Supabase Sign Out (Attempt to notify server)
+            await supabase.auth.signOut();
+
+            // 4. Force a clean URL (Remove fragments/tokens)
+            if (window.location.hash || window.location.search.includes('access_token')) {
+                window.location.href = window.location.origin;
+            }
 
             console.log("Sign out successful");
         } catch (error) {
             console.error('Error during sign out:', error);
-            // Even if Supabase fails (e.g. network), clear local state to unstick the UI
-            setSession(null);
-            setUser(null);
-            setProfile(null);
         } finally {
             setLoading(false);
-            // Clear any potentially corrupted storage
-            localStorage.removeItem('app_version');
+            // One final kick to ensure the app re-renders from scratch
+            window.location.reload();
         }
     };
 
@@ -141,7 +173,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         session,
         profile,
-        role: profile?.role || null,
+        role: (profile?.role as 'user' | 'therapist' | 'admin' | null) || null,
         loading,
         signIn,
         signOut,
