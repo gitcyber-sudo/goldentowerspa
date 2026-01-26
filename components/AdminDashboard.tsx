@@ -17,7 +17,9 @@ import {
     Settings,
     LogOut,
     ArrowLeft,
-    Shield
+    Shield,
+    ChevronRight,
+    Sparkles
 } from 'lucide-react';
 
 interface Booking {
@@ -33,6 +35,8 @@ interface Booking {
     therapists: { name: string };
     created_at: string;
 }
+
+import SelectionGrid from './SelectionGrid';
 
 const AdminDashboard: React.FC = () => {
     const { user, role, loading: authLoading } = useAuth();
@@ -185,8 +189,16 @@ const AdminDashboard: React.FC = () => {
     };
 
     const fetchServices = async () => {
-        const { data } = await supabase.from('services').select('*');
-        if (data) setServices(data);
+        const { data } = await supabase.from('services').select('*').order('title');
+        if (data) {
+            const processedServices = data.map(service => ({
+                ...service,
+                image_url: service.title === 'Shiatsu Massage'
+                    ? 'https://images.unsplash.com/photo-1611077544192-fa35438177e7?q=80&w=2070'
+                    : service.image_url
+            }));
+            setServices(processedServices);
+        }
     };
 
     const handleManualBooking = async (e: React.FormEvent) => {
@@ -283,33 +295,41 @@ const AdminDashboard: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold text-left block mb-1">Service *</label>
-                                <select
-                                    required
-                                    className="w-full border border-gold/20 rounded-lg p-3 bg-white"
-                                    value={manualBookingData.service_id}
-                                    onChange={e => setManualBookingData({ ...manualBookingData, service_id: e.target.value })}
-                                >
-                                    <option value="">Select Service</option>
-                                    {services.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold text-left block mb-1">Therapist</label>
-                                <select
-                                    className="w-full border border-gold/20 rounded-lg p-3 bg-white"
-                                    value={manualBookingData.therapist_id}
-                                    onChange={e => setManualBookingData({ ...manualBookingData, therapist_id: e.target.value })}
-                                >
-                                    <option value="">Any Specialist</option>
-                                    {therapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                                </select>
-                            </div>
+                        <div className="col-span-2">
+                            <SelectionGrid
+                                label="Select Ritual"
+                                options={services.map(s => ({
+                                    id: s.id,
+                                    title: s.title,
+                                    subtitle: s.category === 'signature' ? 'Signature Treatment' : undefined,
+                                    description: s.description,
+                                    imageUrl: s.image_url,
+                                    price: s.price,
+                                    duration: s.duration
+                                }))}
+                                selectedId={manualBookingData.service_id}
+                                onSelect={(id) => setManualBookingData({ ...manualBookingData, service_id: id })}
+                            />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="md:col-span-2">
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold text-left block mb-1">Therapist</label>
+                                <div className="relative">
+                                    <select
+                                        className="w-full border border-gold/20 rounded-lg p-3 bg-white appearance-none"
+                                        value={manualBookingData.therapist_id}
+                                        onChange={e => setManualBookingData({ ...manualBookingData, therapist_id: e.target.value })}
+                                    >
+                                        <option value="">Any Specialist</option>
+                                        {therapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                    </select>
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gold">
+                                        <ChevronDown size={14} />
+                                    </div>
+                                </div>
+                            </div>
+
                             <div>
                                 <label className="text-xs font-bold uppercase tracking-widest text-gold text-left block mb-1">Date *</label>
                                 <input

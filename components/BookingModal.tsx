@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, User, Sparkles, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, Calendar, Clock, User, Sparkles, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
+import SelectionGrid from './SelectionGrid';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import gsap from 'gsap';
@@ -48,9 +49,19 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
     }, [isOpen, user]);
 
     const fetchData = async () => {
-        const { data: s } = await supabase.from('services').select('*');
-        const { data: t } = await supabase.from('therapists').select('*');
-        if (s) setServices(s);
+        const { data: s } = await supabase.from('services').select('*').order('title');
+        const { data: t } = await supabase.from('therapists').select('*').order('name');
+
+        if (s) {
+            // Apply image fixes as seen in Services.tsx
+            const processedServices = s.map(service => ({
+                ...service,
+                image_url: service.title === 'Shiatsu Massage'
+                    ? 'https://images.unsplash.com/photo-1611077544192-fa35438177e7?q=80&w=2070'
+                    : service.image_url
+            }));
+            setServices(processedServices);
+        }
         if (t) setTherapists(t);
     };
 
@@ -145,29 +156,39 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs uppercase tracking-widest font-bold text-gold mb-2">Service</label>
-                                        <select
-                                            required
-                                            className="w-full bg-white border border-gold/20 p-4 rounded-lg focus:outline-none focus:border-gold"
-                                            value={formData.service_id}
-                                            onChange={(e) => setFormData({ ...formData, service_id: e.target.value })}
-                                        >
-                                            <option value="">Select Ritual</option>
-                                            {services.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs uppercase tracking-widest font-bold text-gold mb-2">Therapist</label>
-                                        <select
-                                            className="w-full bg-white border border-gold/20 p-4 rounded-lg focus:outline-none focus:border-gold"
-                                            value={formData.therapist_id}
-                                            onChange={(e) => setFormData({ ...formData, therapist_id: e.target.value })}
-                                        >
-                                            <option value="">Any Specialist</option>
-                                            {therapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                                        </select>
+                                <div className="space-y-6">
+                                    <SelectionGrid
+                                        label="Select Ritual"
+                                        options={services.map(s => ({
+                                            id: s.id,
+                                            title: s.title,
+                                            subtitle: s.category === 'signature' ? 'Signature Treatment' : undefined,
+                                            description: s.description,
+                                            imageUrl: s.image_url,
+                                            price: s.price,
+                                            duration: s.duration
+                                        }))}
+                                        selectedId={formData.service_id}
+                                        onSelect={(id) => setFormData({ ...formData, service_id: id })}
+                                    />
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-xs uppercase tracking-widest font-bold text-gold mb-2 block">Specialist Preference</label>
+                                            <div className="relative">
+                                                <select
+                                                    className="w-full bg-white border border-gold/20 p-4 rounded-xl focus:outline-none focus:border-gold appearance-none custom-select"
+                                                    value={formData.therapist_id}
+                                                    onChange={(e) => setFormData({ ...formData, therapist_id: e.target.value })}
+                                                >
+                                                    <option value="">Any Specialist (Fastest Availability)</option>
+                                                    {therapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                                </select>
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gold">
+                                                    <ArrowLeft className="-rotate-90" size={14} />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
