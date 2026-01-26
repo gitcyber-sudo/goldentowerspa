@@ -83,6 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const fetchProfile = async (userId: string) => {
         try {
+            console.log("Fetching profile for:", userId);
             const { data, error } = await supabase
                 .from('profiles')
                 .select('*')
@@ -91,15 +92,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (error) {
                 console.warn('Profile fetch error:', error.message);
-                // If it's specifically a "not found" error, they might be a new user 
-                // where the trigger hasn't finished yet. Handle gracefully.
                 if (error.code === 'PGRST116') {
                     setProfile({ role: 'user' });
-                } else {
-                    // For other errors (network, etc), don't overwrite with 'user' yet
-                    // maybe they ARE an admin but the network failed.
                 }
             } else if (data) {
+                console.log("Profile loaded:", data.role);
                 setProfile(data);
             }
         } catch (error) {
@@ -110,13 +107,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const signIn = async (email: string) => {
-        // Implement OTP or Magic Link logic here if needed, 
-        // but usually we rely on the UI component calling supabase.auth.signInWith...
+        // Implementation for manual triggers if needed
     };
 
     const signOut = async () => {
-        await supabase.auth.signOut();
-        setProfile(null);
+        setLoading(true);
+        try {
+            console.log("Signing out...");
+            // 1. Sign out from Supabase
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error;
+
+            // 2. Clear local state explicitly
+            setSession(null);
+            setUser(null);
+            setProfile(null);
+
+            console.log("Sign out successful");
+        } catch (error) {
+            console.error('Error during sign out:', error);
+            // Even if Supabase fails (e.g. network), clear local state to unstick the UI
+            setSession(null);
+            setUser(null);
+            setProfile(null);
+        } finally {
+            setLoading(false);
+            // Clear any potentially corrupted storage
+            localStorage.removeItem('app_version');
+        }
     };
 
     const value = {

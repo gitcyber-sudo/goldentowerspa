@@ -39,7 +39,7 @@ interface Booking {
 import SelectionGrid from './SelectionGrid';
 
 const AdminDashboard: React.FC = () => {
-    const { user, role, loading: authLoading } = useAuth();
+    const { user, role, loading: authLoading, signOut } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [bookings, setBookings] = useState<Booking[]>([]);
@@ -590,11 +590,21 @@ const AdminDashboard: React.FC = () => {
                 </nav>
                 <div className="p-6 border-t border-white/10">
                     <button
-                        onClick={() => window.location.href = '/'}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-white/60 hover:text-white transition-all"
+                        onClick={() => navigate('/')}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-white/60 hover:text-white transition-all rounded-xl hover:bg-white/5"
+                    >
+                        <ArrowLeft size={20} />
+                        <span className="font-medium">Back to Site</span>
+                    </button>
+                    <button
+                        onClick={async () => {
+                            await signOut();
+                            navigate('/');
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-rose-400 hover:text-rose-300 transition-all rounded-xl hover:bg-rose-500/10 mt-2"
                     >
                         <LogOut size={20} />
-                        <span className="font-medium">Exit Admin</span>
+                        <span className="font-medium">Sign Out</span>
                     </button>
                 </div>
             </aside>

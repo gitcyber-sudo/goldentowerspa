@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowRight, Loader2, Sparkles, Crown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 interface ServiceItem {
   id: string;
@@ -20,8 +21,19 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { user } = useAuth();
+
   useEffect(() => {
+    let mounted = true;
     const fetchServices = async () => {
+      // Set a safety timeout - if fetch takes > 5s, something is wrong
+      const timeout = setTimeout(() => {
+        if (mounted && loading) {
+          console.warn("Service fetch timed out, forcing loading to false");
+          setLoading(false);
+        }
+      }, 5000);
+
       try {
         const { data, error } = await supabase
           .from('services')
@@ -29,16 +41,20 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
           .order('title', { ascending: true });
 
         if (error) throw error;
-        if (data) setServices(data);
+        if (data && mounted) setServices(data);
       } catch (error) {
         console.error('Error fetching services:', error);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          clearTimeout(timeout);
+        }
       }
     };
 
     fetchServices();
-  }, []);
+    return () => { mounted = false; };
+  }, [user]); // Re-fetch if user changes (e.g. login/logout)
 
   const processedServices = services.map(s => ({
     ...s,
