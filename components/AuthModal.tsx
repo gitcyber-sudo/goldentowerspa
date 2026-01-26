@@ -28,9 +28,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
         setLoading(true);
 
         try {
+            // Handle shorthand for admin login
+            let loginEmail = formData.email;
+            if (loginEmail.toLowerCase() === 'admin') {
+                loginEmail = 'admin@goldentowerspa.ph';
+            }
+
             if (isSignUp) {
                 const { error: signUpError } = await supabase.auth.signUp({
-                    email: formData.email,
+                    email: loginEmail,
                     password: formData.password,
                     options: {
                         data: { full_name: formData.fullName }
@@ -43,7 +49,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
                 setIsSignUp(false); // Switch to sign in
             } else {
                 const { error: signInError } = await supabase.auth.signInWithPassword({
-                    email: formData.email,
+                    email: loginEmail,
                     password: formData.password
                 });
                 if (signInError) throw signInError;

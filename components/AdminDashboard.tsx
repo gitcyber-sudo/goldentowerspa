@@ -1,6 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
     Calendar,
     Clock,
@@ -15,7 +16,8 @@ import {
     Users,
     Settings,
     LogOut,
-    ArrowLeft
+    ArrowLeft,
+    Shield
 } from 'lucide-react';
 
 interface Booking {
@@ -33,6 +35,8 @@ interface Booking {
 }
 
 const AdminDashboard: React.FC = () => {
+    const { user, role, loading: authLoading } = useAuth();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [therapists, setTherapists] = useState<any[]>([]);
@@ -54,6 +58,12 @@ const AdminDashboard: React.FC = () => {
     });
 
     useEffect(() => {
+        if (!authLoading && (!user || role !== 'admin')) {
+            navigate('/');
+        }
+    }, [user, role, authLoading, navigate]);
+
+    useEffect(() => {
         if (showManualBooking) {
             fetchServices();
             if (therapists.length === 0) fetchTherapists();
@@ -61,15 +71,18 @@ const AdminDashboard: React.FC = () => {
     }, [showManualBooking]);
 
     useEffect(() => {
-        if (activeTab === 'dashboard' || activeTab === 'bookings') {
-            fetchBookings();
-        } else if (activeTab === 'therapists') {
-            fetchTherapists();
+        if (role === 'admin') {
+            if (activeTab === 'dashboard' || activeTab === 'bookings') {
+                fetchBookings();
+            } else if (activeTab === 'therapists') {
+                fetchTherapists();
+            }
         }
-    }, [activeTab]);
+    }, [activeTab, role]);
 
     const fetchBookings = async () => {
         setLoading(true);
+        console.log("AdminDashboard: Fetching bookings...");
         try {
             const { data, error } = await supabase
                 .from('bookings')
@@ -80,8 +93,12 @@ const AdminDashboard: React.FC = () => {
                 `)
                 .order('created_at', { ascending: false });
 
-            if (error) throw error;
-            console.log("Fetched bookings:", data);
+            if (error) {
+                console.error("AdminDashboard: Fetch error:", error);
+                throw error;
+            }
+
+            console.log("AdminDashboard: Found bookings count:", data?.length || 0);
             if (data) setBookings(data as any);
         } catch (err) {
             console.error('Error fetching bookings:', err);
@@ -176,6 +193,21 @@ const AdminDashboard: React.FC = () => {
             setLoading(false);
         }
     };
+
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-[#F9F7F2] flex items-center justify-center">
+                <div className="text-center">
+                    <Shield className="w-12 h-12 text-gold animate-pulse mx-auto mb-4" />
+                    <p className="font-serif text-xl text-charcoal">Validating credentials...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!user || role !== 'admin') {
+        return null; // Will redirect via useEffect
+    }
 
     const renderManualBookingModal = () => (
         showManualBooking && (
@@ -486,12 +518,8 @@ const AdminDashboard: React.FC = () => {
                     <button className="bg-charcoal text-white px-8 py-3 rounded-lg font-bold uppercase tracking-widest hover:bg-gold transition-colors w-full">
                         Save Changes
                     </button>
-                    <div className="pt-6 border-t border-gold/10">
-                        <p className="text-xs text-rose-500 italic mb-2">Database Permissions Status</p>
-                        <div className="text-xs bg-rose-50 text-rose-800 p-3 rounded border border-rose-200">
-                            Warning: Public bookings are currently blocked by database policy. <br />
-                            Please run the setup SQL script in your Supabase dashboard.
-                        </div>
+                    <div className="pt-6 border-t border-gold/10 text-center">
+                        <p className="text-xs text-gold font-medium italic">Database permissions are active and managed via Supabase RLS.</p>
                     </div>
                 </div>
             </div>
@@ -547,10 +575,16 @@ const AdminDashboard: React.FC = () => {
                             />
                         </div>
                         <button
-                            onClick={activeTab === 'therapists' ? fetchTherapists : fetchBookings}
-                            className="p-2 border border-gold/20 rounded-xl hover:bg-cream transition-colors"
+                            onClick={async () => {
+                                console.log("Manual refresh triggered");
+                                await fetchBookings();
+                                if (activeTab === 'therapists') await fetchTherapists();
+                            }}
+                            className="bg-white border border-gold/20 p-2 rounded-xl text-gold hover:bg-gold hover:text-white transition-all flex items-center gap-2 px-4"
+                            title="Refresh Data"
                         >
-                            <Clock3 size={20} className="text-gold" />
+                            <Clock3 size={20} />
+                            <span className="text-xs font-bold uppercase tracking-widest hidden md:inline">Refresh</span>
                         </button>
                         <button
                             onClick={() => setShowManualBooking(true)}

@@ -32,27 +32,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // 1. Check active session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            if (session?.user) fetchProfile(session.user.id);
-            else setLoading(false);
-        });
+        let mounted = true;
+
+        const initAuth = async () => {
+            try {
+                // 1. Check active session
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+                if (sessionError) throw sessionError;
+
+                if (mounted) {
+                    setSession(session);
+                    setUser(session?.user ?? null);
+
+                    if (session?.user) {
+                        await fetchProfile(session.user.id);
+                    } else {
+                        setLoading(false);
+                    }
+                }
+            } catch (err) {
+                console.error("Auth init error:", err);
+                if (mounted) setLoading(false);
+            }
+        };
+
+        initAuth();
 
         // 2. Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            if (session?.user) {
-                fetchProfile(session.user.id);
-            } else {
-                setProfile(null);
-                setLoading(false);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log("Auth event:", event);
+            if (mounted) {
+                setSession(session);
+                setUser(session?.user ?? null);
+
+                if (session?.user) {
+                    await fetchProfile(session.user.id);
+                } else {
+                    setProfile(null);
+                    setLoading(false);
+                }
             }
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
     const fetchProfile = async (userId: string) => {
@@ -63,14 +89,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 .eq('id', userId)
                 .single();
 
-            if (!error && data) {
+            if (error) {
+                console.warn('Profile fetch error:', error.message);
+                // If it's specifically a "not found" error, they might be a new user 
+                // where the trigger hasn't finished yet. Handle gracefully.
+                if (error.code === 'PGRST116') {
+                    setProfile({ role: 'user' });
+                } else {
+                    // For other errors (network, etc), don't overwrite with 'user' yet
+                    // maybe they ARE an admin but the network failed.
+                }
+            } else if (data) {
                 setProfile(data);
-            } else {
-                // Fallback if profile trigger failed or hasn't run yet
-                setProfile({ role: 'user' });
             }
         } catch (error) {
-            console.error('Error fetching profile:', error);
+            console.error('Unexpected error fetching profile:', error);
         } finally {
             setLoading(false);
         }
