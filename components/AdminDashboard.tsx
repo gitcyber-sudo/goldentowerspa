@@ -21,6 +21,9 @@ import {
 interface Booking {
     id: string;
     user_email: string;
+    guest_name?: string;
+    guest_email?: string;
+    guest_phone?: string;
     booking_date: string;
     booking_time: string;
     status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
@@ -347,7 +350,10 @@ const AdminDashboard: React.FC = () => {
                                                         <User size={16} />
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-semibold text-charcoal">{booking.user_email}</p>
+                                                        <p className="text-sm font-semibold text-charcoal">
+                                                            {booking.guest_name ? `${booking.guest_name} (Guest)` : booking.user_email}
+                                                        </p>
+                                                        {booking.guest_phone && <p className="text-[10px] text-charcoal/40">{booking.guest_phone}</p>}
                                                         <p className="text-[10px] text-charcoal/40">ID: {booking.id.slice(0, 8)}</p>
                                                     </div>
                                                 </div>
