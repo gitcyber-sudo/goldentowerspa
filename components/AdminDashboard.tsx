@@ -81,6 +81,7 @@ const AdminDashboard: React.FC = () => {
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
+            console.log("Fetched bookings:", data);
             if (data) setBookings(data as any);
         } catch (err) {
             console.error('Error fetching bookings:', err);
@@ -118,8 +119,16 @@ const AdminDashboard: React.FC = () => {
 
     const filteredBookings = bookings.filter(b => {
         const matchesFilter = filter === 'all' || b.status === filter;
-        const matchesSearch = b.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            b.services?.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const search = searchTerm.toLowerCase();
+        const email = (b.user_email || '').toLowerCase();
+        const guestName = (b.guest_name || '').toLowerCase();
+        const serviceTitle = (b.services?.title || '').toLowerCase();
+
+        const matchesSearch = email.includes(search) ||
+            guestName.includes(search) ||
+            serviceTitle.includes(search);
+
         return matchesFilter && matchesSearch;
     });
 
