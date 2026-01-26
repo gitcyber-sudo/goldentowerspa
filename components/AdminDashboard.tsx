@@ -375,6 +375,13 @@ const AdminDashboard: React.FC = () => {
                         >
                             <Clock3 size={20} className="text-gold" />
                         </button>
+                        <button
+                            onClick={() => alert("Manual booking feature coming soon!")}
+                            className="bg-gold text-white px-4 py-2 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-gold-dark transition-colors shadow-lg shadow-gold/20 flex items-center gap-2"
+                        >
+                            <ClipboardList size={16} />
+                            <span>Manual Booking</span>
+                        </button>
                     </div>
                 </header>
 

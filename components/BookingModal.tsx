@@ -161,7 +161,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                     <div>
                                         <label className="block text-xs uppercase tracking-widest font-bold text-gold mb-2">Therapist</label>
                                         <select
-                                            required
                                             className="w-full bg-white border border-gold/20 p-4 rounded-lg focus:outline-none focus:border-gold"
                                             value={formData.therapist_id}
                                             onChange={(e) => setFormData({ ...formData, therapist_id: e.target.value })}
