@@ -105,21 +105,11 @@ I can add Google/Facebook buttons to your AuthModal right now! Just say the word
 ### Why They're Missing:
 The website CODE is ready to display them, but they don't exist in your **Supabase database** yet!
 
-Your `Services.tsx` component filters services by:
-- `category === 'signature'` → Shows in "Signature Massages" section
 - `category === 'package'` → Shows in "Luxury Packages" section
 
 ### ✅ Solution: I've Created SQL Script!
 
 **File:** `add_signature_and_packages.sql`
-
-#### What It Adds:
-
-**Signature Massage:**
-1. **Golden Tower Signature** (90 min, ₱2,500)
-   - Exclusive Hilot + aromatherapy blend
-   - Warm golden oils
-   - Transformative treatment
 
 **Luxury Packages:**
 1. **Ultimate Escape Package** (3 hrs, ₱4,500)
@@ -217,7 +207,7 @@ They will appear automatically in the correct sections!
 2. Try to book → Sign up
 3. Check email for branded confirmation
 4. Confirm → Complete booking
-5. See signature & packages on homepage!
+5. See packages on homepage!
 ```
 
 ---

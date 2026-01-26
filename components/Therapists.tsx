@@ -155,11 +155,7 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
                   </div>
                 </div>
 
-                <div className="hidden md:block absolute -right-8 top-1/2 -rotate-90 origin-center opacity-0 group-hover:opacity-100 transition-all duration-700 delay-100">
-                  <span className="text-[10px] uppercase tracking-[0.5em] text-gold-dark font-bold whitespace-nowrap">
-                    Golden Tower Signature
-                  </span>
-                </div>
+
               </div>
             ))}
           </div>

@@ -1,17 +1,5 @@
 -- Add Signature Massages and Luxury Packages to Golden Tower Spa
 
--- First, let's add the signature massages
-INSERT INTO public.services (title, description, duration, price, category, image_url)
-VALUES 
-  (
-    'Golden Tower Signature',
-    'Our exclusive signature massage combining traditional Hilot techniques with modern aromatherapy. This transformative treatment uses warm golden oils infused with ylang-ylang and sandalwood, designed to restore balance and awaken your inner radiance.',
-    '90 min',
-    2500,
-    'signature',
-    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070'
-  );
-
 -- Now add the luxury packages
 INSERT INTO public.services (title, description, duration, price, category, image_url)
 VALUES 
