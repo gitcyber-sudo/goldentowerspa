@@ -56,17 +56,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
           Experience the golden touch of traditional healing.
         </p>
 
-        <div className="fade-up flex flex-col md:flex-row gap-5 justify-center items-center">
-          <button
-            onClick={onBookClick}
-            className="bg-gold hover:bg-gold-dark text-white px-10 py-4 rounded-full text-sm md:text-base uppercase tracking-widest transition-all duration-300 shadow-xl hover:shadow-gold/30 transform hover:-translate-y-1 w-full md:w-auto"
-          >
-            Book an Experience
-          </button>
-          <button className="bg-transparent hover:bg-gold border border-gold text-gold hover:text-white px-9 py-4 rounded-full text-sm md:text-base uppercase tracking-widest transition-all duration-300 w-full md:w-auto">
-            View Menu
-          </button>
-        </div>
+
       </div>
 
       {/* Scroll Indicator */}

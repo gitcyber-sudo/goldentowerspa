@@ -187,14 +187,7 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
           </div>
         )}
 
-        <div className="mt-24 md:mt-48 text-center">
-          <button
-            onClick={onBookClick}
-            className="bg-charcoal text-gold border border-gold/30 hover:bg-gold hover:text-white px-12 py-5 rounded-full text-sm font-bold uppercase tracking-widest transition-all duration-500 shadow-xl"
-          >
-            Book with your Favorite
-          </button>
-        </div>
+
       </div>
     </section>
   );

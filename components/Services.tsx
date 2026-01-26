@@ -73,10 +73,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
   }, [authLoading]); // Re-fetch when auth settle status changes
 
   const processedServices = services.map(s => ({
-    ...s,
-    image_url: s.title === 'Shiatsu Massage'
-      ? 'https://images.unsplash.com/photo-1611077544192-fa35438177e7?q=80&w=2070'
-      : s.image_url
+    ...s
   }));
 
   const signatureTreatments = processedServices
