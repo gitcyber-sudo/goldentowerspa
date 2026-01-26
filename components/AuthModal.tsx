@@ -68,11 +68,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/dashboard`
+                    redirectTo: window.location.origin
                 }
             });
             if (error) throw error;
         } catch (err: any) {
+            console.error("Google Sign In Error:", err);
             setError(err.message || 'Google sign-in failed');
         }
     };
@@ -83,11 +84,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'facebook',
                 options: {
-                    redirectTo: `${window.location.origin}/dashboard`
+                    redirectTo: window.location.origin
                 }
             });
             if (error) throw error;
         } catch (err: any) {
+            console.error("Facebook Sign In Error:", err);
             setError(err.message || 'Facebook sign-in failed');
         }
     };
