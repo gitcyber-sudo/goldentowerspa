@@ -37,6 +37,26 @@ const AdminDashboard: React.FC = () => {
     const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Manual Booking State
+    const [showManualBooking, setShowManualBooking] = useState(false);
+    const [services, setServices] = useState<any[]>([]);
+    const [manualBookingData, setManualBookingData] = useState({
+        guest_name: '',
+        guest_email: '',
+        guest_phone: '',
+        service_id: '',
+        therapist_id: '',
+        date: '',
+        time: ''
+    });
+
+    useEffect(() => {
+        if (showManualBooking) {
+            fetchServices();
+            if (therapists.length === 0) fetchTherapists();
+        }
+    }, [showManualBooking]);
+
     useEffect(() => {
         if (activeTab === 'dashboard' || activeTab === 'bookings') {
             fetchBookings();
@@ -106,6 +126,148 @@ const AdminDashboard: React.FC = () => {
         confirmed: bookings.filter(b => b.status === 'confirmed').length,
         completed: bookings.filter(b => b.status === 'completed').length,
     };
+
+    const fetchServices = async () => {
+        const { data } = await supabase.from('services').select('*');
+        if (data) setServices(data);
+    };
+
+    const handleManualBooking = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const { error } = await supabase.from('bookings').insert([{
+                user_id: null,
+                guest_name: manualBookingData.guest_name,
+                guest_email: manualBookingData.guest_email || null,
+                guest_phone: manualBookingData.guest_phone,
+                service_id: manualBookingData.service_id,
+                therapist_id: manualBookingData.therapist_id || null,
+                booking_date: manualBookingData.date,
+                booking_time: manualBookingData.time,
+                status: 'confirmed',
+                user_email: manualBookingData.guest_email || 'Walk-in Client'
+            }]);
+
+            if (error) throw error;
+            alert('Guest booking created successfully!');
+            setShowManualBooking(false);
+            fetchBookings();
+            setManualBookingData({
+                guest_name: '', guest_email: '', guest_phone: '',
+                service_id: '', therapist_id: '', date: '', time: ''
+            });
+        } catch (err: any) {
+            console.error("Manual booking error:", err);
+            alert("Failed to create booking: " + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const renderManualBookingModal = () => (
+        showManualBooking && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
+                <div className="bg-white w-full max-w-lg rounded-2xl p-8 shadow-2xl overflow-hidden animate-fade-in relative">
+                    <button
+                        onClick={() => setShowManualBooking(false)}
+                        className="absolute top-4 right-4 text-charcoal/40 hover:text-gold"
+                    >
+                        <XCircle size={24} />
+                    </button>
+                    <h2 className="font-serif text-2xl text-charcoal mb-6">New Guest Reservation</h2>
+
+                    <form onSubmit={handleManualBooking} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="col-span-2">
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold text-left block mb-1">Guest Name *</label>
+                                <input
+                                    required
+                                    type="text"
+                                    className="w-full border border-gold/20 rounded-lg p-3 bg-cream/10"
+                                    value={manualBookingData.guest_name}
+                                    onChange={e => setManualBookingData({ ...manualBookingData, guest_name: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold text-left block mb-1">Email (Optional)</label>
+                                <input
+                                    type="email"
+                                    placeholder="For account linking"
+                                    className="w-full border border-gold/20 rounded-lg p-3 bg-cream/10"
+                                    value={manualBookingData.guest_email}
+                                    onChange={e => setManualBookingData({ ...manualBookingData, guest_email: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold text-left block mb-1">Phone *</label>
+                                <input
+                                    required
+                                    type="tel"
+                                    className="w-full border border-gold/20 rounded-lg p-3 bg-cream/10"
+                                    value={manualBookingData.guest_phone}
+                                    onChange={e => setManualBookingData({ ...manualBookingData, guest_phone: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold text-left block mb-1">Service *</label>
+                                <select
+                                    required
+                                    className="w-full border border-gold/20 rounded-lg p-3 bg-white"
+                                    value={manualBookingData.service_id}
+                                    onChange={e => setManualBookingData({ ...manualBookingData, service_id: e.target.value })}
+                                >
+                                    <option value="">Select Service</option>
+                                    {services.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold text-left block mb-1">Therapist</label>
+                                <select
+                                    className="w-full border border-gold/20 rounded-lg p-3 bg-white"
+                                    value={manualBookingData.therapist_id}
+                                    onChange={e => setManualBookingData({ ...manualBookingData, therapist_id: e.target.value })}
+                                >
+                                    <option value="">Any Specialist</option>
+                                    {therapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold text-left block mb-1">Date *</label>
+                                <input
+                                    required
+                                    type="date"
+                                    className="w-full border border-gold/20 rounded-lg p-3 bg-white"
+                                    value={manualBookingData.date}
+                                    onChange={e => setManualBookingData({ ...manualBookingData, date: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold text-left block mb-1">Time *</label>
+                                <input
+                                    required
+                                    type="time"
+                                    className="w-full border border-gold/20 rounded-lg p-3 bg-white"
+                                    value={manualBookingData.time}
+                                    onChange={e => setManualBookingData({ ...manualBookingData, time: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <button type="submit" className="w-full bg-gold text-white font-bold uppercase tracking-widest py-4 rounded-xl hover:bg-gold-dark transition-colors mt-4">
+                            Confirm Reservation
+                        </button>
+                    </form>
+                </div>
+            </div>
+        )
+    );
 
     const renderSidebarItem = (id: string, icon: React.ReactNode, label: string) => (
         <button
@@ -376,7 +538,7 @@ const AdminDashboard: React.FC = () => {
                             <Clock3 size={20} className="text-gold" />
                         </button>
                         <button
-                            onClick={() => alert("Manual booking feature coming soon!")}
+                            onClick={() => setShowManualBooking(true)}
                             className="bg-gold text-white px-4 py-2 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-gold-dark transition-colors shadow-lg shadow-gold/20 flex items-center gap-2"
                         >
                             <ClipboardList size={16} />
@@ -389,6 +551,7 @@ const AdminDashboard: React.FC = () => {
                 {activeTab === 'bookings' && renderBookingsView()}
                 {activeTab === 'therapists' && renderTherapistsView()}
                 {activeTab === 'settings' && renderSettingsView()}
+                {renderManualBookingModal()}
             </main>
         </div>
     );
