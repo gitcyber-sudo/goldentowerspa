@@ -75,6 +75,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     if (fetchProfileRef.current !== currentUser.id) {
                         fetchProfileRef.current = currentUser.id;
                         await fetchProfile(currentUser.id);
+
+                        // AUTO-REDIRECT after first login/session load if on home page
+                        if ((event === 'SIGNED_IN') && window.location.pathname === '/') {
+                            console.log("Auto-redirecting to dashboard after login...");
+                            // We need access to navigate here, but it's a context.
+                            // Better way: Let the App.tsx handle it or use window.location
+                            // Since we are in a hook, window.location is safe.
+                            const { data: p } = await supabase.from('profiles').select('role').eq('id', currentUser.id).single();
+                            const r = p?.role || 'user';
+                            const path = r === 'admin' ? '/admin' : (r === 'therapist' ? '/therapist' : '/dashboard');
+                            window.location.href = path;
+                        }
                     } else {
                         // Already fetching or loaded, just ensure loading is off
                         setLoading(false);

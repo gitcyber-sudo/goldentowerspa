@@ -60,9 +60,6 @@ const UserDashboard: React.FC = () => {
             if (data) {
                 console.log("Dashboard: Found bookings:", data.length);
                 setBookings(data as any);
-
-                // If zero records found but user is sure they have some, 
-                // it might be a transient Supabase sync issue. Retry once.
                 if (data.length === 0 && retryCount < 1) {
                     setTimeout(() => fetchBookings(retryCount + 1), 2000);
                 }
@@ -76,13 +73,11 @@ const UserDashboard: React.FC = () => {
 
     const cancelBooking = async (id: string) => {
         if (!confirm('Are you sure you want to cancel this booking?')) return;
-
         try {
             const { error } = await supabase
                 .from('bookings')
                 .update({ status: 'cancelled' })
                 .eq('id', id);
-
             if (error) throw error;
             fetchBookings();
         } catch (err) {
@@ -96,13 +91,8 @@ const UserDashboard: React.FC = () => {
         navigate('/');
     };
 
-    const currentBookings = bookings.filter(
-        b => b.status === 'pending' || b.status === 'confirmed'
-    );
-
-    const pastBookings = bookings.filter(
-        b => b.status === 'completed' || b.status === 'cancelled'
-    );
+    const currentBookings = bookings.filter(b => b.status === 'pending' || b.status === 'confirmed');
+    const pastBookings = bookings.filter(b => b.status === 'completed' || b.status === 'cancelled');
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -115,26 +105,14 @@ const UserDashboard: React.FC = () => {
     };
 
     const renderBookingCard = (booking: Booking) => (
-        <div
-            key={booking.id}
-            className="bg-white rounded-xl border border-gold/10 p-6 hover:shadow-lg transition-all"
-        >
+        <div key={booking.id} className="bg-white rounded-xl border border-gold/10 p-6 hover:shadow-lg transition-all">
             <div className="flex justify-between items-start mb-4">
                 <div>
-                    <h3 className="font-serif text-xl text-charcoal mb-1">
-                        {booking.services?.title || 'Service'}
-                    </h3>
-                    <p className="text-sm text-gold italic">
-                        with {booking.therapists?.name || 'Any Specialist'}
-                    </p>
+                    <h3 className="font-serif text-xl text-charcoal mb-1">{booking.services?.title || 'Service'}</h3>
+                    <p className="text-sm text-gold italic">with {booking.therapists?.name || 'Any Specialist'}</p>
                 </div>
-                <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${getStatusColor(booking.status)}`}
-                >
-                    {booking.status}
-                </span>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${getStatusColor(booking.status)}`}>{booking.status}</span>
             </div>
-
             <div className="space-y-2 mb-4">
                 <div className="flex items-center gap-2 text-charcoal/70">
                     <Calendar size={16} className="text-gold" />
@@ -145,18 +123,11 @@ const UserDashboard: React.FC = () => {
                     <span className="text-sm">{booking.booking_time}</span>
                 </div>
             </div>
-
             <div className="flex items-center justify-between pt-4 border-t border-gold/10">
-                <div className="text-xs text-charcoal/50">
-                    Booked {new Date(booking.created_at).toLocaleDateString()}
-                </div>
+                <div className="text-xs text-charcoal/50">Booked {new Date(booking.created_at).toLocaleDateString()}</div>
                 {booking.status === 'pending' && (
-                    <button
-                        onClick={() => cancelBooking(booking.id)}
-                        className="text-rose-600 hover:text-rose-700 text-sm font-medium flex items-center gap-1"
-                    >
-                        <XCircle size={16} />
-                        Cancel
+                    <button onClick={() => cancelBooking(booking.id)} className="text-rose-600 hover:text-rose-700 text-sm font-medium flex items-center gap-1">
+                        <XCircle size={16} /> Cancel
                     </button>
                 )}
             </div>
@@ -169,19 +140,9 @@ const UserDashboard: React.FC = () => {
                 <div className="text-center p-8">
                     <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gold/20 border-t-gold mb-4" />
                     <p className="font-serif text-2xl text-charcoal mb-2">Restoring your session...</p>
-                    <p className="text-sm text-charcoal/40 mb-8 max-w-xs mx-auto italic">This usually takes a few seconds. If it takes longer, your session might be out of sync.</p>
-
+                    <p className="text-sm text-charcoal/40 mb-8 max-w-xs mx-auto italic">This usually takes a few seconds.</p>
                     <div className="pt-8 border-t border-gold/10">
-                        <button
-                            onClick={() => {
-                                localStorage.clear();
-                                sessionStorage.clear();
-                                window.location.href = '/';
-                            }}
-                            className="text-gold text-xs font-bold uppercase tracking-widest hover:text-gold-dark transition-all border-b border-gold/30 pb-1"
-                        >
-                            Stuck? Click here to Reset & Fix
-                        </button>
+                        <button onClick={() => { localStorage.clear(); sessionStorage.clear(); window.location.href = '/'; }} className="text-gold text-xs font-bold uppercase tracking-widest hover:text-gold-dark transition-all border-b border-gold/30 pb-1">Stuck? Click here to Reset & Fix</button>
                     </div>
                 </div>
             </div>
@@ -193,12 +154,7 @@ const UserDashboard: React.FC = () => {
             <div className="min-h-screen bg-cream flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-charcoal/60 mb-4">Please sign in to view your dashboard</p>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="bg-gold text-white px-6 py-3 rounded-full font-bold"
-                    >
-                        Return Home
-                    </button>
+                    <button onClick={() => navigate('/')} className="bg-gold text-white px-6 py-3 rounded-full font-bold">Return Home</button>
                 </div>
             </div>
         );
@@ -206,40 +162,33 @@ const UserDashboard: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#F9F7F2]">
-            {/* Header */}
-            <header className="bg-white border-b border-gold/10 px-6 py-6">
-                <div className="max-w-6xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => navigate('/')}
-                            className="text-charcoal/60 hover:text-gold transition-colors"
-                        >
-                            <ArrowLeft size={24} />
-                        </button>
-                        <div>
-                            <h1 className="font-serif text-2xl text-charcoal">My Rituals</h1>
-                            <p className="text-sm text-charcoal/60">Welcome back, {profile?.full_name || user.email}</p>
-                        </div>
-                    </div>
+            <header className="bg-white border-b border-gold/10 px-6 py-6 font-sans">
+                <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                     <button
-                        onClick={handleSignOut}
-                        className="flex items-center gap-2 text-charcoal/60 hover:text-gold transition-colors"
+                        onClick={() => navigate('/')}
+                        className="flex items-center gap-2 bg-gold/5 hover:bg-gold/10 text-gold px-5 py-2.5 rounded-full transition-all border border-gold/10 font-bold uppercase tracking-widest text-[10px]"
                     >
-                        <LogOut size={20} />
-                        <span className="text-sm font-medium">Sign Out</span>
+                        <ArrowLeft size={16} />
+                        <span>Return to Home</span>
                     </button>
+                    <div className="flex flex-col md:flex-row items-center gap-6">
+                        <p className="text-xl font-serif text-charcoal text-center md:text-left">Welcome, <span className="text-gold italic">{profile?.full_name || user.email}</span></p>
+                        <button
+                            onClick={handleSignOut}
+                            className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors font-bold uppercase tracking-widest text-[10px] md:border-l md:border-gold/20 md:pl-6"
+                        >
+                            <LogOut size={16} />
+                            <span>Sign Out</span>
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            {/* Main Content */}
             <main className="max-w-6xl mx-auto px-6 py-12">
-                {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                     <div className="bg-white p-6 rounded-xl border border-gold/10">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
-                                <Clock3 className="text-gold" size={20} />
-                            </div>
+                            <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center"><Clock3 className="text-gold" size={20} /></div>
                             <div>
                                 <p className="text-2xl font-serif text-charcoal">{currentBookings.length}</p>
                                 <p className="text-xs uppercase tracking-widest text-charcoal/60">Active</p>
@@ -248,9 +197,7 @@ const UserDashboard: React.FC = () => {
                     </div>
                     <div className="bg-white p-6 rounded-xl border border-gold/10">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                                <CheckCircle2 className="text-emerald-600" size={20} />
-                            </div>
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center"><CheckCircle2 className="text-emerald-600" size={20} /></div>
                             <div>
                                 <p className="text-2xl font-serif text-charcoal">{pastBookings.filter(b => b.status === 'completed').length}</p>
                                 <p className="text-xs uppercase tracking-widest text-charcoal/60">Completed</p>
@@ -259,9 +206,7 @@ const UserDashboard: React.FC = () => {
                     </div>
                     <div className="bg-white p-6 rounded-xl border border-gold/10">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
-                                <Sparkles className="text-gold" size={20} />
-                            </div>
+                            <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center"><Sparkles className="text-gold" size={20} /></div>
                             <div>
                                 <p className="text-2xl font-serif text-charcoal">{bookings.length}</p>
                                 <p className="text-xs uppercase tracking-widest text-charcoal/60">Total Rituals</p>
@@ -270,36 +215,18 @@ const UserDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Tabs */}
                 <div className="flex gap-4 mb-8 border-b border-gold/10">
-                    <button
-                        onClick={() => setActiveTab('current')}
-                        className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeTab === 'current'
-                            ? 'text-gold'
-                            : 'text-charcoal/40 hover:text-charcoal/60'
-                            }`}
-                    >
+                    <button onClick={() => setActiveTab('current')} className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeTab === 'current' ? 'text-gold' : 'text-charcoal/40 hover:text-charcoal/60'}`}>
                         Current Bookings
-                        {activeTab === 'current' && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
-                        )}
+                        {activeTab === 'current' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />}
                     </button>
-                    <button
-                        onClick={() => setActiveTab('past')}
-                        className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeTab === 'past'
-                            ? 'text-gold'
-                            : 'text-charcoal/40 hover:text-charcoal/60'
-                            }`}
-                    >
+                    <button onClick={() => setActiveTab('past')} className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeTab === 'past' ? 'text-gold' : 'text-charcoal/40 hover:text-charcoal/60'}`}>
                         <History size={16} className="inline mr-2" />
                         Past Bookings
-                        {activeTab === 'past' && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
-                        )}
+                        {activeTab === 'past' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />}
                     </button>
                 </div>
 
-                {/* Bookings Grid */}
                 {loading ? (
                     <div className="text-center py-12">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gold/20 border-t-gold" />
@@ -312,12 +239,7 @@ const UserDashboard: React.FC = () => {
                                 <div className="col-span-full text-center py-16">
                                     <Sparkles className="text-gold/20 mx-auto mb-4" size={48} />
                                     <p className="text-charcoal/40 italic mb-4">No active bookings</p>
-                                    <button
-                                        onClick={() => navigate('/')}
-                                        className="bg-gold text-white px-6 py-3 rounded-full font-bold uppercase tracking-widest hover:bg-gold-dark transition-all"
-                                    >
-                                        Book a Ritual
-                                    </button>
+                                    <button onClick={() => navigate('/')} className="bg-gold text-white px-6 py-3 rounded-full font-bold uppercase tracking-widest hover:bg-gold-dark transition-all">Book a Ritual</button>
                                 </div>
                             ) : (
                                 currentBookings.map(renderBookingCard)

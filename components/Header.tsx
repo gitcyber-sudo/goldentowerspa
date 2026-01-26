@@ -72,87 +72,86 @@ const Header: React.FC<HeaderProps> = ({ onBookClick }) => {
         </a>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center space-x-10">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              className={`text-[11px] uppercase tracking-[0.2em] font-bold transition-all hover:text-gold ${isScrolled ? 'text-charcoal/80' : 'text-charcoal'
-                }`}
+        <nav className="hidden md:flex items-center space-x-6">
+          {!user ? (
+            <button
+              onClick={onBookClick}
+              className="bg-gold hover:bg-gold-dark text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-500 transform hover:scale-105 shadow-lg border border-white/20 hover:shadow-gold/30"
             >
-              {link.name}
-            </a>
-          ))}
-          <button
-            onClick={onBookClick}
-            className="bg-gold hover:bg-gold-dark text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-500 transform hover:scale-105 shadow-lg border border-white/20 hover:shadow-gold/30"
-          >
-            Book Now
-          </button>
-
-          {/* User Profile Menu */}
-          {user ? (
-            <div className="relative">
+              Login
+            </button>
+          ) : (
+            <div className="flex items-center gap-4">
               <button
-                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 hover:bg-gold/20 transition-all border border-gold/20"
+                onClick={() => navigate(getDashboardLink())}
+                className="bg-charcoal hover:bg-gold text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-500 shadow-md border border-gold/10"
               >
-                <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center">
-                  <User size={16} className="text-gold" />
-                </div>
-                <span className="text-xs font-medium text-charcoal max-w-[100px] truncate">
-                  {profile?.full_name || user.email}
-                </span>
+                Dashboard
               </button>
 
-              {profileMenuOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setProfileMenuOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gold/10 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gold/10">
-                      <p className="text-xs text-charcoal/60 uppercase tracking-widest">Signed in as</p>
-                      <p className="text-sm font-medium text-charcoal truncate">{user.email}</p>
-                      {profile?.role && profile.role !== 'user' && (
-                        <span className="inline-block mt-1 px-2 py-0.5 bg-gold/10 text-gold text-xs rounded-full uppercase tracking-wider">
-                          {profile.role}
-                        </span>
-                      )}
+              <div className="relative">
+                <button
+                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                  className="flex items-center justify-center w-11 h-11 rounded-full bg-gold/10 hover:bg-gold/20 transition-all border border-gold/20"
+                  title={profile?.full_name || user.email}
+                >
+                  <User size={20} className="text-gold" />
+                </button>
+
+                {profileMenuOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setProfileMenuOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gold/10 py-3 z-50 overflow-hidden animate-fade-in">
+                      <div className="px-5 py-3 border-b border-gold/5 bg-cream/30">
+                        <p className="text-[10px] text-gold uppercase font-bold tracking-[0.2em] mb-1">Authenticated</p>
+                        <p className="text-sm font-bold text-charcoal truncate">{profile?.full_name || 'Valued Guest'}</p>
+                        <p className="text-[10px] text-charcoal/40 truncate mt-0.5">{user.email}</p>
+                      </div>
+
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full text-left px-5 py-4 hover:bg-rose-50 transition-all flex items-center gap-3 text-rose-600 font-bold text-xs uppercase tracking-widest"
+                      >
+                        <LogOut size={16} />
+                        <span>Sign Out</span>
+                      </button>
                     </div>
-                    <button
-                      onClick={() => {
-                        navigate(getDashboardLink());
-                        setProfileMenuOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-3 hover:bg-gold/5 transition-colors flex items-center gap-3 text-charcoal"
-                    >
-                      <Calendar size={16} className="text-gold" />
-                      <span className="text-sm">My Dashboard</span>
-                    </button>
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full text-left px-4 py-3 hover:bg-rose-50 transition-colors flex items-center gap-3 text-rose-600 border-t border-gold/10"
-                    >
-                      <LogOut size={16} />
-                      <span className="text-sm">Sign Out</span>
-                    </button>
-                  </div>
-                </>
-              )}
+                  </>
+                )}
+              </div>
             </div>
-          ) : null}
+          )}
         </nav>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          className="md:hidden text-charcoal focus:outline-none p-2 transition-transform active:scale-90"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
-        </button>
+        {/* Mobile Action Button */}
+        <div className="md:hidden flex items-center gap-3">
+          {!user ? (
+            <button
+              onClick={onBookClick}
+              className="bg-gold text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg"
+            >
+              Login
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate(getDashboardLink())}
+              className="bg-charcoal text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg"
+            >
+              Dashboard
+            </button>
+          )}
+
+          <button
+            className="text-charcoal focus:outline-none p-1.5 transition-transform active:scale-90 bg-gold/5 rounded-lg"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation Menu */}
@@ -160,54 +159,22 @@ const Header: React.FC<HeaderProps> = ({ onBookClick }) => {
         className={`md:hidden absolute top-full left-0 w-full bg-cream/98 backdrop-blur-2xl border-t border-gold/10 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden ${mobileMenuOpen ? 'max-h-screen opacity-100 shadow-2xl' : 'max-h-0 opacity-0'
           }`}
       >
-        <div className="flex flex-col items-center py-20 space-y-10 min-h-[60vh]">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-charcoal text-3xl font-serif italic hover:text-gold transition-all"
-            >
-              {link.name}
-            </a>
-          ))}
-          <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              onBookClick();
-            }}
-            className="bg-gold text-white px-12 py-5 rounded-full text-sm font-bold uppercase tracking-widest shadow-xl w-3/4 max-w-xs transition-transform active:scale-95"
-          >
-            Book Appointment
-          </button>
+        <div className="flex flex-col items-center py-16 space-y-8 min-h-[40vh]">
+          <a href="/" onClick={() => setMobileMenuOpen(false)} className="text-charcoal text-2xl font-serif italic">Home</a>
+          <a href="#services" onClick={() => setMobileMenuOpen(false)} className="text-charcoal text-2xl font-serif italic">Rituals</a>
+          <a href="#specialists" onClick={() => setMobileMenuOpen(false)} className="text-charcoal text-2xl font-serif italic">Specialists</a>
+          <a href="#footer" onClick={() => setMobileMenuOpen(false)} className="text-charcoal text-2xl font-serif italic">Location</a>
 
-          {/* Mobile User Menu */}
           {user && (
-            <>
-              <div className="w-3/4 max-w-xs border-t border-gold/20 pt-6">
-                <p className="text-xs text-charcoal/60 uppercase tracking-widest text-center mb-3">
-                  {profile?.full_name || user.email}
-                </p>
-                <button
-                  onClick={() => {
-                    navigate(getDashboardLink());
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full bg-white text-charcoal border border-gold/20 px-6 py-3 rounded-full text-sm font-bold mb-2"
-                >
-                  My Dashboard
-                </button>
-                <button
-                  onClick={() => {
-                    handleSignOut();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-rose-600 px-6 py-3 rounded-full text-sm font-medium"
-                >
-                  Sign Out
-                </button>
-              </div>
-            </>
+            <button
+              onClick={() => {
+                handleSignOut();
+                setMobileMenuOpen(false);
+              }}
+              className="mt-8 text-rose-600 font-bold uppercase tracking-[0.2em] text-xs flex items-center gap-2"
+            >
+              <LogOut size={16} /> Sign Out
+            </button>
           )}
         </div>
       </div>

@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 import { X, Mail, Lock, User, Loader2, ArrowRight } from 'lucide-react';
 
 interface AuthModalProps {
@@ -10,6 +11,7 @@ interface AuthModalProps {
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
+    const navigate = useNavigate();
     const [isSignUp, setIsSignUp] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -48,13 +50,29 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
                 alert('Account created! Please check your email to confirm, then sign in.');
                 setIsSignUp(false); // Switch to sign in
             } else {
-                const { error: signInError } = await supabase.auth.signInWithPassword({
+                const { data, error: signInError } = await supabase.auth.signInWithPassword({
                     email: loginEmail,
                     password: formData.password
                 });
+
                 if (signInError) throw signInError;
-                onSuccess();
-                onClose();
+
+                // Success - Redirect based on role
+                if (data.user) {
+                    // Check profile for role-based redirect
+                    const { data: profileData } = await supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', data.user.id)
+                        .single();
+
+                    const role = profileData?.role || 'user';
+                    const dashboardPath = role === 'admin' ? '/admin' : (role === 'therapist' ? '/therapist' : '/dashboard');
+
+                    onSuccess();
+                    onClose();
+                    navigate(dashboardPath);
+                }
             }
         } catch (err: any) {
             // Improved error message for specific Supabase error "Invalid login credentials"
