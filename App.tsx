@@ -77,6 +77,7 @@ const MainLayout: React.FC<{
 };
 
 const App: React.FC = () => {
+  const { loading: authLoading } = useAuth();
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string | undefined>(undefined);
@@ -87,6 +88,20 @@ const App: React.FC = () => {
   };
 
   const containerRef = useScrollAnimation() as React.RefObject<HTMLDivElement>;
+
+  // Global loading state to ensure auth is settled before any components try to fetch data
+  // This prevents race conditions during page refreshes for signed-in users.
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-center p-8">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gold/20 border-t-gold mb-6" />
+          <h2 className="font-serif text-3xl text-charcoal mb-2">Golden Tower <span className="text-gold italic">Spa</span></h2>
+          <p className="text-sm text-charcoal/40 italic">Restoring your session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Routes>
