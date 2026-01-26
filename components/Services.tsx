@@ -28,7 +28,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
     const fetchServices = async () => {
       // Set a safety timeout - if fetch takes > 5s, something is wrong
       const timeout = setTimeout(() => {
-        if (mounted && loading) {
+        if (mounted) {
           console.warn("Service fetch timed out, forcing loading to false");
           setLoading(false);
         }

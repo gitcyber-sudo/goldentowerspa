@@ -30,54 +30,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [session, setSession] = useState<Session | null>(null);
     const [profile, setProfile] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
+    const fetchProfileRef = React.useRef<string | null>(null);
 
     useEffect(() => {
         let mounted = true;
 
-        const initAuth = async () => {
-            try {
-                // 1. Check active session
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-                if (sessionError) throw sessionError;
-
-                if (mounted) {
-                    setSession(session);
-                    setUser(session?.user ?? null);
-
-                    if (session?.user) {
-                        await fetchProfile(session.user.id);
-                    } else {
-                        setLoading(false);
-                    }
-                }
-            } catch (err) {
-                console.error("Auth init error:", err);
-                if (mounted) setLoading(false);
+        // --- SAFETY TIMEOUT ---
+        // If auth takes more than 7 seconds, something is wrong (likely network or blocked storage)
+        // Force loading to false so the user isn't stuck behind a white screen.
+        const authTimeout = setTimeout(() => {
+            if (mounted && loading) {
+                console.warn("Auth initialization timed out. Forcing loading false.");
+                setLoading(false);
             }
-        };
+        }, 7000);
 
-        initAuth();
-
-        // 2. Listen for changes
+        // Listen for changes (this will also provide the initial session on subscribe)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log("Auth event:", event);
-            if (mounted) {
-                setSession(session);
-                setUser(session?.user ?? null);
+            console.log("Auth event triggered:", event);
 
-                if (session?.user) {
-                    await fetchProfile(session.user.id);
-                } else {
-                    setProfile(null);
-                    setLoading(false);
+            if (!mounted) return;
+
+            setSession(session);
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
+
+            if (currentUser) {
+                // Prevent duplicate fetches for the same user ID in the same mount cycle
+                if (fetchProfileRef.current !== currentUser.id) {
+                    fetchProfileRef.current = currentUser.id;
+                    await fetchProfile(currentUser.id);
                 }
+            } else {
+                fetchProfileRef.current = null;
+                setProfile(null);
+                setLoading(false);
             }
         });
 
         return () => {
             mounted = false;
             subscription.unsubscribe();
+            clearTimeout(authTimeout);
         };
     }, []);
 

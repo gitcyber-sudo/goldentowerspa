@@ -27,7 +27,16 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
+    let mounted = true;
     const fetchTherapists = async () => {
+      // Safety timeout: don't wait forever
+      const timeout = setTimeout(() => {
+        if (mounted) {
+          console.warn("Therapist fetch timeout - unsticking UI");
+          setLoading(false);
+        }
+      }, 5000);
+
       try {
         const { data, error } = await supabase
           .from('therapists')
@@ -35,15 +44,19 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
           .order('name', { ascending: true });
 
         if (error) throw error;
-        if (data) setTeam(data);
+        if (data && mounted) setTeam(data);
       } catch (error) {
         console.error('Error fetching therapists:', error);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          clearTimeout(timeout);
+        }
       }
     };
 
     fetchTherapists();
+    return () => { mounted = false; };
   }, []);
 
   useLayoutEffect(() => {

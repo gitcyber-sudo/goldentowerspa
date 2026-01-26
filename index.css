@@ -6,6 +6,7 @@
   html {
     scroll-behavior: smooth;
   }
+
   body {
     @apply bg-cream text-charcoal font-sans antialiased;
   }
@@ -23,6 +24,20 @@
 ::-webkit-scrollbar-thumb {
   background: #C5A059;
   border-radius: 4px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+#root {
+  animation: fadeIn 0.5s ease-out;
 }
 
 /* Custom Animations from index.html (if any were left over) or specific component styles */
