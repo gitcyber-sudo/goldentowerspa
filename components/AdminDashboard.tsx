@@ -152,7 +152,7 @@ const AdminDashboard: React.FC = () => {
             if (error) throw error;
             alert('Guest booking created successfully!');
             setShowManualBooking(false);
-            fetchBookings();
+            await fetchBookings(); // Ensure this is awaited
             setManualBookingData({
                 guest_name: '', guest_email: '', guest_phone: '',
                 service_id: '', therapist_id: '', date: '', time: ''
