@@ -35,31 +35,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         let mounted = true;
 
-        // --- SAFETY TIMEOUT ---
-        // If auth takes more than 7 seconds, something is wrong (likely network or blocked storage)
-        // Force loading to false so the user isn't stuck behind a white screen.
-        const authTimeout = setTimeout(() => {
-            if (mounted && loading) {
-                console.warn("Auth initialization timed out. Forcing loading false.");
-                setLoading(false);
-            }
-        }, 7000);
+        const initAuth = async () => {
+            try {
+                // 1. Check existing session immediately
+                const { data: { session: initialSession } } = await supabase.auth.getSession();
 
-        // Listen for changes (this will also provide the initial session on subscribe)
+                if (mounted) {
+                    if (initialSession) {
+                        setSession(initialSession);
+                        setUser(initialSession.user);
+                        fetchProfileRef.current = initialSession.user.id;
+                        await fetchProfile(initialSession.user.id);
+                    } else {
+                        setLoading(false);
+                    }
+                }
+            } catch (err) {
+                console.error("Manual session check error:", err);
+                if (mounted) setLoading(false);
+            }
+        };
+
+        initAuth();
+
+        // 2. Listen for all auth events
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log("Auth event triggered:", event);
 
             if (!mounted) return;
 
+            // Update session and user states
             setSession(session);
             const currentUser = session?.user ?? null;
             setUser(currentUser);
 
             if (currentUser) {
-                // Prevent duplicate fetches for the same user ID in the same mount cycle
-                if (fetchProfileRef.current !== currentUser.id) {
-                    fetchProfileRef.current = currentUser.id;
-                    await fetchProfile(currentUser.id);
+                // Only fetch profile if it's a new login or a fresh session recovery
+                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
+                    if (fetchProfileRef.current !== currentUser.id) {
+                        fetchProfileRef.current = currentUser.id;
+                        await fetchProfile(currentUser.id);
+                    } else {
+                        // Already fetching or loaded, just ensure loading is off
+                        setLoading(false);
+                    }
                 }
             } else {
                 fetchProfileRef.current = null;
@@ -68,10 +87,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         });
 
+        // 3. Global Safety Timeout (Hard unstick)
+        const globalTimeout = setTimeout(() => {
+            if (mounted && loading) {
+                console.warn("Global Auth timeout hit. Unsticking UI.");
+                setLoading(false);
+            }
+        }, 8000);
+
         return () => {
             mounted = false;
             subscription.unsubscribe();
-            clearTimeout(authTimeout);
+            clearTimeout(globalTimeout);
         };
     }, []);
 
@@ -105,11 +132,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const fetchProfile = async (userId: string) => {
         try {
             console.log("Fetching profile for:", userId);
-            const { data, error } = await supabase
+
+            // Add a sub-timeout specifically for the database query
+            const profilePromise = supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
                 .single();
+
+            // Race the database query against a 5s timeout
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Profile fetch timeout")), 5000)
+            );
+
+            const result: any = await Promise.race([profilePromise, timeoutPromise]);
+            const { data, error } = result;
 
             if (error) {
                 console.warn('Profile fetch error:', error.message);
@@ -117,11 +154,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setProfile({ role: 'user' });
                 }
             } else if (data) {
-                console.log("Profile loaded:", data.role);
+                console.log("Profile loaded successfully:", data.role);
                 setProfile(data);
             }
         } catch (error) {
-            console.error('Unexpected error fetching profile:', error);
+            console.error('Unexpected error during profile fetch:', error);
+            // Fallback for failed profile fetch (to unstick dashboard)
+            if (!profile) setProfile({ role: 'user' });
         } finally {
             setLoading(false);
         }
