@@ -19,8 +19,10 @@ import {
     ArrowLeft,
     Shield,
     ChevronRight,
-    Sparkles
+    Sparkles,
+    BarChart3
 } from 'lucide-react';
+import AnalyticsDashboard from './AnalyticsDashboard';
 
 interface Booking {
     id: string;
@@ -332,6 +334,7 @@ const AdminDashboard: React.FC = () => {
                 <nav className="flex-1 p-6 space-y-2">
                     {renderSidebarItem('dashboard', <LayoutDashboard size={20} />, 'Dashboard')}
                     {renderSidebarItem('bookings', <ClipboardList size={20} />, 'Bookings')}
+                    {renderSidebarItem('analytics', <BarChart3 size={20} />, 'Analytics')}
                 </nav>
                 <div className="p-6 border-t border-white/10">
                     <button onClick={() => navigate('/')} className="w-full flex items-center gap-3 px-4 py-3 bg-white/5 text-gold hover:bg-white/10 rounded-xl transition-all mb-2"><ArrowLeft size={20} />Back to Site</button>
@@ -340,7 +343,7 @@ const AdminDashboard: React.FC = () => {
             </aside>
             <main className="flex-1 overflow-y-auto h-screen">
                 <header className="bg-white border-b border-gold/10 p-6 flex justify-between items-center">
-                    <h1 className="text-2xl font-serif">{activeTab === 'dashboard' ? 'Overview' : 'Treatments'}</h1>
+                    <h1 className="text-2xl font-serif">{activeTab === 'dashboard' ? 'Overview' : activeTab === 'analytics' ? 'Analytics' : 'Treatments'}</h1>
                     <div className="flex gap-3">
                         <input type="text" placeholder="Search..." className="px-4 py-2 border rounded-xl" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                         <button onClick={() => fetchBookings()} className="p-2 border rounded-xl"><Clock3 /></button>
@@ -349,6 +352,7 @@ const AdminDashboard: React.FC = () => {
                 </header>
                 {activeTab === 'dashboard' && renderBookingsView()}
                 {activeTab === 'bookings' && renderBookingsView()}
+                {activeTab === 'analytics' && <AnalyticsDashboard />}
                 {renderManualBookingModal()}
                 {renderAssignTherapistModal()}
             </main>

@@ -16,6 +16,7 @@ import AdminDashboard from './components/AdminDashboard';
 import UserDashboard from './components/UserDashboard';
 import TherapistDashboard from './components/TherapistDashboard';
 import { useAuth } from './context/AuthContext';
+import { AnalyticsProvider } from './context/AnalyticsContext';
 
 const MainLayout: React.FC<{
   openBooking: (id?: string) => void;
@@ -104,22 +105,24 @@ const App: React.FC = () => {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={
-        <MainLayout
-          openBooking={openBooking}
-          isBookingOpen={isBookingOpen}
-          setIsBookingOpen={setIsBookingOpen}
-          isAuthOpen={isAuthOpen}
-          setIsAuthOpen={setIsAuthOpen}
-          selectedServiceId={selectedServiceId}
-          containerRef={containerRef}
-        />
-      } />
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/dashboard" element={<UserDashboard />} />
-      <Route path="/therapist" element={<TherapistDashboard />} />
-    </Routes>
+    <AnalyticsProvider>
+      <Routes>
+        <Route path="/" element={
+          <MainLayout
+            openBooking={openBooking}
+            isBookingOpen={isBookingOpen}
+            setIsBookingOpen={setIsBookingOpen}
+            isAuthOpen={isAuthOpen}
+            setIsAuthOpen={setIsAuthOpen}
+            selectedServiceId={selectedServiceId}
+            containerRef={containerRef}
+          />
+        } />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/dashboard" element={<UserDashboard />} />
+        <Route path="/therapist" element={<TherapistDashboard />} />
+      </Routes>
+    </AnalyticsProvider>
   );
 };
 
