@@ -720,6 +720,13 @@ const AdminDashboard: React.FC = () => {
                                         <RefreshCcw size={14} /> Restore
                                     </button>
                                 )}
+                                {/* Delete button - always visible on mobile */}
+                                <button
+                                    onClick={() => deleteBooking(b.id)}
+                                    className="px-3 py-2 bg-rose-100 text-rose-600 rounded-lg text-xs font-bold flex items-center gap-1"
+                                >
+                                    <Trash2 size={14} /> Delete
+                                </button>
                             </div>
                         </div>
                     ))}
@@ -812,9 +819,9 @@ const AdminDashboard: React.FC = () => {
                             <button onClick={() => fetchBookings()} className="p-2 border rounded-xl hover:bg-gold/5 transition-colors" title="Refresh">
                                 <RefreshCcw size={18} className="text-charcoal/60" />
                             </button>
-                            <button onClick={() => setShowManualBooking(true)} className="bg-gold text-white px-3 lg:px-4 py-2 rounded-xl text-xs lg:text-sm font-bold flex items-center gap-2">
+                            <button onClick={() => setShowManualBooking(true)} className="bg-gold text-white px-3 lg:px-4 py-2 rounded-xl text-xs lg:text-sm font-bold flex items-center gap-1 lg:gap-2">
                                 <span className="hidden sm:inline">Manual Booking</span>
-                                <span className="sm:hidden">+</span>
+                                <span className="sm:hidden">+ Add New</span>
                             </button>
                         </div>
                     </div>

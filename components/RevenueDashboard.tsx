@@ -33,30 +33,48 @@ interface RevenueDashboardProps {
     bookings: Booking[];
 }
 
-type TimeRange = '7d' | '30d' | '90d' | 'all';
+type TimeRange = '7d' | '30d' | '90d' | 'all' | 'custom';
 
 const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
     const [timeRange, setTimeRange] = useState<TimeRange>('30d');
+    const [customMonth, setCustomMonth] = useState(new Date().getMonth());
+    const [customYear, setCustomYear] = useState(new Date().getFullYear());
 
-    const getTimeFilter = () => {
+    const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    // Generate year options (last 5 years + current year)
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
+
+    const getTimeFilter = (): { start: Date | null; end: Date | null } => {
         const now = new Date();
         switch (timeRange) {
             case '7d':
-                return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                return { start: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), end: now };
             case '30d':
-                return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                return { start: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), end: now };
             case '90d':
-                return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+                return { start: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000), end: now };
+            case 'custom':
+                const start = new Date(customYear, customMonth, 1);
+                const end = new Date(customYear, customMonth + 1, 0, 23, 59, 59);
+                return { start, end };
             default:
-                return null;
+                return { start: null, end: null };
         }
     };
 
     const filteredBookings = useMemo(() => {
-        const timeFilter = getTimeFilter();
-        if (!timeFilter) return bookings;
-        return bookings.filter(b => new Date(b.created_at) >= timeFilter);
-    }, [bookings, timeRange]);
+        const { start, end } = getTimeFilter();
+        if (!start || !end) return bookings;
+        return bookings.filter(b => {
+            const date = new Date(b.created_at);
+            return date >= start && date <= end;
+        });
+    }, [bookings, timeRange, customMonth, customYear]);
 
     const stats = useMemo(() => {
         const completed = filteredBookings.filter(b => b.status === 'completed');
@@ -111,7 +129,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
 
         // Booking trend calculation (compare with previous period)
         const now = new Date();
-        const periodLength = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : 365;
+        const periodLength = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : timeRange === 'custom' ? 30 : 365;
         const previousPeriodStart = new Date(now.getTime() - periodLength * 2 * 24 * 60 * 60 * 1000);
         const previousPeriodEnd = new Date(now.getTime() - periodLength * 24 * 60 * 60 * 1000);
 
@@ -125,7 +143,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
 
         // Weekly breakdown
         const weeklyRevenue: { week: string; revenue: number; bookings: number }[] = [];
-        const weeks = timeRange === '7d' ? 1 : timeRange === '30d' ? 4 : timeRange === '90d' ? 12 : 52;
+        const weeks = timeRange === '7d' ? 1 : timeRange === '30d' ? 4 : timeRange === '90d' ? 12 : timeRange === 'custom' ? 4 : 52;
 
         for (let i = weeks - 1; i >= 0; i--) {
             const weekStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
@@ -158,7 +176,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             topTherapists,
             weeklyRevenue
         };
-    }, [filteredBookings, bookings, timeRange]);
+    }, [filteredBookings, bookings, timeRange, customMonth, customYear]);
 
     const StatCard = ({ icon: Icon, label, value, subValue, trend, color, prefix = '' }: {
         icon: React.ElementType;
@@ -229,6 +247,18 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         );
     };
 
+    const getDateRangeLabel = () => {
+        if (timeRange === 'custom') {
+            return `${months[customMonth]} ${customYear}`;
+        }
+        switch (timeRange) {
+            case '7d': return 'last 7 days';
+            case '30d': return 'last 30 days';
+            case '90d': return 'last 90 days';
+            default: return 'all time';
+        }
+    };
+
     return (
         <div className="p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8">
             {/* Header */}
@@ -237,20 +267,52 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                     <h2 className="text-xl md:text-2xl font-serif text-charcoal">Revenue Analytics</h2>
                     <p className="text-xs md:text-sm text-charcoal/60">Track earnings and business performance</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                    {/* Time Range Selector */}
                     <div className="relative">
                         <select
                             value={timeRange}
                             onChange={(e) => setTimeRange(e.target.value as TimeRange)}
-                            className="appearance-none bg-white border border-gold/20 rounded-xl px-4 py-2 pr-10 text-sm font-medium text-charcoal focus:outline-none focus:border-gold"
+                            className="appearance-none bg-white border border-gold/20 rounded-xl px-3 md:px-4 py-2 pr-8 md:pr-10 text-xs md:text-sm font-medium text-charcoal focus:outline-none focus:border-gold"
                         >
                             <option value="7d">Last 7 Days</option>
                             <option value="30d">Last 30 Days</option>
                             <option value="90d">Last 90 Days</option>
                             <option value="all">All Time</option>
+                            <option value="custom">Custom Month</option>
                         </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/40 pointer-events-none" />
+                        <ChevronDown className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/40 pointer-events-none" />
                     </div>
+
+                    {/* Custom Month/Year Picker */}
+                    {timeRange === 'custom' && (
+                        <div className="flex items-center gap-2">
+                            <div className="relative">
+                                <select
+                                    value={customMonth}
+                                    onChange={(e) => setCustomMonth(parseInt(e.target.value))}
+                                    className="appearance-none bg-white border border-gold/20 rounded-xl px-3 py-2 pr-8 text-xs md:text-sm font-medium text-charcoal focus:outline-none focus:border-gold"
+                                >
+                                    {months.map((month, index) => (
+                                        <option key={month} value={index}>{month}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/40 pointer-events-none" />
+                            </div>
+                            <div className="relative">
+                                <select
+                                    value={customYear}
+                                    onChange={(e) => setCustomYear(parseInt(e.target.value))}
+                                    className="appearance-none bg-white border border-gold/20 rounded-xl px-3 py-2 pr-8 text-xs md:text-sm font-medium text-charcoal focus:outline-none focus:border-gold"
+                                >
+                                    {years.map((year) => (
+                                        <option key={year} value={year}>{year}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/40 pointer-events-none" />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -408,7 +470,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                         <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl">
                             <span className="text-sm text-white/80">Avg. Daily Revenue</span>
                             <span className="text-lg font-serif text-emerald-400">
-                                ₱{Math.round(stats.totalRevenue / (timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : 365)).toLocaleString()}
+                                ₱{Math.round(stats.totalRevenue / (timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : timeRange === 'custom' ? new Date(customYear, customMonth + 1, 0).getDate() : 365)).toLocaleString()}
                             </span>
                         </div>
                     </div>
@@ -425,9 +487,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                         <div>
                             <p className="font-serif text-base md:text-lg text-charcoal">Revenue Summary</p>
                             <p className="text-[10px] md:text-xs text-charcoal/60">
-                                Data from {timeRange === '7d' ? 'last 7 days' :
-                                    timeRange === '30d' ? 'last 30 days' :
-                                        timeRange === '90d' ? 'last 90 days' : 'all time'}
+                                Data from {getDateRangeLabel()}
                             </p>
                         </div>
                     </div>

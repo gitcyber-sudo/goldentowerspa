@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { useNavigate } from 'react-router-dom';
 import { X, Mail, Lock, User, Loader2, ArrowRight } from 'lucide-react';
 
 interface AuthModalProps {
@@ -10,8 +9,7 @@ interface AuthModalProps {
     onSuccess: () => void;
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
-    const navigate = useNavigate();
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     const [isSignUp, setIsSignUp] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -69,9 +67,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
                     const role = profileData?.role || 'user';
                     const dashboardPath = role === 'admin' ? '/admin' : (role === 'therapist' ? '/therapist' : '/dashboard');
 
-                    onSuccess();
-                    onClose();
-                    navigate(dashboardPath);
+                    // Use window.location.href for reliable redirect (avoids React state race conditions)
+                    window.location.href = dashboardPath;
                 }
             }
         } catch (err: any) {
