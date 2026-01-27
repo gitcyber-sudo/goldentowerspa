@@ -206,10 +206,10 @@ const AnalyticsDashboard: React.FC = () => {
         trend?: 'up' | 'down';
         color: string;
     }) => (
-        <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm hover:shadow-lg transition-shadow">
-            <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-xl ${color}`}>
-                    <Icon className="w-6 h-6" />
+        <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm hover:shadow-lg transition-shadow">
+            <div className="flex items-start justify-between mb-3 md:mb-4">
+                <div className={`p-2 md:p-3 rounded-xl ${color}`}>
+                    <Icon className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 {trend && (
                     <div className={`flex items-center text-xs font-medium ${trend === 'up' ? 'text-emerald-600' : 'text-rose-600'}`}>
@@ -218,8 +218,8 @@ const AnalyticsDashboard: React.FC = () => {
                     </div>
                 )}
             </div>
-            <p className="text-3xl font-serif text-charcoal mb-1">{value}</p>
-            <p className="text-xs uppercase tracking-wider text-charcoal/50 font-medium">{label}</p>
+            <p className="text-2xl md:text-3xl font-serif text-charcoal mb-1">{value}</p>
+            <p className="text-[10px] md:text-xs uppercase tracking-wider text-charcoal/50 font-medium">{label}</p>
             {subValue && <p className="text-xs text-gold mt-2">{subValue}</p>}
         </div>
     );
@@ -299,12 +299,12 @@ const AnalyticsDashboard: React.FC = () => {
     }
 
     return (
-        <div className="p-6 md:p-8 space-y-8">
+        <div className="p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-serif text-charcoal">Website Analytics</h2>
-                    <p className="text-sm text-charcoal/60">Track visitor behavior and engagement</p>
+                    <h2 className="text-xl md:text-2xl font-serif text-charcoal">Website Analytics</h2>
+                    <p className="text-xs md:text-sm text-charcoal/60">Track visitor behavior and engagement</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="relative">
@@ -330,7 +330,7 @@ const AnalyticsDashboard: React.FC = () => {
             </div>
 
             {/* Overview Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                 <StatCard
                     icon={Eye}
                     label="Page Views"
@@ -361,30 +361,30 @@ const AnalyticsDashboard: React.FC = () => {
             </div>
 
             {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 {/* Daily Views Chart */}
-                <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
-                            <h3 className="font-semibold text-charcoal">Daily Page Views</h3>
-                            <p className="text-xs text-charcoal/50">Views per day</p>
+                            <h3 className="font-semibold text-charcoal text-sm md:text-base">Daily Page Views</h3>
+                            <p className="text-[10px] md:text-xs text-charcoal/50">Views per day</p>
                         </div>
-                        <BarChart3 className="w-5 h-5 text-gold" />
+                        <BarChart3 className="w-4 h-4 md:w-5 md:h-5 text-gold" />
                     </div>
                     <MiniBarChart data={stats.dailyViews} />
                 </div>
 
                 {/* Hourly Heatmap */}
-                <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
-                            <h3 className="font-semibold text-charcoal">Activity by Hour</h3>
-                            <p className="text-xs text-charcoal/50">Peak traffic times (0-23h)</p>
+                            <h3 className="font-semibold text-charcoal text-sm md:text-base">Activity by Hour</h3>
+                            <p className="text-[10px] md:text-xs text-charcoal/50">Peak traffic times (0-23h)</p>
                         </div>
-                        <Clock className="w-5 h-5 text-gold" />
+                        <Clock className="w-4 h-4 md:w-5 md:h-5 text-gold" />
                     </div>
                     <HourlyHeatmap data={stats.hourlyViews} />
-                    <div className="flex justify-between text-xs text-charcoal/40 mt-2">
+                    <div className="flex justify-between text-[10px] md:text-xs text-charcoal/40 mt-2">
                         <span>12 AM</span>
                         <span>12 PM</span>
                         <span>11 PM</span>
@@ -393,12 +393,12 @@ const AnalyticsDashboard: React.FC = () => {
             </div>
 
             {/* Secondary Analytics */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Device Breakdown */}
-                <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-semibold text-charcoal">Devices</h3>
-                        <Monitor className="w-5 h-5 text-gold" />
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 md:mb-6">
+                        <h3 className="font-semibold text-charcoal text-sm md:text-base">Devices</h3>
+                        <Monitor className="w-4 h-4 md:w-5 md:h-5 text-gold" />
                     </div>
                     <div className="space-y-4">
                         <ProgressBar
@@ -437,10 +437,10 @@ const AnalyticsDashboard: React.FC = () => {
                 </div>
 
                 {/* Browser Breakdown */}
-                <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-semibold text-charcoal">Browsers</h3>
-                        <Globe className="w-5 h-5 text-gold" />
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 md:mb-6">
+                        <h3 className="font-semibold text-charcoal text-sm md:text-base">Browsers</h3>
+                        <Globe className="w-4 h-4 md:w-5 md:h-5 text-gold" />
                     </div>
                     <div className="space-y-3">
                         {Object.entries(stats.browserBreakdown)
@@ -458,10 +458,10 @@ const AnalyticsDashboard: React.FC = () => {
                 </div>
 
                 {/* Top Pages */}
-                <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-semibold text-charcoal">Top Pages</h3>
-                        <TrendingUp className="w-5 h-5 text-gold" />
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 md:mb-6">
+                        <h3 className="font-semibold text-charcoal text-sm md:text-base">Top Pages</h3>
+                        <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-gold" />
                     </div>
                     <div className="space-y-3">
                         {stats.topPages.map(([path, views], index) => (
@@ -486,15 +486,15 @@ const AnalyticsDashboard: React.FC = () => {
             </div>
 
             {/* Events & Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 {/* Event Breakdown */}
-                <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
-                            <h3 className="font-semibold text-charcoal">Event Tracking</h3>
-                            <p className="text-xs text-charcoal/50">User interactions & conversions</p>
+                            <h3 className="font-semibold text-charcoal text-sm md:text-base">Event Tracking</h3>
+                            <p className="text-[10px] md:text-xs text-charcoal/50">User interactions & conversions</p>
                         </div>
-                        <MousePointerClick className="w-5 h-5 text-gold" />
+                        <MousePointerClick className="w-4 h-4 md:w-5 md:h-5 text-gold" />
                     </div>
                     {Object.keys(stats.eventBreakdown).length > 0 ? (
                         <div className="space-y-3">
@@ -519,13 +519,13 @@ const AnalyticsDashboard: React.FC = () => {
                 </div>
 
                 {/* Recent Visitors */}
-                <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
-                            <h3 className="font-semibold text-charcoal">Recent Visitors</h3>
-                            <p className="text-xs text-charcoal/50">Latest visitor activity</p>
+                            <h3 className="font-semibold text-charcoal text-sm md:text-base">Recent Visitors</h3>
+                            <p className="text-[10px] md:text-xs text-charcoal/50">Latest visitor activity</p>
                         </div>
-                        <Calendar className="w-5 h-5 text-gold" />
+                        <Calendar className="w-4 h-4 md:w-5 md:h-5 text-gold" />
                     </div>
                     <div className="space-y-3 max-h-[300px] overflow-y-auto">
                         {data.visitors.slice(0, 10).map((visitor) => (
@@ -559,33 +559,33 @@ const AnalyticsDashboard: React.FC = () => {
             </div>
 
             {/* Footer Stats */}
-            <div className="bg-gradient-to-r from-charcoal to-charcoal/90 rounded-2xl p-6 text-white">
+            <div className="bg-gradient-to-r from-charcoal to-charcoal/90 rounded-xl md:rounded-2xl p-4 md:p-6 text-white">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-3 bg-gold/20 rounded-xl">
-                            <Activity className="w-6 h-6 text-gold" />
+                        <div className="p-2 md:p-3 bg-gold/20 rounded-xl">
+                            <Activity className="w-5 h-5 md:w-6 md:h-6 text-gold" />
                         </div>
                         <div>
-                            <p className="font-serif text-lg">Analytics Summary</p>
-                            <p className="text-xs text-white/60">
+                            <p className="font-serif text-base md:text-lg">Analytics Summary</p>
+                            <p className="text-[10px] md:text-xs text-white/60">
                                 Data from {timeRange === '24h' ? 'last 24 hours' :
                                     timeRange === '7d' ? 'last 7 days' :
                                         timeRange === '30d' ? 'last 30 days' : 'all time'}
                             </p>
                         </div>
                     </div>
-                    <div className="flex gap-8">
+                    <div className="flex gap-6 md:gap-8">
                         <div className="text-center">
-                            <p className="text-2xl font-serif text-gold">{stats.totalPageViews}</p>
-                            <p className="text-xs text-white/60">Total Views</p>
+                            <p className="text-xl md:text-2xl font-serif text-gold">{stats.totalPageViews}</p>
+                            <p className="text-[10px] md:text-xs text-white/60">Total Views</p>
                         </div>
                         <div className="text-center">
-                            <p className="text-2xl font-serif text-gold">{stats.uniqueVisitors}</p>
-                            <p className="text-xs text-white/60">Unique Visitors</p>
+                            <p className="text-xl md:text-2xl font-serif text-gold">{stats.uniqueVisitors}</p>
+                            <p className="text-[10px] md:text-xs text-white/60">Unique Visitors</p>
                         </div>
                         <div className="text-center">
-                            <p className="text-2xl font-serif text-gold">{stats.returnRate}%</p>
-                            <p className="text-xs text-white/60">Return Rate</p>
+                            <p className="text-xl md:text-2xl font-serif text-gold">{stats.returnRate}%</p>
+                            <p className="text-[10px] md:text-xs text-white/60">Return Rate</p>
                         </div>
                     </div>
                 </div>

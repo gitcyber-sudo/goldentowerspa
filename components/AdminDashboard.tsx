@@ -16,13 +16,28 @@ import {
     Users,
     Settings,
     LogOut,
-    ArrowLeft,
     Shield,
     ChevronRight,
     Sparkles,
-    BarChart3
+    BarChart3,
+    TrendingUp,
+    DollarSign,
+    Eye,
+    Edit3,
+    X,
+    Check,
+    Phone,
+    Mail,
+    Save,
+    RefreshCcw,
+    Menu,
+    ChevronLeft,
+    PlayCircle,
+    MoreVertical,
+    Trash2
 } from 'lucide-react';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import RevenueDashboard from './RevenueDashboard';
 
 interface Booking {
     id: string;
@@ -35,7 +50,7 @@ interface Booking {
     booking_date: string;
     booking_time: string;
     status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-    services: { title: string };
+    services: { title: string; price: number };
     therapists?: { name: string };
     created_at: string;
 }
@@ -48,13 +63,14 @@ const AdminDashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [therapists, setTherapists] = useState<any[]>([]);
+    const [services, setServices] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Manual Booking State
     const [showManualBooking, setShowManualBooking] = useState(false);
-    const [services, setServices] = useState<any[]>([]);
     const [manualBookingData, setManualBookingData] = useState({
         guest_name: '',
         guest_email: '',
@@ -66,6 +82,9 @@ const AdminDashboard: React.FC = () => {
     });
 
     const [assigningBooking, setAssigningBooking] = useState<Booking | null>(null);
+    const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+    const [editFormData, setEditFormData] = useState<any>({});
+    const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
 
     useEffect(() => {
         const checkAdmin = async () => {
@@ -89,11 +108,11 @@ const AdminDashboard: React.FC = () => {
     }, [user, role, authLoading, navigate]);
 
     useEffect(() => {
-        if (showManualBooking) {
+        if (showManualBooking || editingBooking) {
             fetchServices();
             if (therapists.length === 0) fetchTherapists();
         }
-    }, [showManualBooking]);
+    }, [showManualBooking, editingBooking]);
 
     useEffect(() => {
         if ((role as string) === 'admin') {
@@ -110,7 +129,7 @@ const AdminDashboard: React.FC = () => {
         try {
             const { data, error } = await supabase
                 .from('bookings')
-                .select(`*, services (title), therapists (name)`)
+                .select(`*, services (title, price), therapists (name)`)
                 .order('created_at', { ascending: false });
             if (error) throw error;
             if (data) setBookings(data as any);
@@ -141,6 +160,7 @@ const AdminDashboard: React.FC = () => {
             const { error } = await supabase.from('bookings').update(updateData).eq('id', id);
             if (error) throw error;
             setAssigningBooking(null);
+            setActionMenuOpen(null);
             fetchBookings();
         } catch (err) {
             console.error('Error updating status:', err);
@@ -195,11 +215,77 @@ const AdminDashboard: React.FC = () => {
             }]);
             if (error) throw error;
             setShowManualBooking(false);
+            setManualBookingData({
+                guest_name: '',
+                guest_email: '',
+                guest_phone: '',
+                service_id: '',
+                therapist_id: '',
+                date: '',
+                time: ''
+            });
             fetchBookings();
         } catch (err: any) {
             alert("Error: " + err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Edit booking functions
+    const openEditModal = (booking: Booking) => {
+        setEditingBooking(booking);
+        setEditFormData({
+            guest_name: booking.guest_name || '',
+            guest_email: booking.guest_email || booking.user_email || '',
+            guest_phone: booking.guest_phone || '',
+            service_id: booking.service_id,
+            therapist_id: booking.therapist_id || '',
+            booking_date: booking.booking_date,
+            booking_time: booking.booking_time,
+            status: booking.status
+        });
+        setActionMenuOpen(null);
+    };
+
+    const handleEditBooking = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingBooking) return;
+
+        setLoading(true);
+        try {
+            const { error } = await supabase.from('bookings').update({
+                guest_name: editFormData.guest_name,
+                guest_email: editFormData.guest_email,
+                guest_phone: editFormData.guest_phone,
+                service_id: editFormData.service_id,
+                therapist_id: editFormData.therapist_id || null,
+                booking_date: editFormData.booking_date,
+                booking_time: editFormData.booking_time,
+                status: editFormData.status,
+                user_email: editFormData.guest_email || editingBooking.user_email
+            }).eq('id', editingBooking.id);
+
+            if (error) throw error;
+            setEditingBooking(null);
+            fetchBookings();
+        } catch (err: any) {
+            alert("Error updating booking: " + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const deleteBooking = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this booking? This action cannot be undone.")) return;
+
+        try {
+            const { error } = await supabase.from('bookings').delete().eq('id', id);
+            if (error) throw error;
+            setActionMenuOpen(null);
+            fetchBookings();
+        } catch (err: any) {
+            alert("Error deleting booking: " + err.message);
         }
     };
 
@@ -218,17 +304,34 @@ const AdminDashboard: React.FC = () => {
         pending: bookings.filter(b => b.status === 'pending').length,
         confirmed: bookings.filter(b => b.status === 'confirmed').length,
         completed: bookings.filter(b => b.status === 'completed').length,
+        cancelled: bookings.filter(b => b.status === 'cancelled').length,
+    };
+
+    // Calculate revenue stats
+    const revenueStats = {
+        totalRevenue: bookings
+            .filter(b => b.status === 'completed')
+            .reduce((sum, b) => sum + (b.services?.price || 0), 0),
+        pendingRevenue: bookings
+            .filter(b => b.status === 'confirmed' || b.status === 'pending')
+            .reduce((sum, b) => sum + (b.services?.price || 0), 0),
+        todayRevenue: bookings
+            .filter(b => {
+                const today = new Date().toISOString().split('T')[0];
+                return b.status === 'completed' && b.booking_date === today;
+            })
+            .reduce((sum, b) => sum + (b.services?.price || 0), 0),
     };
 
     const renderManualBookingModal = () => (
         showManualBooking && (
-            <div className="fixed inset-0 z-50 overflow-y-auto flex justify-center items-start md:items-center p-6 bg-charcoal/80 backdrop-blur-sm">
-                <div className="bg-white w-full max-w-lg rounded-2xl p-8 shadow-2xl relative my-auto">
+            <div className="fixed inset-0 z-50 overflow-y-auto flex justify-center items-start md:items-center p-4 md:p-6 bg-charcoal/80 backdrop-blur-sm">
+                <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
                     <button onClick={() => setShowManualBooking(false)} className="absolute top-4 right-4 text-charcoal/40 hover:text-gold"><XCircle size={24} /></button>
-                    <h2 className="font-serif text-2xl text-charcoal mb-6">New Guest Reservation</h2>
+                    <h2 className="font-serif text-xl md:text-2xl text-charcoal mb-6">New Guest Reservation</h2>
                     <form onSubmit={handleManualBooking} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="col-span-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="col-span-1 md:col-span-2">
                                 <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Guest Name *</label>
                                 <input required type="text" className="w-full border border-gold/20 rounded-lg p-3" value={manualBookingData.guest_name} onChange={e => setManualBookingData({ ...manualBookingData, guest_name: e.target.value })} />
                             </div>
@@ -255,10 +358,95 @@ const AdminDashboard: React.FC = () => {
                                     {therapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                                 </select>
                             </div>
-                            <input required type="date" className="border border-gold/20 rounded-lg p-3" value={manualBookingData.date} onChange={e => setManualBookingData({ ...manualBookingData, date: e.target.value })} />
-                            <input required type="time" className="border border-gold/20 rounded-lg p-3" value={manualBookingData.time} onChange={e => setManualBookingData({ ...manualBookingData, time: e.target.value })} />
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Date *</label>
+                                <input required type="date" className="w-full border border-gold/20 rounded-lg p-3" value={manualBookingData.date} onChange={e => setManualBookingData({ ...manualBookingData, date: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Time *</label>
+                                <input required type="time" className="w-full border border-gold/20 rounded-lg p-3" value={manualBookingData.time} onChange={e => setManualBookingData({ ...manualBookingData, time: e.target.value })} />
+                            </div>
                         </div>
                         <button type="submit" className="w-full bg-gold text-white font-bold uppercase tracking-widest py-4 rounded-xl mt-4">Confirm Reservation</button>
+                    </form>
+                </div>
+            </div>
+        )
+    );
+
+    const renderEditBookingModal = () => (
+        editingBooking && (
+            <div className="fixed inset-0 z-50 overflow-y-auto flex justify-center items-start md:items-center p-4 md:p-6 bg-charcoal/80 backdrop-blur-sm">
+                <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
+                    <button onClick={() => setEditingBooking(null)} className="absolute top-4 right-4 text-charcoal/40 hover:text-gold"><X size={24} /></button>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-gold/10 rounded-xl">
+                            <Edit3 className="text-gold" size={24} />
+                        </div>
+                        <div>
+                            <h2 className="font-serif text-xl md:text-2xl text-charcoal">Edit Booking</h2>
+                            <p className="text-xs text-charcoal/50">Modify booking details</p>
+                        </div>
+                    </div>
+                    <form onSubmit={handleEditBooking} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="col-span-1 md:col-span-2">
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Client Name</label>
+                                <input type="text" className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.guest_name} onChange={e => setEditFormData({ ...editFormData, guest_name: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Email</label>
+                                <input type="email" className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.guest_email} onChange={e => setEditFormData({ ...editFormData, guest_email: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Phone</label>
+                                <input type="tel" className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.guest_phone} onChange={e => setEditFormData({ ...editFormData, guest_phone: e.target.value })} />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Service</label>
+                            <select className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.service_id} onChange={e => setEditFormData({ ...editFormData, service_id: e.target.value })}>
+                                {services.map(s => <option key={s.id} value={s.id}>{s.title} - ₱{s.price}</option>)}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Assigned Specialist</label>
+                            <select className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.therapist_id} onChange={e => setEditFormData({ ...editFormData, therapist_id: e.target.value })}>
+                                <option value="">-- Any Available --</option>
+                                {therapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Date</label>
+                                <input type="date" className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.booking_date} onChange={e => setEditFormData({ ...editFormData, booking_date: e.target.value })} />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Time</label>
+                                <input type="time" className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.booking_time} onChange={e => setEditFormData({ ...editFormData, booking_time: e.target.value })} />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Status</label>
+                            <select className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.status} onChange={e => setEditFormData({ ...editFormData, status: e.target.value })}>
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+
+                        <div className="flex gap-3 pt-2">
+                            <button type="button" onClick={() => setEditingBooking(null)} className="flex-1 border border-gold/20 text-charcoal font-bold uppercase tracking-widest py-3 rounded-xl hover:bg-charcoal/5">Cancel</button>
+                            <button type="submit" className="flex-1 bg-gold text-white font-bold uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2">
+                                <Save size={18} />
+                                Save Changes
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -268,14 +456,14 @@ const AdminDashboard: React.FC = () => {
     const renderAssignTherapistModal = () => (
         assigningBooking && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
-                <div className="bg-white w-full max-w-md rounded-2xl p-8 shadow-2xl text-center">
+                <div className="bg-white w-full max-w-md rounded-2xl p-6 md:p-8 shadow-2xl text-center">
                     <Users className="text-gold mx-auto mb-4" size={32} />
-                    <h2 className="font-serif text-2xl text-charcoal mb-2">Assign Specialist</h2>
+                    <h2 className="font-serif text-xl md:text-2xl text-charcoal mb-2">Assign Specialist</h2>
                     <p className="text-sm text-charcoal/60 mt-1">Manage and monitor client treatments</p>
-                    <p className="text-sm text-charcoal/60 mb-6">Select a therapist for <b>{assigningBooking.user_email}</b></p>
+                    <p className="text-sm text-charcoal/60 mb-6">Select a therapist for <b>{assigningBooking.guest_name || assigningBooking.user_email}</b></p>
                     <div className="space-y-3 mb-8 max-h-[40vh] overflow-y-auto">
                         {therapists.map(t => (
-                            <button key={t.id} onClick={() => updateStatus(assigningBooking.id, 'confirmed', t.id)} className="w-full p-4 border border-gold/10 rounded-xl hover:border-gold hover:bg-gold/5 flex items-center gap-4">
+                            <button key={t.id} onClick={() => updateStatus(assigningBooking.id, 'confirmed', t.id)} className="w-full p-4 border border-gold/10 rounded-xl hover:border-gold hover:bg-gold/5 flex items-center gap-4 transition-all">
                                 <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center font-serif text-gold">{t.name.charAt(0)}</div>
                                 <div className="text-left"><p className="font-bold text-charcoal">{t.name}</p></div>
                             </button>
@@ -287,75 +475,379 @@ const AdminDashboard: React.FC = () => {
         )
     );
 
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'pending': return 'bg-amber-100 text-amber-700';
+            case 'confirmed': return 'bg-blue-100 text-blue-700';
+            case 'completed': return 'bg-emerald-100 text-emerald-700';
+            case 'cancelled': return 'bg-rose-100 text-rose-700';
+            default: return 'bg-gray-100 text-gray-700';
+        }
+    };
+
     const renderBookingsView = () => (
-        <div className="p-6 md:p-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                {[{ label: 'Total', value: stats.total, color: 'bg-white' }, { label: 'Pending', value: stats.pending, color: 'bg-amber-50' }, { label: 'Confirmed', value: stats.confirmed, color: 'bg-emerald-50' }, { label: 'Finished', value: stats.completed, color: 'bg-blue-50' }].map((stat, i) => (
-                    <div key={i} className={`${stat.color} p-6 rounded-2xl border border-gold/10 shadow-sm`}>
-                        <p className="text-xs uppercase font-bold opacity-70 mb-2">{stat.label}</p>
-                        <p className="text-3xl font-serif">{stat.value}</p>
+        <div className="p-4 md:p-6 lg:p-8">
+            {/* Quick Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6 mb-6 md:mb-8">
+                {[
+                    { label: 'Total', value: stats.total, color: 'bg-white', icon: ClipboardList },
+                    { label: 'Pending', value: stats.pending, color: 'bg-amber-50', icon: Clock3 },
+                    { label: 'Confirmed', value: stats.confirmed, color: 'bg-blue-50', icon: CheckCircle2 },
+                    { label: 'Finished', value: stats.completed, color: 'bg-emerald-50', icon: Check },
+                    { label: 'Cancelled', value: stats.cancelled, color: 'bg-rose-50', icon: XCircle, hideOnMobile: true }
+                ].map((stat, i) => (
+                    <div key={i} className={`${stat.color} ${stat.hideOnMobile ? 'hidden lg:block' : ''} p-4 md:p-6 rounded-xl md:rounded-2xl border border-gold/10 shadow-sm`}>
+                        <div className="flex items-center gap-2 mb-2">
+                            <stat.icon size={16} className="text-gold/60" />
+                            <p className="text-[10px] md:text-xs uppercase font-bold opacity-70">{stat.label}</p>
+                        </div>
+                        <p className="text-2xl md:text-3xl font-serif">{stat.value}</p>
                     </div>
                 ))}
             </div>
-            <div className="bg-white rounded-2xl border border-gold/10 overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                    <thead className="bg-[#Fdfbf7] border-b border-gold/10 text-xs uppercase font-bold text-charcoal/50">
-                        <tr><th className="px-6 py-4">Client</th><th className="px-6 py-4">Service</th><th className="px-6 py-4">Date</th><th className="px-6 py-4">Status</th><th className="px-6 py-4 text-right">Actions</th></tr>
-                    </thead>
-                    <tbody className="divide-y divide-gold/5">
-                        {filteredBookings.map(b => (
-                            <tr key={b.id} className="hover:bg-cream/30">
-                                <td className="px-6 py-4"><p className="text-sm font-semibold">{b.guest_name || b.user_email}</p></td>
-                                <td className="px-6 py-4"><p className="text-sm">{b.services?.title}</p><p className="text-xs text-gold italic">{b.therapists?.name || 'Any Specialist'}</p></td>
-                                <td className="px-6 py-4"><p className="text-xs">{b.booking_date} at {b.booking_time}</p></td>
-                                <td className="px-6 py-4"><span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${b.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>{b.status}</span></td>
-                                <td className="px-6 py-4 text-right">
-                                    <div className="flex justify-end gap-2">
-                                        {b.status === 'pending' && <button onClick={() => !b.therapist_id ? setAssigningBooking(b) : updateStatus(b.id, 'confirmed')} className="text-emerald-600"><CheckCircle2 size={18} /></button>}
-                                        {b.status !== 'cancelled' && <button onClick={() => updateStatus(b.id, 'cancelled')} className="text-rose-600"><XCircle size={18} /></button>}
-                                    </div>
-                                </td>
+
+            {/* Revenue Summary (Mobile-friendly) */}
+            <div className="bg-gradient-to-r from-gold/10 to-gold/5 rounded-xl md:rounded-2xl p-4 md:p-6 mb-6 md:mb-8 border border-gold/20">
+                <div className="flex items-center gap-2 mb-4">
+                    <DollarSign className="text-gold" size={20} />
+                    <h3 className="font-semibold text-charcoal">Revenue Overview</h3>
+                </div>
+                <div className="grid grid-cols-3 gap-3 md:gap-6">
+                    <div className="text-center">
+                        <p className="text-lg md:text-2xl font-serif text-gold">₱{revenueStats.todayRevenue.toLocaleString()}</p>
+                        <p className="text-[10px] md:text-xs text-charcoal/60 uppercase">Today</p>
+                    </div>
+                    <div className="text-center border-x border-gold/20">
+                        <p className="text-lg md:text-2xl font-serif text-emerald-600">₱{revenueStats.totalRevenue.toLocaleString()}</p>
+                        <p className="text-[10px] md:text-xs text-charcoal/60 uppercase">Completed</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-lg md:text-2xl font-serif text-blue-600">₱{revenueStats.pendingRevenue.toLocaleString()}</p>
+                        <p className="text-[10px] md:text-xs text-charcoal/60 uppercase">Pending</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex flex-wrap gap-2 mb-4 md:mb-6">
+                {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(f => (
+                    <button
+                        key={f}
+                        onClick={() => setFilter(f)}
+                        className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all ${filter === f ? 'bg-gold text-white' : 'bg-white border border-gold/20 text-charcoal/60 hover:border-gold'}`}
+                    >
+                        {f}
+                    </button>
+                ))}
+            </div>
+
+            {/* Bookings List - Mobile Card View / Desktop Table View */}
+            <div className="bg-white rounded-xl md:rounded-2xl border border-gold/10 overflow-hidden shadow-sm">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-[#Fdfbf7] border-b border-gold/10 text-xs uppercase font-bold text-charcoal/50">
+                            <tr>
+                                <th className="px-6 py-4">Client</th>
+                                <th className="px-6 py-4">Service</th>
+                                <th className="px-6 py-4">Date & Time</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-gold/5">
+                            {filteredBookings.map(b => (
+                                <tr key={b.id} className="hover:bg-cream/30">
+                                    <td className="px-6 py-4">
+                                        <p className="text-sm font-semibold">{b.guest_name || b.user_email}</p>
+                                        {b.guest_phone && <p className="text-xs text-charcoal/40">{b.guest_phone}</p>}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <p className="text-sm">{b.services?.title}</p>
+                                        <p className="text-xs text-gold italic">{b.therapists?.name || 'Any Specialist'}</p>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <p className="text-sm">{b.booking_date}</p>
+                                        <p className="text-xs text-charcoal/50">{b.booking_time}</p>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusColor(b.status)}`}>
+                                            {b.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="flex justify-end gap-2 relative">
+                                            {/* Quick Actions */}
+                                            {b.status === 'pending' && (
+                                                <button
+                                                    onClick={() => !b.therapist_id ? setAssigningBooking(b) : updateStatus(b.id, 'confirmed')}
+                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Confirm Booking"
+                                                >
+                                                    <CheckCircle2 size={18} />
+                                                </button>
+                                            )}
+                                            {b.status === 'confirmed' && (
+                                                <button
+                                                    onClick={() => updateStatus(b.id, 'completed')}
+                                                    className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                                    title="Mark as Completed"
+                                                >
+                                                    <Check size={18} />
+                                                </button>
+                                            )}
+                                            {(b.status === 'pending' || b.status === 'confirmed') && (
+                                                <button
+                                                    onClick={() => openEditModal(b)}
+                                                    className="p-2 text-gold hover:bg-gold/10 rounded-lg transition-colors"
+                                                    title="Edit Booking"
+                                                >
+                                                    <Edit3 size={18} />
+                                                </button>
+                                            )}
+                                            {/* More Actions Menu */}
+                                            <div className="relative">
+                                                <button
+                                                    onClick={() => setActionMenuOpen(actionMenuOpen === b.id ? null : b.id)}
+                                                    className="p-2 text-charcoal/40 hover:bg-charcoal/5 rounded-lg transition-colors"
+                                                >
+                                                    <MoreVertical size={18} />
+                                                </button>
+                                                {actionMenuOpen === b.id && (
+                                                    <div className="absolute right-0 top-full mt-1 bg-white border border-gold/10 rounded-xl shadow-lg py-2 z-10 min-w-[160px]">
+                                                        {b.status !== 'completed' && b.status !== 'cancelled' && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => { setAssigningBooking(b); setActionMenuOpen(null); }}
+                                                                    className="w-full px-4 py-2 text-left text-sm hover:bg-gold/5 flex items-center gap-2"
+                                                                >
+                                                                    <Users size={14} /> Assign Therapist
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => updateStatus(b.id, 'cancelled')}
+                                                                    className="w-full px-4 py-2 text-left text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2"
+                                                                >
+                                                                    <XCircle size={14} /> Cancel Booking
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        {b.status === 'cancelled' && (
+                                                            <button
+                                                                onClick={() => updateStatus(b.id, 'pending')}
+                                                                className="w-full px-4 py-2 text-left text-sm hover:bg-gold/5 flex items-center gap-2"
+                                                            >
+                                                                <RefreshCcw size={14} /> Restore Booking
+                                                            </button>
+                                                        )}
+                                                        <hr className="my-2 border-gold/10" />
+                                                        <button
+                                                            onClick={() => deleteBooking(b.id)}
+                                                            className="w-full px-4 py-2 text-left text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2"
+                                                        >
+                                                            <Trash2 size={14} /> Delete Permanently
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y divide-gold/10">
+                    {filteredBookings.map(b => (
+                        <div key={b.id} className="p-4">
+                            <div className="flex items-start justify-between mb-3">
+                                <div>
+                                    <p className="font-semibold text-charcoal">{b.guest_name || b.user_email}</p>
+                                    <p className="text-xs text-charcoal/50">{b.services?.title}</p>
+                                </div>
+                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusColor(b.status)}`}>
+                                    {b.status}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-charcoal/60 mb-3">
+                                <span className="flex items-center gap-1"><Calendar size={12} /> {b.booking_date}</span>
+                                <span className="flex items-center gap-1"><Clock size={12} /> {b.booking_time}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gold mb-3">
+                                <User size={12} />
+                                <span>{b.therapists?.name || 'Any Specialist'}</span>
+                            </div>
+                            {/* Mobile Action Buttons */}
+                            <div className="flex gap-2 flex-wrap">
+                                {b.status === 'pending' && (
+                                    <button
+                                        onClick={() => !b.therapist_id ? setAssigningBooking(b) : updateStatus(b.id, 'confirmed')}
+                                        className="flex-1 min-w-[100px] px-3 py-2 bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1"
+                                    >
+                                        <CheckCircle2 size={14} /> Confirm
+                                    </button>
+                                )}
+                                {b.status === 'confirmed' && (
+                                    <button
+                                        onClick={() => updateStatus(b.id, 'completed')}
+                                        className="flex-1 min-w-[100px] px-3 py-2 bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1"
+                                    >
+                                        <Check size={14} /> Complete
+                                    </button>
+                                )}
+                                {(b.status === 'pending' || b.status === 'confirmed') && (
+                                    <>
+                                        <button
+                                            onClick={() => openEditModal(b)}
+                                            className="px-3 py-2 bg-gold/10 text-gold rounded-lg text-xs font-bold flex items-center gap-1"
+                                        >
+                                            <Edit3 size={14} /> Edit
+                                        </button>
+                                        <button
+                                            onClick={() => updateStatus(b.id, 'cancelled')}
+                                            className="px-3 py-2 bg-rose-50 text-rose-600 rounded-lg text-xs font-bold flex items-center gap-1"
+                                        >
+                                            <XCircle size={14} /> Cancel
+                                        </button>
+                                    </>
+                                )}
+                                {b.status === 'cancelled' && (
+                                    <button
+                                        onClick={() => updateStatus(b.id, 'pending')}
+                                        className="px-3 py-2 bg-charcoal/10 text-charcoal rounded-lg text-xs font-bold flex items-center gap-1"
+                                    >
+                                        <RefreshCcw size={14} /> Restore
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                    {filteredBookings.length === 0 && (
+                        <div className="p-8 text-center text-charcoal/40">
+                            <ClipboardList size={40} className="mx-auto mb-3 opacity-40" />
+                            <p>No bookings found</p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
 
     const renderSidebarItem = (id: string, icon: React.ReactNode, label: string) => (
-        <button onClick={() => setActiveTab(id)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl ${activeTab === id ? 'bg-gold/10 text-gold' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>{icon}{label}</button>
+        <button
+            onClick={() => { setActiveTab(id); setSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === id ? 'bg-gold/10 text-gold' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+        >
+            {icon}{label}
+        </button>
     );
+
+    const getPageTitle = () => {
+        switch (activeTab) {
+            case 'dashboard': return 'Overview';
+            case 'bookings': return 'Bookings';
+            case 'website-analytics': return 'Website Analytics';
+            case 'revenue': return 'Revenue Analytics';
+            default: return 'Admin Panel';
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#F9F7F2] flex">
-            <aside className="w-64 bg-charcoal text-white flex flex-col hidden lg:flex border-r border-gold/10">
-                <div className="p-8 border-b border-white/10"><h2 className="font-serif text-2xl text-gold">Golden Tower</h2></div>
-                <nav className="flex-1 p-6 space-y-2">
+            {/* Mobile Sidebar Overlay */}
+            {sidebarOpen && (
+                <div className="fixed inset-0 bg-charcoal/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+            )}
+
+            {/* Sidebar */}
+            <aside className={`fixed lg:static inset-y-0 left-0 w-64 bg-charcoal text-white flex flex-col z-50 transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+                <div className="p-6 lg:p-8 border-b border-white/10 flex items-center justify-between">
+                    <h2 className="font-serif text-xl lg:text-2xl text-gold">Golden Tower</h2>
+                    <button className="lg:hidden text-white/60" onClick={() => setSidebarOpen(false)}>
+                        <X size={24} />
+                    </button>
+                </div>
+                <nav className="flex-1 p-4 lg:p-6 space-y-2">
                     {renderSidebarItem('dashboard', <LayoutDashboard size={20} />, 'Dashboard')}
                     {renderSidebarItem('bookings', <ClipboardList size={20} />, 'Bookings')}
-                    {renderSidebarItem('analytics', <BarChart3 size={20} />, 'Analytics')}
+                    <div className="pt-4 pb-2">
+                        <p className="text-xs uppercase text-white/30 font-bold tracking-widest px-4">Analytics</p>
+                    </div>
+                    {renderSidebarItem('website-analytics', <Eye size={20} />, 'Website Visits')}
+                    {renderSidebarItem('revenue', <TrendingUp size={20} />, 'Revenue')}
                 </nav>
-                <div className="p-6 border-t border-white/10">
-                    <button onClick={() => navigate('/')} className="w-full flex items-center gap-3 px-4 py-3 bg-white/5 text-gold hover:bg-white/10 rounded-xl transition-all mb-2"><ArrowLeft size={20} />Back to Site</button>
-                    <button onClick={async () => { await signOut(); navigate('/'); }} className="w-full flex items-center gap-3 px-4 py-3 text-rose-400"><LogOut size={20} />Sign Out</button>
+                <div className="p-4 lg:p-6 border-t border-white/10">
+                    <button onClick={async () => { await signOut(); navigate('/'); }} className="w-full flex items-center gap-3 px-4 py-3 text-rose-400 hover:bg-white/5 rounded-xl transition-all">
+                        <LogOut size={20} />Sign Out
+                    </button>
                 </div>
             </aside>
+
+            {/* Main Content */}
             <main className="flex-1 overflow-y-auto h-screen">
-                <header className="bg-white border-b border-gold/10 p-6 flex justify-between items-center">
-                    <h1 className="text-2xl font-serif">{activeTab === 'dashboard' ? 'Overview' : activeTab === 'analytics' ? 'Analytics' : 'Treatments'}</h1>
-                    <div className="flex gap-3">
-                        <input type="text" placeholder="Search..." className="px-4 py-2 border rounded-xl" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-                        <button onClick={() => fetchBookings()} className="p-2 border rounded-xl"><Clock3 /></button>
-                        <button onClick={() => setShowManualBooking(true)} className="bg-gold text-white px-4 py-2 rounded-xl">Manual Booking</button>
+                {/* Mobile-Friendly Header */}
+                <header className="bg-white border-b border-gold/10 p-4 lg:p-6 sticky top-0 z-30">
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <button
+                                className="lg:hidden p-2 -ml-2 text-charcoal"
+                                onClick={() => setSidebarOpen(true)}
+                            >
+                                <Menu size={24} />
+                            </button>
+                            <h1 className="text-xl lg:text-2xl font-serif">{getPageTitle()}</h1>
+                        </div>
+                        <div className="flex items-center gap-2 lg:gap-3">
+                            <div className="relative hidden sm:block">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Search..."
+                                    className="pl-9 pr-4 py-2 border rounded-xl w-40 lg:w-auto text-sm"
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <button onClick={() => fetchBookings()} className="p-2 border rounded-xl hover:bg-gold/5 transition-colors" title="Refresh">
+                                <RefreshCcw size={18} className="text-charcoal/60" />
+                            </button>
+                            <button onClick={() => setShowManualBooking(true)} className="bg-gold text-white px-3 lg:px-4 py-2 rounded-xl text-xs lg:text-sm font-bold flex items-center gap-2">
+                                <span className="hidden sm:inline">Manual Booking</span>
+                                <span className="sm:hidden">+</span>
+                            </button>
+                        </div>
+                    </div>
+                    {/* Mobile Search */}
+                    <div className="sm:hidden mt-4">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Search bookings..."
+                                className="pl-9 pr-4 py-2 border rounded-xl w-full text-sm"
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                            />
+                        </div>
                     </div>
                 </header>
-                {activeTab === 'dashboard' && renderBookingsView()}
-                {activeTab === 'bookings' && renderBookingsView()}
-                {activeTab === 'analytics' && <AnalyticsDashboard />}
+
+                {/* Content Area */}
+                {(activeTab === 'dashboard' || activeTab === 'bookings') && renderBookingsView()}
+                {activeTab === 'website-analytics' && <AnalyticsDashboard />}
+                {activeTab === 'revenue' && <RevenueDashboard bookings={bookings} />}
+
+                {/* Modals */}
                 {renderManualBookingModal()}
+                {renderEditBookingModal()}
                 {renderAssignTherapistModal()}
             </main>
+
+            {/* Click outside to close action menu */}
+            {actionMenuOpen && (
+                <div className="fixed inset-0 z-0" onClick={() => setActionMenuOpen(null)} />
+            )}
         </div>
     );
 };
