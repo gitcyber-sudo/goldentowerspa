@@ -74,13 +74,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
                     if (fetchProfileRef.current !== currentUser.id) {
                         fetchProfileRef.current = currentUser.id;
-                        await fetchProfile(currentUser.id);
+                        const profileData = await fetchProfile(currentUser.id);
 
-                        // AUTO-REDIRECT after first login/session load if on home page
-                        if ((event === 'SIGNED_IN') && (window.location.pathname === '/' || window.location.pathname === '/index.html')) {
-                            console.log("Auto-redirecting to dashboard after login...");
-                            const { data: p } = await supabase.from('profiles').select('role').eq('id', currentUser.id).single();
-                            const r = p?.role || 'user';
+                        // AUTO-REDIRECT after login/session load if on home page
+                        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && (window.location.pathname === '/' || window.location.pathname === '/index.html')) {
+                            console.log(`Auto-redirecting to dashboard after ${event}...`);
+                            const r = profileData?.role || 'user';
                             const path = r === 'admin' ? '/admin' : (r === 'therapist' ? '/therapist' : '/dashboard');
                             window.location.replace(path);
                         }
@@ -159,17 +158,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (error) {
                 console.warn('Profile fetch error:', error.message);
+                const fallback = { role: 'user' };
                 if (error.code === 'PGRST116') {
-                    setProfile({ role: 'user' });
+                    setProfile(fallback);
+                    return fallback;
                 }
-            } else if (data) {
+                return null;
+            }
+
+            if (data) {
                 console.log("Profile loaded successfully:", data.role);
                 setProfile(data);
+                return data;
             }
+            return null;
         } catch (error) {
             console.error('Unexpected error during profile fetch:', error);
-            // Fallback for failed profile fetch (to unstick dashboard)
-            if (!profile) setProfile({ role: 'user' });
+            const fallback = { role: 'user' };
+            if (!profile) setProfile(fallback);
+            return fallback;
         } finally {
             setLoading(false);
         }

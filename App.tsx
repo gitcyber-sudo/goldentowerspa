@@ -94,7 +94,10 @@ const App: React.FC = () => {
 
   // Global loading state to ensure auth is settled before any components try to fetch data
   // This prevents race conditions during page refreshes for signed-in users.
-  if (authLoading) {
+  // We allow the homepage ('/') to render immediately to prevent blank sections.
+  const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+
+  if (authLoading && !isHomePage) {
     return <LoadingScreen message="Restoring your session" />;
   }
 

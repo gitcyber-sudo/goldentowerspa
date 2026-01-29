@@ -41,8 +41,8 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
         if (error) throw error;
 
         // If no data returned, it might be a Supabase sync delay
-        if ((!data || data.length === 0) && retryCount < 1) {
-          console.log("Services: No data yet, retrying in 2s...");
+        if ((!data || data.length === 0) && retryCount < 3) {
+          console.log(`Services: No data yet, retrying (${retryCount + 1}/3) in 2s...`);
           setTimeout(() => fetchServices(retryCount + 1), 2000);
           return;
         }
@@ -54,7 +54,8 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
       } catch (error) {
         console.error('Services fetch error:', error);
         // Try a retry even on error (e.g. network blip during sync)
-        if (retryCount < 1) {
+        if (retryCount < 3) {
+          console.log(`Services: Error encountered, retrying (${retryCount + 1}/3) in 2s...`);
           setTimeout(() => fetchServices(retryCount + 1), 2000);
           return;
         }

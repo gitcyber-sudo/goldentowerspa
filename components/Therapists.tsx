@@ -45,8 +45,8 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
 
         if (error) throw error;
 
-        if ((!data || data.length === 0) && retryCount < 1) {
-          console.log("Therapists: No data yet, retrying in 2s...");
+        if ((!data || data.length === 0) && retryCount < 3) {
+          console.log(`Therapists: No data yet, retrying (${retryCount + 1}/3) in 2s...`);
           setTimeout(() => fetchTherapists(retryCount + 1), 2000);
           return;
         }
@@ -57,7 +57,8 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
         }
       } catch (error) {
         console.error('Therapists fetch error:', error);
-        if (retryCount < 1) {
+        if (retryCount < 3) {
+          console.log(`Therapists: Error encountered, retrying (${retryCount + 1}/3) in 2s...`);
           setTimeout(() => fetchTherapists(retryCount + 1), 2000);
           return;
         }
