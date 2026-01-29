@@ -121,7 +121,7 @@ const Header: React.FC<HeaderProps> = ({ onBookClick }) => {
         </nav>
 
         {/* Mobile Action Button */}
-        <div className="md:hidden flex items-center gap-3">
+        <div className="md:hidden flex items-center gap-2">
           {!user ? (
             <button
               onClick={onBookClick}
@@ -130,12 +130,21 @@ const Header: React.FC<HeaderProps> = ({ onBookClick }) => {
               Login
             </button>
           ) : (
-            <button
-              onClick={() => navigate(getDashboardLink())}
-              className="bg-charcoal text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg"
-            >
-              Dashboard
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate(getDashboardLink())}
+                className="bg-charcoal text-white px-4 py-2.5 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-md border border-gold/10"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="bg-rose-50 text-rose-600 p-2.5 rounded-full border border-rose-100 shadow-sm"
+                title="Sign Out"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
           )}
         </div>
       </div>

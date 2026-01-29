@@ -31,6 +31,7 @@ interface Booking {
     booking_time: string;
     status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
     services: { title: string; duration: number; price: number };
+    therapist_id: string;
     therapists: { name: string };
     created_at: string;
 }
@@ -41,6 +42,11 @@ const UserDashboard: React.FC = () => {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'current' | 'past'>('current');
+    const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const [rating, setRating] = useState(5);
+    const [comment, setComment] = useState('');
+    const [submittingFeedback, setSubmittingFeedback] = useState(false);
 
     // Data fetching logic
     useEffect(() => {
@@ -101,6 +107,33 @@ const UserDashboard: React.FC = () => {
         navigate('/');
     };
 
+    const submitFeedback = async () => {
+        if (!selectedBooking || !user) return;
+        setSubmittingFeedback(true);
+        try {
+            const { error } = await supabase
+                .from('therapist_feedback')
+                .insert({
+                    booking_id: selectedBooking.id,
+                    user_id: user.id,
+                    therapist_id: selectedBooking.therapist_id,
+                    rating,
+                    comment
+                });
+            if (error) throw error;
+
+            setFeedbackModalOpen(false);
+            setComment('');
+            setRating(5);
+            alert('Thank you for your feedback!');
+        } catch (err) {
+            console.error('Error submitting feedback:', err);
+            alert('Failed to submit feedback');
+        } finally {
+            setSubmittingFeedback(false);
+        }
+    };
+
     const currentBookings = bookings.filter(b => b.status === 'pending' || b.status === 'confirmed');
     const pastBookings = bookings.filter(b => b.status === 'completed' || b.status === 'cancelled');
     const completedBookings = pastBookings.filter(b => b.status === 'completed');
@@ -158,6 +191,18 @@ const UserDashboard: React.FC = () => {
                 {booking.status === 'pending' && (
                     <button onClick={() => cancelBooking(booking.id)} className="text-rose-600 hover:text-rose-700 text-sm font-medium flex items-center gap-1 hover:bg-rose-50 px-3 py-1.5 rounded-full transition-all">
                         <XCircle size={16} /> Cancel
+                    </button>
+                )}
+                {booking.status === 'completed' && (
+                    <button
+                        onClick={() => {
+                            setSelectedBooking(booking);
+                            setFeedbackModalOpen(true);
+                        }}
+                        className="text-gold hover:text-gold-dark text-sm font-bold flex items-center gap-2 bg-gold/10 px-4 py-2 rounded-full transition-all border border-gold/20"
+                    >
+                        <Star size={16} fill="currentColor" />
+                        Rate Therapist
                     </button>
                 )}
             </div>
@@ -381,6 +426,70 @@ const UserDashboard: React.FC = () => {
                     </div>
                 )}
             </main>
+
+            {/* Feedback Modal */}
+            {feedbackModalOpen && selectedBooking && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-charcoal/40 backdrop-blur-sm" onClick={() => setFeedbackModalOpen(false)} />
+                    <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-scale-in">
+                        <div className="bg-gradient-to-r from-gold to-gold-dark p-6 text-white text-center">
+                            <h3 className="font-serif text-2xl mb-1">Rate Your Experience</h3>
+                            <p className="text-white/80 text-xs uppercase tracking-widest font-bold">with {selectedBooking.therapists.name}</p>
+                        </div>
+
+                        <div className="p-8">
+                            <div className="flex justify-center gap-2 mb-8">
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                    <button
+                                        key={s}
+                                        onClick={() => setRating(s)}
+                                        className={`transition-all ${s <= rating ? 'text-gold scale-110' : 'text-gold/20'}`}
+                                    >
+                                        <Star size={32} fill={s <= rating ? 'currentColor' : 'none'} />
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="mb-6">
+                                <label className="block text-[10px] uppercase tracking-widest font-black text-charcoal/40 mb-2">Your Feedback</label>
+                                <textarea
+                                    className="w-full bg-cream/50 border border-gold/10 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-gold/20 min-h-[120px]"
+                                    placeholder="Tell us about your massage session..."
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setFeedbackModalOpen(false)}
+                                    className="flex-1 py-4 text-xs font-bold uppercase tracking-widest text-charcoal/40 hover:text-charcoal transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={submitFeedback}
+                                    disabled={submittingFeedback}
+                                    className="flex-1 bg-gold hover:bg-gold-dark text-white py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg transition-all disabled:opacity-50"
+                                >
+                                    {submittingFeedback ? 'Submitting...' : 'Submit Review'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                @keyframes scale-in {
+                    from { opacity: 0; transform: scale(0.95); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                .animate-scale-in {
+                    animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+            `}} />
         </div>
     );
 };
