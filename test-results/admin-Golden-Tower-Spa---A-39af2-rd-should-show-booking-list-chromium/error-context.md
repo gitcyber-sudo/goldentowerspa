@@ -1,0 +1,333 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Golden Tower Spa & Wellness" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - generic [ref=e9]:
+          - heading "Golden Tower" [level=1] [ref=e10]
+          - generic [ref=e11]: Spa & Wellness
+      - navigation [ref=e12]:
+        - button "Login" [ref=e13] [cursor=pointer]
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: Luxury Wellness in Quezon City
+        - heading "Golden Tower Spa" [level=1] [ref=e21]:
+          - generic "Golden Tower" [ref=e23]:
+            - generic [ref=e24]: G
+            - generic [ref=e25]: o
+            - generic [ref=e26]: l
+            - generic [ref=e27]: d
+            - generic [ref=e28]: e
+            - generic [ref=e29]: "n"
+            - generic [ref=e31]: T
+            - generic [ref=e32]: o
+            - generic [ref=e33]: w
+            - generic [ref=e34]: e
+            - generic [ref=e35]: r
+          - generic [ref=e37]: Spa
+        - paragraph [ref=e38]: Escape the ordinary and ascend to a state of pure tranquility. Experience the golden touch of traditional healing.
+      - img [ref=e40]
+    - generic [ref=e47]:
+      - heading "Our Philosophy" [level=2] [ref=e50]:
+        - text: Our
+        - text: Philosophy
+      - generic [ref=e51]:
+        - paragraph [ref=e52]:
+          - generic [ref=e53]: "\"We"
+          - generic [ref=e54]: believe
+          - generic [ref=e55]: that
+          - generic [ref=e56]: wellness
+          - generic [ref=e57]: is
+          - generic [ref=e58]: not
+          - generic [ref=e59]: a
+          - generic [ref=e60]: luxury,
+          - generic [ref=e61]: but
+          - generic [ref=e62]: a
+          - generic [ref=e63]: necessity
+          - generic [ref=e64]: for
+          - generic [ref=e65]: the
+          - generic [ref=e66]: soul.
+          - generic [ref=e67]: At
+          - generic [ref=e68]: Golden
+          - generic [ref=e69]: Tower
+          - generic [ref=e70]: Spa,
+          - generic [ref=e71]: we
+          - generic [ref=e72]: blend
+          - generic [ref=e73]: the
+          - generic [ref=e74]: architectural
+          - generic [ref=e75]: elegance
+          - generic [ref=e76]: of
+          - generic [ref=e77]: Paris
+          - generic [ref=e78]: with
+          - generic [ref=e79]: the
+          - generic [ref=e80]: warm,
+          - generic [ref=e81]: healing
+          - generic [ref=e82]: hands
+          - generic [ref=e83]: of
+          - generic [ref=e84]: Quezon
+          - generic [ref=e85]: City."
+        - generic [ref=e86]:
+          - paragraph [ref=e87]: Every treatment is a journey, designed to elevate your senses and ground your spirit. We use only organic, gold-infused oils and locally sourced botanicals to ensure your skin receives nature's purest gifts.
+          - paragraph [ref=e88]: Located in the heart of Quezon City, we offer a sanctuary where time slows down, allowing you to reconnect with your inner balance amidst the chaos of modern life.
+    - generic [ref=e91]:
+      - generic [ref=e92]:
+        - generic [ref=e93]:
+          - img "Center Spa Moment" [ref=e94]
+          - heading "The Experience" [level=3] [ref=e96]
+        - img "Gallery 0" [ref=e98]
+        - img "Gallery 1" [ref=e100]
+        - img "Gallery 2" [ref=e102]
+        - img "Gallery 3" [ref=e104]
+        - img "Gallery 4" [ref=e106]
+        - img "Gallery 5" [ref=e108]
+        - img "Gallery 6" [ref=e110]
+        - img "Gallery 7" [ref=e112]
+      - generic:
+        - paragraph: Ascend to Tranquility
+    - generic [ref=e115]:
+      - generic [ref=e116]:
+        - generic [ref=e117]:
+          - generic [ref=e118]: The Art of Healing
+          - heading "Signature Massages" [level=2] [ref=e119]
+        - generic [ref=e120]:
+          - generic [ref=e121]:
+            - generic [ref=e122]:
+              - img "Golden Tower Signature Massage" [ref=e123]
+              - generic [ref=e124]: P 700
+              - generic [ref=e125]: 1 Hour 30 Min
+            - heading "Golden Tower Signature Massage" [level=3] [ref=e126]
+            - paragraph [ref=e127]: A luxurious combination of swedish, shiatsu, thai, hawaiian lomi lomi, traditional filipino hilot, and hot stone therapy, designed to melt away tension and restore total body balance.
+            - button "Book Massage" [ref=e128] [cursor=pointer]:
+              - text: Book Massage
+              - img [ref=e129]
+          - generic [ref=e131]:
+            - generic [ref=e132]:
+              - img "Body Scrub Massage" [ref=e133]
+              - generic [ref=e134]: P 499
+              - generic [ref=e135]: 1 Hour
+            - heading "Body Scrub Massage" [level=3] [ref=e136]
+            - paragraph [ref=e137]: Exfoliating treatment followed by a relaxing massage to leave skin smooth and glowing.
+            - button "Book Massage" [ref=e138] [cursor=pointer]:
+              - text: Book Massage
+              - img [ref=e139]
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - img "Combination Massage" [ref=e143]
+              - generic [ref=e144]: P 499
+              - generic [ref=e145]: 1 Hour
+            - heading "Combination Massage" [level=3] [ref=e146]
+            - paragraph [ref=e147]: A therapeutic blend of techniques designed to release tension and improve circulation.
+            - button "Book Massage" [ref=e148] [cursor=pointer]:
+              - text: Book Massage
+              - img [ref=e149]
+          - generic [ref=e151]:
+            - generic [ref=e152]:
+              - img "Hot Stone Massage" [ref=e153]
+              - generic [ref=e154]: P 499
+              - generic [ref=e155]: 1 Hour
+            - heading "Hot Stone Massage" [level=3] [ref=e156]
+            - paragraph [ref=e157]: Smooth, heated stones are used to deeply relax muscles and balance energy centers.
+            - button "Book Massage" [ref=e158] [cursor=pointer]:
+              - text: Book Massage
+              - img [ref=e159]
+          - generic [ref=e161]:
+            - generic [ref=e162]:
+              - img "Shiatsu Massage" [ref=e163]
+              - generic [ref=e164]: P 500
+              - generic [ref=e165]: 1 Hour
+            - heading "Shiatsu Massage" [level=3] [ref=e166]
+            - paragraph [ref=e167]: A finger-pressure technique that targets points on the body to improve energy flow.
+            - button "Book Massage" [ref=e168] [cursor=pointer]:
+              - text: Book Massage
+              - img [ref=e169]
+          - generic [ref=e171]:
+            - generic [ref=e172]:
+              - img "Swedish Massage" [ref=e173]
+              - generic [ref=e174]: P 500
+              - generic [ref=e175]: 1 Hour
+            - heading "Swedish Massage" [level=3] [ref=e176]
+            - paragraph [ref=e177]: Classic smooth-stroke massage focusing on relaxation and overall well-being.
+            - button "Book Massage" [ref=e178] [cursor=pointer]:
+              - text: Book Massage
+              - img [ref=e179]
+      - generic [ref=e181]:
+        - generic [ref=e182]:
+          - generic [ref=e183]: Exclusive Bundles
+          - heading "Luxury Packages" [level=2] [ref=e184]
+          - paragraph [ref=e185]: Experience more for less. Our packages are designed to provide a holistic journey of rebirth and relaxation.
+        - generic [ref=e186]:
+          - generic [ref=e187]:
+            - generic [ref=e188]:
+              - generic [ref=e189]:
+                - generic [ref=e190]:
+                  - generic [ref=e191]: Value Bundle
+                  - heading "PACKAGE 1" [level=3] [ref=e192]
+                - generic [ref=e193]: P800
+              - paragraph [ref=e194]: Bodyscrub + regular massage (swedish / shiatsu)
+            - generic [ref=e195]:
+              - generic [ref=e196]: 1 Hour 30 min Total Duration
+              - button "Select Package" [ref=e197] [cursor=pointer]:
+                - text: Select Package
+                - img [ref=e198]
+          - generic [ref=e200]:
+            - generic [ref=e201]:
+              - generic [ref=e202]:
+                - generic [ref=e203]:
+                  - generic [ref=e204]: Value Bundle
+                  - heading "PACKAGE 2" [level=3] [ref=e205]
+                - generic [ref=e206]: P800
+              - paragraph [ref=e207]: Ear candling with scalp massage + regular massage (swedish / shiatsu)
+            - generic [ref=e208]:
+              - generic [ref=e209]: 1 Hour 30 min Total Duration
+              - button "Select Package" [ref=e210] [cursor=pointer]:
+                - text: Select Package
+                - img [ref=e211]
+          - generic [ref=e213]:
+            - generic [ref=e214]:
+              - generic [ref=e215]:
+                - generic [ref=e216]:
+                  - generic [ref=e217]: Value Bundle
+                  - heading "PACKAGE 3" [level=3] [ref=e218]
+                - generic [ref=e219]: P800
+              - paragraph [ref=e220]: Hotstone with 1 hour whole body massage
+            - generic [ref=e221]:
+              - generic [ref=e222]: 1 Hour 30 min Total Duration
+              - button "Select Package" [ref=e223] [cursor=pointer]:
+                - text: Select Package
+                - img [ref=e224]
+          - generic [ref=e226]:
+            - generic [ref=e227]:
+              - generic [ref=e228]:
+                - generic [ref=e229]:
+                  - generic [ref=e230]: Value Bundle
+                  - heading "PACKAGE 4" [level=3] [ref=e231]
+                - generic [ref=e232]: P800
+              - paragraph [ref=e233]: Ventosa with 1 hour whole body massage
+            - generic [ref=e234]:
+              - generic [ref=e235]: 1 Hour 30 min Total Duration
+              - button "Select Package" [ref=e236] [cursor=pointer]:
+                - text: Select Package
+                - img [ref=e237]
+    - generic [ref=e242]:
+      - generic [ref=e243]:
+        - generic [ref=e244]: Expert Hands
+        - heading "Meet the Therapists" [level=2] [ref=e245]
+      - generic [ref=e247]:
+        - generic [ref=e249]:
+          - img "Fait" [ref=e250]
+          - generic [ref=e252]:
+            - paragraph [ref=e253]: Signature Spa Rituals
+            - generic [ref=e254]:
+              - heading "Fait" [level=3] [ref=e255]
+              - generic [ref=e256]: 5★
+        - generic [ref=e258]:
+          - img "Gelo" [ref=e259]
+          - generic [ref=e261]:
+            - paragraph [ref=e262]: Traditional Hilot Specialist
+            - generic [ref=e263]:
+              - heading "Gelo" [level=3] [ref=e264]
+              - generic [ref=e265]: 5★
+        - generic [ref=e267]:
+          - img "Jake" [ref=e268]
+          - generic [ref=e270]:
+            - paragraph [ref=e271]: Thai Massage & Stretching
+            - generic [ref=e272]:
+              - heading "Jake" [level=3] [ref=e273]
+              - generic [ref=e274]: 5★
+        - generic [ref=e276]:
+          - img "Jb" [ref=e277]
+          - generic [ref=e279]:
+            - paragraph [ref=e280]: Reflexology & Nerve Rituals
+            - generic [ref=e281]:
+              - heading "Jb" [level=3] [ref=e282]
+              - generic [ref=e283]: 5★
+        - generic [ref=e285]:
+          - img "Jom" [ref=e286]
+          - generic [ref=e288]:
+            - paragraph [ref=e289]: Swedish & Holistic Wellness
+            - generic [ref=e290]:
+              - heading "Jom" [level=3] [ref=e291]
+              - generic [ref=e292]: 5★
+        - generic [ref=e294]:
+          - img "Kim" [ref=e295]
+          - generic [ref=e297]:
+            - paragraph [ref=e298]: Traditional Hilot & Reflexology
+            - generic [ref=e299]:
+              - heading "Kim" [level=3] [ref=e300]
+              - generic [ref=e301]: 5★
+        - generic [ref=e303]:
+          - img "Lemuel" [ref=e304]
+          - generic [ref=e306]:
+            - paragraph [ref=e307]: Hot Stone & Bamboo Therapy
+            - generic [ref=e308]:
+              - heading "Lemuel" [level=3] [ref=e309]
+              - generic [ref=e310]: 5★
+        - generic [ref=e312]:
+          - img "Matt" [ref=e313]
+          - generic [ref=e315]:
+            - paragraph [ref=e316]: Aromatherapy & Pressure Point
+            - generic [ref=e317]:
+              - heading "Matt" [level=3] [ref=e318]
+              - generic [ref=e319]: 5★
+        - generic [ref=e321]:
+          - img "Nic" [ref=e322]
+          - generic [ref=e324]:
+            - paragraph [ref=e325]: Deep Tissue & Sports Rituals
+            - generic [ref=e326]:
+              - heading "Nic" [level=3] [ref=e327]
+              - generic [ref=e328]: 5★
+        - generic [ref=e330]:
+          - img "Sheena" [ref=e331]
+          - generic [ref=e333]:
+            - paragraph [ref=e334]: Aromatherapy & Skin Rituals
+            - generic [ref=e335]:
+              - heading "Sheena" [level=3] [ref=e336]
+              - generic [ref=e337]: 5★
+  - contentinfo [ref=e338]:
+    - generic [ref=e339]:
+      - generic [ref=e340]:
+        - generic [ref=e341]:
+          - heading "Golden Tower Spa" [level=2] [ref=e342]
+          - paragraph [ref=e343]: An oasis of calm where French elegance meets Filipino hospitality. Reconnect with your inner self in Quezon City.
+          - link [ref=e345] [cursor=pointer]:
+            - /url: https://www.facebook.com/profile.php?id=100063262268519
+            - img [ref=e346]
+        - generic [ref=e348]:
+          - heading "Explore" [level=3] [ref=e349]
+          - list [ref=e350]:
+            - listitem [ref=e351]:
+              - link "Philosophy" [ref=e352] [cursor=pointer]:
+                - /url: "#philosophy"
+            - listitem [ref=e353]:
+              - link "Treatments" [ref=e354] [cursor=pointer]:
+                - /url: "#services"
+            - listitem [ref=e355]:
+              - link "Gift Cards" [ref=e356] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e357]:
+              - link "Membership" [ref=e358] [cursor=pointer]:
+                - /url: "#"
+        - generic [ref=e359]:
+          - heading "Visit Us" [level=3] [ref=e360]
+          - list [ref=e361]:
+            - listitem [ref=e362]:
+              - img [ref=e363]
+              - generic [ref=e366]:
+                - text: "#1 C2 Road 9, Project 6,"
+                - text: Quezon City, Philippines
+            - listitem [ref=e367]:
+              - img [ref=e368]
+              - generic [ref=e371]: gtowerspa@gmail.com
+      - generic [ref=e372]:
+        - paragraph [ref=e373]: © 2026 Golden Tower Spa. All rights reserved.
+        - generic [ref=e374]:
+          - link "Privacy Policy" [ref=e375] [cursor=pointer]:
+            - /url: "#"
+          - link "Terms of Service" [ref=e376] [cursor=pointer]:
+            - /url: "#"
+```

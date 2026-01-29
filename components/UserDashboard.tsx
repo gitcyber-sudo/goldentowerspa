@@ -41,14 +41,7 @@ const UserDashboard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'current' | 'past'>('current');
 
-    // Redirect admin users to admin page
-    useEffect(() => {
-        if (!authLoading && role === 'admin') {
-            console.log('Admin detected on user dashboard, redirecting to /admin');
-            navigate('/admin', { replace: true });
-        }
-    }, [role, authLoading, navigate]);
-
+    // Data fetching logic
     useEffect(() => {
         if (!authLoading && user) {
             fetchBookings();
