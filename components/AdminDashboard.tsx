@@ -296,8 +296,10 @@ const AdminDashboard: React.FC = () => {
             .reduce((sum, b) => sum + (b.services?.price || 0), 0),
         todayRevenue: bookings
             .filter(b => {
-                const today = new Date().toISOString().split('T')[0];
-                return b.status === 'completed' && b.booking_date === today;
+                // Determine today's date in Philippine Time (PHT - UTC+8)
+                const phtToday = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }))
+                    .toISOString().split('T')[0];
+                return b.status === 'completed' && b.booking_date === phtToday;
             })
             .reduce((sum, b) => sum + (b.services?.price || 0), 0),
     };

@@ -50,7 +50,9 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
     const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
     const getTimeFilter = (): { start: Date | null; end: Date | null } => {
-        const now = new Date();
+        // Use PHT (UTC+8) as the reference for 'now'
+        const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+
         switch (timeRange) {
             case '7d':
                 return { start: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), end: now };

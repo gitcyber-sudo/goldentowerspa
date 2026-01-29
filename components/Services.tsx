@@ -82,8 +82,15 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
     .filter(s => s && s.title && s.title.toUpperCase().includes('PACKAGE'))
     .sort((a, b) => (a.title || "").localeCompare(b.title || "", undefined, { numeric: true }));
 
+  const expressMassages = processedServices
+    .filter(s => s && s.category === 'express')
+    .sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+
   const regularServices = processedServices.filter(s =>
-    s && !signatureTreatments.some(st => st.id === s.id) && !luxuryPackages.some(lp => lp.id === s.id)
+    s &&
+    !signatureTreatments.some(st => st.id === s.id) &&
+    !luxuryPackages.some(lp => lp.id === s.id) &&
+    !expressMassages.some(em => em.id === s.id)
   ).sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 
   return (
@@ -155,6 +162,44 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                     className="text-gold text-xs font-bold uppercase tracking-widest flex items-center hover:text-gold-dark transition-colors"
                   >
                     Book Massage <ArrowRight size={14} className="ml-2" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* --- EXPRESS SECTION --- */}
+        <div id="express" className="mb-24 pt-24 border-t border-gold/10">
+          <div className="flex flex-col mb-12">
+            <span className="text-gold text-sm uppercase tracking-widest font-bold mb-2 block">Quick Rejuvenation</span>
+            <h2 className="font-serif text-4xl md:text-5xl text-charcoal">Express Massages</h2>
+            <p className="text-charcoal-light mt-4 max-w-2xl">Perfect for those on the go. Targeted treatments designed for maximum relaxation in minimum time.</p>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-10"><Loader2 className="animate-spin text-gold" size={32} /></div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {expressMassages.map((service) => (
+                <div
+                  key={service.id}
+                  className="group transition-all duration-700 relative bg-cream/10 p-4 rounded-2xl border border-gold/10 hover:border-gold/30 hover:shadow-lg"
+                >
+                  <div className="relative h-[240px] w-full overflow-hidden mb-6 rounded-lg">
+                    <img src={service.image_url} alt={service.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                    <div className="absolute bottom-4 right-4 bg-gold text-white px-3 py-1 text-sm font-bold shadow-md">P {service.price}</div>
+                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] uppercase font-bold tracking-widest">30 MIN</div>
+                  </div>
+                  <h3 className="font-serif text-2xl text-charcoal mb-2 group-hover:text-gold transition-colors">{service.title}</h3>
+                  <p className="text-charcoal-light text-sm font-light mb-4 line-clamp-2 italic">
+                    {service.description.toLowerCase().charAt(0).toUpperCase() + service.description.toLowerCase().slice(1)}
+                  </p>
+                  <button
+                    onClick={() => onBookClick(service.id)}
+                    className="text-gold text-xs font-bold uppercase tracking-widest flex items-center hover:text-gold-dark transition-colors"
+                  >
+                    Select Express <ArrowRight size={14} className="ml-2" />
                   </button>
                 </div>
               ))}
