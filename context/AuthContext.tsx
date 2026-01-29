@@ -185,16 +185,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const signOut = async () => {
         setLoading(true);
         try {
-            console.log("Initiating foolproof sign out...");
+            console.log("Initiating targeted sign out...");
 
-            // 1. Clear state immediately for UI responsiveness
+            // 1. Clear profile state immediately
             setUser(null);
             setSession(null);
             setProfile(null);
 
-            // 2. Clear all browser storage to prevent "stuck" sessions
-            localStorage.clear();
-            sessionStorage.clear();
+            // 2. Clear ONLY Supabase/Auth related keys from storage
+            // This preserves analytics (gt_visitor_id) and other app state
+            const storageKey = `sb-${new URL((supabase as any).supabaseUrl).hostname.split('.')[0]}-auth-token`;
+            localStorage.removeItem(storageKey);
+
+            // Also clear any other potential supabase keys
+            Object.keys(localStorage).forEach(key => {
+                if (key.includes('supabase.auth') || key.includes('-auth-token')) {
+                    localStorage.removeItem(key);
+                }
+            });
 
             // 3. Supabase Sign Out (Attempt to notify server)
             await supabase.auth.signOut();

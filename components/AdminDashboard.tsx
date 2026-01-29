@@ -38,6 +38,8 @@ import {
 } from 'lucide-react';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import RevenueDashboard from './RevenueDashboard';
+import ManualBookingModal from './modals/ManualBookingModal';
+import EditBookingModal from './modals/EditBookingModal';
 
 interface Booking {
     id: string;
@@ -54,8 +56,6 @@ interface Booking {
     therapists?: { name: string };
     created_at: string;
 }
-
-import SelectionGrid from './SelectionGrid';
 
 const AdminDashboard: React.FC = () => {
     const { user, role, loading: authLoading, signOut } = useAuth();
@@ -86,26 +86,7 @@ const AdminDashboard: React.FC = () => {
     const [editFormData, setEditFormData] = useState<any>({});
     const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
 
-    useEffect(() => {
-        const checkAdmin = async () => {
-            if (authLoading) return;
-            if (!user) {
-                navigate('/');
-                return;
-            }
-            if ((role as string) !== 'admin') {
-                if (role === null) {
-                    const timeout = setTimeout(() => {
-                        if ((role as string) !== 'admin') navigate('/');
-                    }, 2000);
-                    return () => clearTimeout(timeout);
-                } else {
-                    navigate('/');
-                }
-            }
-        };
-        checkAdmin();
-    }, [user, role, authLoading, navigate]);
+    // Redundant auth check removed - handled by ProtectedRoute in App.tsx
 
     useEffect(() => {
         if (showManualBooking || editingBooking) {
@@ -115,14 +96,12 @@ const AdminDashboard: React.FC = () => {
     }, [showManualBooking, editingBooking]);
 
     useEffect(() => {
-        if ((role as string) === 'admin') {
-            if (activeTab === 'dashboard' || activeTab === 'bookings') {
-                fetchBookings();
-            } else if (activeTab === 'therapists') {
-                fetchTherapists();
-            }
+        if (activeTab === 'dashboard' || activeTab === 'bookings') {
+            fetchBookings();
+        } else if (activeTab === 'therapists') {
+            fetchTherapists();
         }
-    }, [activeTab, role]);
+    }, [activeTab]);
 
     const fetchBookings = async () => {
         setLoading(true);
@@ -322,136 +301,6 @@ const AdminDashboard: React.FC = () => {
             })
             .reduce((sum, b) => sum + (b.services?.price || 0), 0),
     };
-
-    const renderManualBookingModal = () => (
-        showManualBooking && (
-            <div className="fixed inset-0 z-50 overflow-y-auto flex justify-center items-start md:items-center p-4 md:p-6 bg-charcoal/80 backdrop-blur-sm">
-                <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
-                    <button onClick={() => setShowManualBooking(false)} className="absolute top-4 right-4 text-charcoal/40 hover:text-gold"><XCircle size={24} /></button>
-                    <h2 className="font-serif text-xl md:text-2xl text-charcoal mb-6">New Guest Reservation</h2>
-                    <form onSubmit={handleManualBooking} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="col-span-1 md:col-span-2">
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Guest Name *</label>
-                                <input required type="text" className="w-full border border-gold/20 rounded-lg p-3" value={manualBookingData.guest_name} onChange={e => setManualBookingData({ ...manualBookingData, guest_name: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Email</label>
-                                <input type="email" className="w-full border border-gold/20 rounded-lg p-3" value={manualBookingData.guest_email} onChange={e => setManualBookingData({ ...manualBookingData, guest_email: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Phone *</label>
-                                <input required type="tel" className="w-full border border-gold/20 rounded-lg p-3" value={manualBookingData.guest_phone} onChange={e => setManualBookingData({ ...manualBookingData, guest_phone: e.target.value })} />
-                            </div>
-                        </div>
-                        <SelectionGrid
-                            label="Select Ritual"
-                            options={services.map(s => ({ id: s.id, title: s.title, subtitle: s.category, imageUrl: s.image_url, price: s.price, duration: s.duration }))}
-                            selectedId={manualBookingData.service_id}
-                            onSelect={(id) => setManualBookingData({ ...manualBookingData, service_id: id })}
-                        />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="md:col-span-2">
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Assigned Specialist *</label>
-                                <select required className="w-full border border-gold/20 rounded-lg p-3" value={manualBookingData.therapist_id} onChange={e => setManualBookingData({ ...manualBookingData, therapist_id: e.target.value })}>
-                                    <option value="">-- Choose Specialist --</option>
-                                    {therapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Date *</label>
-                                <input required type="date" className="w-full border border-gold/20 rounded-lg p-3" value={manualBookingData.date} onChange={e => setManualBookingData({ ...manualBookingData, date: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Time *</label>
-                                <input required type="time" className="w-full border border-gold/20 rounded-lg p-3" value={manualBookingData.time} onChange={e => setManualBookingData({ ...manualBookingData, time: e.target.value })} />
-                            </div>
-                        </div>
-                        <button type="submit" className="w-full bg-gold text-white font-bold uppercase tracking-widest py-4 rounded-xl mt-4">Confirm Reservation</button>
-                    </form>
-                </div>
-            </div>
-        )
-    );
-
-    const renderEditBookingModal = () => (
-        editingBooking && (
-            <div className="fixed inset-0 z-50 overflow-y-auto flex justify-center items-start md:items-center p-4 md:p-6 bg-charcoal/80 backdrop-blur-sm">
-                <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
-                    <button onClick={() => setEditingBooking(null)} className="absolute top-4 right-4 text-charcoal/40 hover:text-gold"><X size={24} /></button>
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 bg-gold/10 rounded-xl">
-                            <Edit3 className="text-gold" size={24} />
-                        </div>
-                        <div>
-                            <h2 className="font-serif text-xl md:text-2xl text-charcoal">Edit Booking</h2>
-                            <p className="text-xs text-charcoal/50">Modify booking details</p>
-                        </div>
-                    </div>
-                    <form onSubmit={handleEditBooking} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="col-span-1 md:col-span-2">
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Client Name</label>
-                                <input type="text" className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.guest_name} onChange={e => setEditFormData({ ...editFormData, guest_name: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Email</label>
-                                <input type="email" className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.guest_email} onChange={e => setEditFormData({ ...editFormData, guest_email: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Phone</label>
-                                <input type="tel" className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.guest_phone} onChange={e => setEditFormData({ ...editFormData, guest_phone: e.target.value })} />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Service</label>
-                            <select className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.service_id} onChange={e => setEditFormData({ ...editFormData, service_id: e.target.value })}>
-                                {services.map(s => <option key={s.id} value={s.id}>{s.title} - ₱{s.price}</option>)}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Assigned Specialist</label>
-                            <select className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.therapist_id} onChange={e => setEditFormData({ ...editFormData, therapist_id: e.target.value })}>
-                                <option value="">-- Any Available --</option>
-                                {therapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                            </select>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Date</label>
-                                <input type="date" className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.booking_date} onChange={e => setEditFormData({ ...editFormData, booking_date: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Time</label>
-                                <input type="time" className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.booking_time} onChange={e => setEditFormData({ ...editFormData, booking_time: e.target.value })} />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Status</label>
-                            <select className="w-full border border-gold/20 rounded-lg p-3" value={editFormData.status} onChange={e => setEditFormData({ ...editFormData, status: e.target.value })}>
-                                <option value="pending">Pending</option>
-                                <option value="confirmed">Confirmed</option>
-                                <option value="completed">Completed</option>
-                                <option value="cancelled">Cancelled</option>
-                            </select>
-                        </div>
-
-                        <div className="flex gap-3 pt-2">
-                            <button type="button" onClick={() => setEditingBooking(null)} className="flex-1 border border-gold/20 text-charcoal font-bold uppercase tracking-widest py-3 rounded-xl hover:bg-charcoal/5">Cancel</button>
-                            <button type="submit" className="flex-1 bg-gold text-white font-bold uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2">
-                                <Save size={18} />
-                                Save Changes
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        )
-    );
 
     const renderAssignTherapistModal = () => (
         assigningBooking && (
@@ -846,8 +695,24 @@ const AdminDashboard: React.FC = () => {
                 {activeTab === 'revenue' && <RevenueDashboard bookings={bookings} />}
 
                 {/* Modals */}
-                {renderManualBookingModal()}
-                {renderEditBookingModal()}
+                <ManualBookingModal
+                    isOpen={showManualBooking}
+                    onClose={() => setShowManualBooking(false)}
+                    onSubmit={handleManualBooking}
+                    data={manualBookingData}
+                    setData={setManualBookingData}
+                    services={services}
+                    therapists={therapists}
+                />
+                <EditBookingModal
+                    isOpen={!!editingBooking}
+                    onClose={() => setEditingBooking(null)}
+                    onSubmit={handleEditBooking}
+                    data={editFormData}
+                    setData={setEditFormData}
+                    services={services}
+                    therapists={therapists}
+                />
                 {renderAssignTherapistModal()}
             </main>
 

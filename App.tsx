@@ -17,6 +17,7 @@ import UserDashboard from './components/UserDashboard';
 import TherapistDashboard from './components/TherapistDashboard';
 import { useAuth } from './context/AuthContext';
 import { AnalyticsProvider } from './context/AnalyticsContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const MainLayout: React.FC<{
   openBooking: (id?: string) => void;
@@ -118,13 +119,33 @@ const App: React.FC = () => {
             containerRef={containerRef}
           />
         } />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/therapist" element={<TherapistDashboard />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['user', 'admin']}>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/therapist"
+          element={
+            <ProtectedRoute allowedRoles={['therapist', 'admin']}>
+              <TherapistDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </AnalyticsProvider>
   );
 };
 
 export default App;
-
