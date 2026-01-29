@@ -296,9 +296,14 @@ const AdminDashboard: React.FC = () => {
             .reduce((sum, b) => sum + (b.services?.price || 0), 0),
         todayRevenue: bookings
             .filter(b => {
-                // Determine today's date in Philippine Time (PHT - UTC+8)
-                const phtToday = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }))
-                    .toISOString().split('T')[0];
+                // Determine today's date in Philippine Time (PHT - UTC+8) reliably
+                const phtToday = new Intl.DateTimeFormat('en-CA', {
+                    timeZone: 'Asia/Manila',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).format(new Date());
+
                 return b.status === 'completed' && b.booking_date === phtToday;
             })
             .reduce((sum, b) => sum + (b.services?.price || 0), 0),

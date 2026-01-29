@@ -50,16 +50,40 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
     const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
     const getTimeFilter = (): { start: Date | null; end: Date | null } => {
-        // Use PHT (UTC+8) as the reference for 'now'
-        const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+        // Get current time in Manila
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Manila',
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: false
+        });
+
+        const parts = formatter.formatToParts(now);
+        const map: Record<string, string> = {};
+        parts.forEach(p => map[p.type] = p.value);
+
+        // Construct a Date object that represents Manila local time
+        const manilaNow = new Date(
+            parseInt(map.year),
+            parseInt(map.month) - 1,
+            parseInt(map.day),
+            parseInt(map.hour),
+            parseInt(map.minute),
+            parseInt(map.second)
+        );
 
         switch (timeRange) {
             case '7d':
-                return { start: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), end: now };
+                return { start: new Date(manilaNow.getTime() - 7 * 24 * 60 * 60 * 1000), end: manilaNow };
             case '30d':
-                return { start: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), end: now };
+                return { start: new Date(manilaNow.getTime() - 30 * 24 * 60 * 60 * 1000), end: manilaNow };
             case '90d':
-                return { start: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000), end: now };
+                return { start: new Date(manilaNow.getTime() - 90 * 24 * 60 * 60 * 1000), end: manilaNow };
             case 'custom':
                 const start = new Date(customYear, customMonth, 1);
                 const end = new Date(customYear, customMonth + 1, 0, 23, 59, 59);
