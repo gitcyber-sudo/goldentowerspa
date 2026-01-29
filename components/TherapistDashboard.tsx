@@ -1,7 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { formatTimeTo12h } from '../lib/utils';
 import {
     Calendar,
     Clock,
@@ -62,10 +62,10 @@ const TherapistDashboard: React.FC = () => {
             const { data, error } = await supabase
                 .from('bookings')
                 .select(`
-                    *,
-                    services (title, duration),
-                    profiles (full_name, email)
-                `)
+    *,
+    services(title, duration),
+    profiles(full_name, email)
+        `)
                 .eq('therapist_id', therapist.id)
                 .order('booking_date', { ascending: true });
 
@@ -127,7 +127,7 @@ const TherapistDashboard: React.FC = () => {
                     </div>
                 </div>
                 <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${getStatusColor(booking.status)}`}
+                    className={`px - 3 py - 1 rounded - full text - xs font - bold uppercase tracking - widest ${getStatusColor(booking.status)} `}
                 >
                     {booking.status}
                 </span>
@@ -148,7 +148,7 @@ const TherapistDashboard: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-1">
                         <Clock size={14} className="text-gold" />
-                        {booking.booking_time}
+                        {formatTimeTo12h(booking.booking_time)}
                     </div>
                     {booking.services?.duration && (
                         <div className="text-gold">
@@ -244,10 +244,10 @@ const TherapistDashboard: React.FC = () => {
                 <div className="flex gap-4 mb-8 border-b border-gold/10">
                     <button
                         onClick={() => setActiveFilter('upcoming')}
-                        className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeFilter === 'upcoming'
-                            ? 'text-gold'
-                            : 'text-charcoal/40 hover:text-charcoal/60'
-                            }`}
+                        className={`pb - 4 px - 2 font - bold uppercase tracking - widest text - sm transition - all relative ${activeFilter === 'upcoming'
+                                ? 'text-gold'
+                                : 'text-charcoal/40 hover:text-charcoal/60'
+                            } `}
                     >
                         Upcoming Sessions
                         {activeFilter === 'upcoming' && (
@@ -256,10 +256,10 @@ const TherapistDashboard: React.FC = () => {
                     </button>
                     <button
                         onClick={() => setActiveFilter('completed')}
-                        className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeFilter === 'completed'
-                            ? 'text-gold'
-                            : 'text-charcoal/40 hover:text-charcoal/60'
-                            }`}
+                        className={`pb - 4 px - 2 font - bold uppercase tracking - widest text - sm transition - all relative ${activeFilter === 'completed'
+                                ? 'text-gold'
+                                : 'text-charcoal/40 hover:text-charcoal/60'
+                            } `}
                     >
                         Past Sessions
                         {activeFilter === 'completed' && (

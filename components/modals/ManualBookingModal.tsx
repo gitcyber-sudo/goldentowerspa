@@ -60,16 +60,6 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
                                 onChange={e => setData({ ...data, guest_email: e.target.value })}
                             />
                         </div>
-                        <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Phone *</label>
-                            <input
-                                required
-                                type="tel"
-                                className="w-full border border-gold/20 rounded-lg p-3"
-                                value={data.guest_phone}
-                                onChange={e => setData({ ...data, guest_phone: e.target.value })}
-                            />
-                        </div>
                     </div>
                     <SelectionGrid
                         label="Select Ritual"

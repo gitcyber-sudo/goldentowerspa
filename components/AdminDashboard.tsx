@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { formatTimeTo12h } from '../lib/utils';
 import {
     Calendar,
     Clock,
@@ -184,7 +185,7 @@ const AdminDashboard: React.FC = () => {
                 user_id: null,
                 guest_name: manualBookingData.guest_name,
                 guest_email: manualBookingData.guest_email || null,
-                guest_phone: manualBookingData.guest_phone,
+                guest_phone: manualBookingData.guest_phone || null,
                 service_id: manualBookingData.service_id,
                 therapist_id: manualBookingData.therapist_id,
                 booking_date: manualBookingData.date,
@@ -424,7 +425,7 @@ const AdminDashboard: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <p className="text-sm">{b.booking_date}</p>
-                                        <p className="text-xs text-charcoal/50">{b.booking_time}</p>
+                                        <p className="text-xs text-charcoal/50">{formatTimeTo12h(b.booking_time)}</p>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusColor(b.status)}`}>
@@ -528,7 +529,7 @@ const AdminDashboard: React.FC = () => {
                             </div>
                             <div className="flex items-center gap-4 text-xs text-charcoal/60 mb-3">
                                 <span className="flex items-center gap-1"><Calendar size={12} /> {b.booking_date}</span>
-                                <span className="flex items-center gap-1"><Clock size={12} /> {b.booking_time}</span>
+                                <span className="flex items-center gap-1"><Clock size={12} /> {formatTimeTo12h(b.booking_time)}</span>
                             </div>
                             <div className="flex items-center gap-2 text-xs text-gold mb-3">
                                 <User size={12} />

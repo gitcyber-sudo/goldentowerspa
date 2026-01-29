@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { formatTimeTo12h } from '../lib/utils';
 import {
     Calendar,
     Clock,
@@ -172,7 +173,7 @@ const UserDashboard: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2 text-charcoal/70">
                     <Clock size={16} className="text-gold" />
-                    <span className="text-sm">{booking.booking_time}</span>
+                    <span className="text-sm">{formatTimeTo12h(booking.booking_time)}</span>
                     {booking.services?.duration && (
                         <span className="text-xs text-charcoal/40 ml-2">({booking.services.duration} min)</span>
                     )}
