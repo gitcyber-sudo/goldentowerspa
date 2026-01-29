@@ -14,6 +14,7 @@ import {
     Sparkles
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import LoadingScreen from './LoadingScreen';
 
 interface Booking {
     id: string;
@@ -164,38 +165,11 @@ const TherapistDashboard: React.FC = () => {
     );
 
     if (!user || profile?.role !== 'therapist') {
-        return (
-            <div className="min-h-screen bg-cream flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-charcoal/60 mb-4">
-                        {!user ? 'Please sign in to view therapist dashboard' : 'Access denied: Therapist role required'}
-                    </p>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="bg-gold hover:bg-gold-dark text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm shadow-xl transition-all"
-                    >
-                        Return Home
-                    </button>
-                </div>
-            </div>
-        );
+        return <LoadingScreen message="Access Denied" />;
     }
 
     if (!therapistInfo) {
-        return (
-            <div className="min-h-screen bg-cream flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-charcoal/60 mb-4">Your account is not linked to a therapist profile</p>
-                    <p className="text-sm text-charcoal/40 mb-6">Please contact administration</p>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="bg-gold hover:bg-gold-dark text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm shadow-xl transition-all"
-                    >
-                        Return Home
-                    </button>
-                </div>
-            </div>
-        );
+        return <LoadingScreen message="Linking Profile..." />;
     }
 
     return (

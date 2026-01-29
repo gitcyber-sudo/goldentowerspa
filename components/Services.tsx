@@ -23,10 +23,6 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
   const { loading: authLoading, user } = useAuth();
 
   useEffect(() => {
-    // Wait for auth to settle to prevent unnecessary dual-fetches 
-    // during initial app load, but don't block forever
-    if (authLoading) return;
-
     let mounted = true;
 
     const fetchServices = async (retryCount = 0) => {
@@ -71,7 +67,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
 
     fetchServices();
     return () => { mounted = false; };
-  }, [authLoading]);
+  }, []);
 
   const processedServices = (services || []).map(s => ({
     ...s

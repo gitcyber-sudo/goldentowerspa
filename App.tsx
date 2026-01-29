@@ -18,6 +18,7 @@ import TherapistDashboard from './components/TherapistDashboard';
 import { useAuth } from './context/AuthContext';
 import { AnalyticsProvider } from './context/AnalyticsContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import LoadingScreen from './components/LoadingScreen';
 
 const MainLayout: React.FC<{
   openBooking: (id?: string) => void;
@@ -94,15 +95,7 @@ const App: React.FC = () => {
   // Global loading state to ensure auth is settled before any components try to fetch data
   // This prevents race conditions during page refreshes for signed-in users.
   if (authLoading) {
-    return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="text-center p-8">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gold/20 border-t-gold mb-6" />
-          <h2 className="font-serif text-3xl text-charcoal mb-2">Golden Tower <span className="text-gold italic">Spa</span></h2>
-          <p className="text-sm text-charcoal/40 italic">Restoring your session...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Restoring your session" />;
   }
 
   return (

@@ -23,6 +23,7 @@ import {
     Star
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import LoadingScreen from './LoadingScreen';
 
 interface Booking {
     id: string;
@@ -164,18 +165,7 @@ const UserDashboard: React.FC = () => {
     );
 
     if (authLoading) {
-        return (
-            <div className="min-h-screen bg-cream flex items-center justify-center">
-                <div className="text-center p-8">
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gold/20 border-t-gold mb-4" />
-                    <p className="font-serif text-2xl text-charcoal mb-2">Restoring your session...</p>
-                    <p className="text-sm text-charcoal/40 mb-8 max-w-xs mx-auto italic">This usually takes a few seconds.</p>
-                    <div className="pt-8 border-t border-gold/10">
-                        <button onClick={() => { localStorage.clear(); sessionStorage.clear(); window.location.href = '/'; }} className="text-gold text-xs font-bold uppercase tracking-widest hover:text-gold-dark transition-all border-b border-gold/30 pb-1">Stuck? Click here to Reset & Fix</button>
-                    </div>
-                </div>
-            </div>
-        );
+        return <LoadingScreen message="Restoring your session" />;
     }
 
     if (!user) {

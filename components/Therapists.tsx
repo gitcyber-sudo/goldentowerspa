@@ -29,8 +29,6 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    if (authLoading) return;
-
     let mounted = true;
 
     const fetchTherapists = async (retryCount = 0) => {
@@ -72,7 +70,7 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
 
     fetchTherapists();
     return () => { mounted = false; };
-  }, [authLoading]);
+  }, []);
 
   useLayoutEffect(() => {
     if (loading) return;
