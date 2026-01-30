@@ -82,7 +82,7 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
             }
 
             // 2. Update Therapist Record
-            const { error: updateError } = await supabase
+            const { data: updatedData, error: updateError } = await supabase
                 .from('therapists')
                 .update({
                     name: formData.name,
@@ -91,7 +91,10 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                     active: formData.active,
                     image_url: imageUrl
                 })
-                .eq('id', therapist.id);
+                .eq('id', therapist.id)
+                .select();
+
+            console.log('Update operation result:', { data: updatedData, error: updateError });
 
             if (updateError) throw updateError;
 
