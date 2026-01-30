@@ -20,12 +20,23 @@ const TherapistLogin: React.FC = () => {
         setLoading(true);
 
         try {
-            // Auto-generate email from name matching creation logic
-            const generatedEmail = `${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@goldentower.internal`;
+            // 1. Fetch the user's email from profiles table using their name (case-insensitive)
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('email')
+                .ilike('full_name', formData.name.trim())
+                .eq('role', 'therapist')
+                .maybeSingle();
 
-            // Sign in with the generated email
+            if (profileError) throw profileError;
+
+            if (!profile) {
+                throw new Error('Specialist account not found. Please verify the name or contact admin.');
+            }
+
+            // 2. Sign in with the fetched email
             const { error: signInError } = await supabase.auth.signInWithPassword({
-                email: generatedEmail,
+                email: profile.email,
                 password: formData.password
             });
 

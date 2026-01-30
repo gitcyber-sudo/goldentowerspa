@@ -98,22 +98,56 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
 
             if (updateError) throw updateError;
 
-            // 3. Update Password if requested
+            // 3. Update Password or Create Account if requested
             if (showPasswordReset && newPassword) {
-                if (!therapist.user_id) {
-                    throw new Error("This specialist does not have a login account yet. Please create one by adding them as a 'New Specialist' or contact support to link their account.");
+                if (newPassword.length < 4) {
+                    throw new Error('PIN must be at least 4 digits');
                 }
 
-                const { data, error: passError } = await supabase.functions.invoke('update-therapist-password', {
-                    body: {
-                        therapist_id: therapist.id,
-                        new_password: newPassword
+                if (!therapist.user_id) {
+                    // Create account for existing specialist
+                    const confirmCreate = window.confirm(`Create a new login account for ${formData.name} with PIN ${newPassword}?`);
+                    if (!confirmCreate) {
+                        setLoading(false);
+                        return;
                     }
-                });
 
-                if (passError) {
-                    console.error("Edge Function Error Context:", passError);
-                    throw new Error(`Password update failed. ${passError.message || 'Unknown server error'}`);
+                    const generatedEmail = `${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '')}_${therapist.id.substring(0, 4)}@goldentower.internal`;
+
+                    const { data, error: createError } = await supabase.functions.invoke('create-therapist', {
+                        body: {
+                            ...formData,
+                            email: generatedEmail,
+                            password: newPassword,
+                            image_url: imageUrl,
+                            existing_therapist_id: therapist.id
+                        }
+                    });
+
+                    if (createError) throw createError;
+
+                    alert(`Login account created successfully for ${formData.name}.\nPIN: ${newPassword}\nPlease ensure the specialist saves this PIN.`);
+                } else {
+                    // Update existing password
+                    const confirmReset = window.confirm(`Are you sure you want to reset the password for ${formData.name}? New PIN will be ${newPassword}`);
+                    if (!confirmReset) {
+                        setLoading(false);
+                        return;
+                    }
+
+                    const { data, error: passError } = await supabase.functions.invoke('update-therapist-password', {
+                        body: {
+                            therapist_id: therapist.id,
+                            new_password: newPassword
+                        }
+                    });
+
+                    if (passError) {
+                        console.error("Edge Function Error Context:", passError);
+                        throw new Error(`Password update failed. ${passError.message || 'Unknown server error'}`);
+                    }
+
+                    alert(`Password reset successfully for ${formData.name}.\nNew PIN: ${newPassword}`);
                 }
             }
 
@@ -197,45 +231,93 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                         </span>
                     </div>
 
-                    {/* Password Reset Toggle */}
+                    {/* Account Management (Reset Password or Create Account) */}
                     <div className="border-t border-gold/10 pt-4 mt-2">
-                        {!showPasswordReset ? (
-                            <button
-                                type="button"
-                                onClick={() => setShowPasswordReset(true)}
-                                className="text-sm text-gold font-bold flex items-center gap-2 hover:underline"
-                            >
-                                <RefreshCw size={14} /> Reset Password
-                            </button>
-                        ) : (
-                            <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                <div className="flex justify-between items-center">
-                                    <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">New Password</label>
-                                    {!therapist.user_id && (
-                                        <span className="text-[10px] text-rose-500 font-bold uppercase">No login account linked</span>
-                                    )}
+                        {!therapist.user_id ? (
+                            <div className="space-y-3">
+                                <div className="bg-gold/5 p-4 rounded-lg border border-gold/10">
+                                    <h4 className="flex items-center gap-2 text-sm font-bold text-gold mb-1">
+                                        <User size={16} />
+                                        No Login Account
+                                    </h4>
+                                    <p className="text-xs text-charcoal/60 leading-relaxed">
+                                        This specialist doesn't have a login account yet. You can create one now.
+                                        They will sign in using their <strong>Full Name</strong> and a <strong>6-Digit PIN</strong>.
+                                    </p>
                                 </div>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder={therapist.user_id ? "Enter new password" : "Cannot reset - no account"}
-                                        disabled={!therapist.user_id}
-                                        className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold disabled:opacity-50"
-                                        value={newPassword}
-                                        onChange={e => setNewPassword(e.target.value)}
-                                    />
+
+                                {!showPasswordReset ? (
                                     <button
                                         type="button"
-                                        onClick={() => { setShowPasswordReset(false); setNewPassword(''); }}
-                                        className="p-3 text-charcoal/40 hover:text-charcoal"
+                                        onClick={() => {
+                                            setShowPasswordReset(true);
+                                            // Pre-generate a PIN
+                                            setNewPassword(Math.floor(100000 + Math.random() * 900000).toString());
+                                        }}
+                                        className="text-sm bg-gold text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gold-dark transition-colors shadow-sm"
                                     >
-                                        <X size={20} />
+                                        <Plus size={14} /> Create Login Account
                                     </button>
-                                </div>
-                                {!therapist.user_id && (
-                                    <p className="text-[10px] text-charcoal/40 italic">Note: To create a login for this specialist, please re-add them using 'Add Specialist'.</p>
+                                ) : (
+                                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Generated 6-Digit PIN</label>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                maxLength={6}
+                                                className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold font-mono font-bold tracking-widest text-center text-lg"
+                                                value={newPassword}
+                                                onChange={e => setNewPassword(e.target.value.replace(/[^0-9]/g, ''))}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => { setShowPasswordReset(false); setNewPassword(''); }}
+                                                className="p-3 text-charcoal/40 hover:text-charcoal"
+                                            >
+                                                <X size={20} />
+                                            </button>
+                                        </div>
+                                        <p className="text-[10px] text-charcoal/40 italic">Note: Make sure to share this PIN with the specialist after saving.</p>
+                                    </div>
                                 )}
                             </div>
+                        ) : (
+                            <>
+                                {!showPasswordReset ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPasswordReset(true)}
+                                        className="text-sm text-gold font-bold flex items-center gap-2 hover:underline"
+                                    >
+                                        <RefreshCw size={14} /> Reset Password
+                                    </button>
+                                ) : (
+                                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">New 6-Digit PIN</label>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                maxLength={6}
+                                                placeholder="Enter new 6-digit PIN"
+                                                className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold font-mono font-bold tracking-widest text-center text-lg"
+                                                value={newPassword}
+                                                onChange={e => setNewPassword(e.target.value.replace(/[^0-9]/g, ''))}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => { setShowPasswordReset(false); setNewPassword(''); }}
+                                                className="p-3 text-charcoal/40 hover:text-charcoal"
+                                            >
+                                                <X size={20} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
 
