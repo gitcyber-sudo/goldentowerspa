@@ -106,6 +106,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
 
   const regularServices = processedServices.filter(s =>
     s &&
+    s.title !== 'Home Service Massage' &&
     !signatureTreatments.some(st => st.id === s.id) &&
     !luxuryPackages.some(lp => lp.id === s.id) &&
     !expressMassages.some(em => em.id === s.id)

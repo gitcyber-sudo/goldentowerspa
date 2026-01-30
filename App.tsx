@@ -6,6 +6,7 @@ import Philosophy from './components/Philosophy';
 import VisualJourney from './components/VisualJourney';
 import Services from './components/Services';
 import Therapists from './components/Therapists';
+import HomeService from './components/HomeService';
 import Footer from './components/Footer';
 import BookingModal from './components/BookingModal';
 import AuthModal from './components/AuthModal';
@@ -16,6 +17,7 @@ import { Routes, Route } from 'react-router-dom';
 import AdminDashboard from './components/AdminDashboard';
 import UserDashboard from './components/UserDashboard';
 import TherapistDashboard from './components/TherapistDashboard';
+import TherapistLogin from './components/TherapistLogin';
 import { useAuth } from './context/AuthContext';
 import { AnalyticsProvider } from './context/AnalyticsContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -54,6 +56,10 @@ const MainLayout: React.FC<{
 
         <div className="section-reveal will-change-transform">
           <Services onBookClick={(id) => handleBookingAttempt(id)} />
+        </div>
+
+        <div className="section-reveal will-change-transform">
+          <HomeService onBookClick={(id) => handleBookingAttempt(id)} />
         </div>
 
         <Therapists onBookClick={() => handleBookingAttempt()} />
@@ -153,6 +159,7 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/therapist-login" element={<TherapistLogin />} />
       </Routes>
     </AnalyticsProvider>
   );

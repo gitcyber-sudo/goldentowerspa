@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { X, Mail, Lock, User, Loader2, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -10,6 +11,7 @@ interface AuthModalProps {
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
+    const navigate = useNavigate();
     const [isSignUp, setIsSignUp] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -214,13 +216,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                         </button>
                     </form>
 
-                    <div className="mt-6 text-center">
+                    <div className="mt-6 text-center flex flex-col items-center gap-4">
                         <button
                             onClick={() => { setIsSignUp(!isSignUp); setError(null); }}
                             className="text-sm text-charcoal/60 hover:text-gold transition-colors underline decoration-gold/30 underline-offset-4"
                         >
                             {isSignUp ? 'Already a member? Sign In' : 'New here? Create Account'}
                         </button>
+
+                        {!isSignUp && (
+                            <button
+                                onClick={() => { navigate('/therapist-login'); onClose(); }}
+                                className="text-xs text-gold/60 hover:text-gold transition-colors font-bold uppercase tracking-widest pt-4 border-t border-gold/5 w-full"
+                            >
+                                Therapist Access
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
