@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, X, Upload, RefreshCw } from 'lucide-react';
+import { Camera, X, Upload, RefreshCw, Plus, User } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface EditTherapistModalProps {
