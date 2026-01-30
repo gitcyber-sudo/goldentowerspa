@@ -19,7 +19,6 @@ import {
     LogOut,
     Shield,
     ChevronRight,
-    Sparkles,
     BarChart3,
     TrendingUp,
     DollarSign,

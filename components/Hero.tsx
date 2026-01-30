@@ -1,5 +1,6 @@
 import React, { useLayoutEffect, useRef, useState, useEffect } from 'react';
-import { ChevronDown, Star } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
+import Logo from './Logo';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -121,9 +122,9 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
 
       {/* Particles/Sparkles (Static CSS animation) */}
       <div className="absolute inset-0 z-[1] opacity-30 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 animate-pulse text-gold"><Star size={16} /></div>
-        <div className="absolute top-1/3 right-1/3 animate-pulse delay-700 text-gold-light"><Star size={24} /></div>
-        <div className="absolute bottom-1/3 left-1/3 animate-pulse delay-1000 text-gold"><Star size={12} /></div>
+        <div className="absolute top-1/4 left-1/4 animate-pulse"><Logo className="h-4 w-4" color="#DFBD69" /></div>
+        <div className="absolute top-1/3 right-1/3 animate-pulse delay-700"><Logo className="h-6 w-6" color="#DFBD69" /></div>
+        <div className="absolute bottom-1/3 left-1/3 animate-pulse delay-1000"><Logo className="h-3 w-3" color="#DFBD69" /></div>
       </div>
 
       {/* Content */}

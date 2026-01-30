@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, Loader2, Sparkles, Crown } from 'lucide-react';
+import { ArrowRight, Loader2, Crown } from 'lucide-react';
+import Logo from './Logo';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
@@ -180,7 +181,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] uppercase font-bold tracking-widest">30 MIN</div>
                   </div>
                   <h3 className="font-serif text-2xl text-charcoal mb-2 group-hover:text-gold transition-colors flex items-center gap-2">
-                    {service.title} <Sparkles size={16} className="text-gold opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {service.title} <Logo className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" color="#997B3D" />
                   </h3>
                   <p className="text-charcoal-light text-sm font-light mb-4 line-clamp-2 italic">
                     {service.description.toLowerCase().charAt(0).toUpperCase() + service.description.toLowerCase().slice(1)}

@@ -11,11 +11,11 @@ import {
     CheckCircle2,
     Clock3,
     ArrowLeft,
-    Mail,
-    Sparkles
+    Mail
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from './LoadingScreen';
+import Logo from './Logo';
 
 interface Booking {
     id: string;
@@ -168,7 +168,7 @@ const TherapistDashboard: React.FC = () => {
                     {/* Focus Tag */}
                     {booking.services?.title.toLowerCase().includes('massage') && (
                         <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-gold/80 bg-gold/5 px-2 py-0.5 rounded-md border border-gold/10">
-                            <Sparkles size={10} /> Focus: Relaxation
+                            <Logo className="h-3 w-3" color="#997B3D" /> Focus: Relaxation
                         </span>
                     )}
                 </div>
@@ -320,7 +320,7 @@ const TherapistDashboard: React.FC = () => {
                         {activeFilter === 'upcoming' ? (
                             upcomingBookings.length === 0 ? (
                                 <div className="text-center py-16">
-                                    <Sparkles className="text-gold/20 mx-auto mb-4" size={48} />
+                                    <Logo className="h-12 w-12 mx-auto mb-4 opacity-20" color="#997B3D" />
                                     <p className="text-charcoal/40 italic">No upcoming sessions scheduled</p>
                                 </div>
                             ) : (

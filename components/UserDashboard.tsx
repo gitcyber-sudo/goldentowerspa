@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from './LoadingScreen';
+import Logo from './Logo';
 
 interface Booking {
     id: string;
@@ -370,7 +371,7 @@ const UserDashboard: React.FC = () => {
                                 onClick={() => navigate('/')}
                                 className="flex items-center gap-2 bg-gold hover:bg-gold-dark text-white px-6 py-3 rounded-full transition-all shadow-md hover:shadow-lg font-bold uppercase tracking-widest text-[10px]"
                             >
-                                <Sparkles size={16} />
+                                <Logo className="h-4 w-4" color="white" />
                                 <span>Book New Treatment</span>
                             </button>
                         </div>
@@ -412,9 +413,7 @@ const UserDashboard: React.FC = () => {
                     </div>
                     <div className="bg-white p-5 rounded-xl border border-gold/10 hover:shadow-md transition-all group hover:-translate-y-1">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center group-hover:bg-gold/20 transition-colors">
-                                <Sparkles className="text-gold" size={22} />
-                            </div>
+                            <Logo className="h-6 w-6" color="#997B3D" />
                             <div>
                                 <p className="text-3xl font-serif text-charcoal">{bookings.length}</p>
                                 <p className="text-xs uppercase tracking-widest text-charcoal/60">Total</p>
@@ -509,12 +508,12 @@ const UserDashboard: React.FC = () => {
                             currentBookings.length === 0 ? (
                                 <div className="col-span-full bg-white rounded-2xl border border-gold/10 text-center py-16 px-8">
                                     <div className="w-20 h-20 rounded-full bg-gold/10 flex items-center justify-center mx-auto mb-6">
-                                        <Sparkles className="text-gold" size={32} />
+                                        <Logo className="h-8 w-8" color="#997B3D" />
                                     </div>
                                     <h3 className="font-serif text-xl text-charcoal mb-2">No Active Bookings</h3>
                                     <p className="text-charcoal/50 mb-6 max-w-sm mx-auto">Ready for some relaxation? Book your next treatment and let us take care of you.</p>
                                     <button onClick={() => navigate('/')} className="bg-gradient-to-r from-gold to-gold-dark text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest hover:shadow-lg transition-all">
-                                        <Sparkles size={16} className="inline mr-2" />
+                                        <Logo className="h-4 w-4 inline mr-2" color="white" />
                                         Book a Treatment
                                     </button>
                                 </div>

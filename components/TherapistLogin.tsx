@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { User, Lock, Loader2, ArrowLeft, Sparkles, AlertCircle } from 'lucide-react';
+import { User, Lock, Loader2, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Logo from './Logo';
 
 const TherapistLogin: React.FC = () => {
     const navigate = useNavigate();
@@ -76,7 +77,7 @@ const TherapistLogin: React.FC = () => {
                 <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gold/10 overflow-hidden">
                     <div className="bg-charcoal p-8 text-center relative overflow-hidden">
                         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/dust.png')]" />
-                        <Sparkles className="text-gold mx-auto mb-4 animate-pulse" size={32} />
+                        <Logo className="h-8 w-8 mx-auto mb-4 animate-pulse" color="#997B3D" />
                         <h1 className="font-serif text-3xl text-white mb-2 italic">Therapist Portal</h1>
                         <p className="text-gold/60 text-xs uppercase tracking-[0.2em] font-bold">Staff Secure Access</p>
                     </div>
@@ -135,7 +136,7 @@ const TherapistLogin: React.FC = () => {
                                 ) : (
                                     <>
                                         <span>Enter Portal</span>
-                                        <Sparkles size={16} className="group-hover:rotate-12 transition-transform" />
+                                        <Logo className="h-4 w-4 group-hover:rotate-12 transition-transform" color="white" />
                                     </>
                                 )}
                             </button>

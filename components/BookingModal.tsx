@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, User, Sparkles, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
+import { X, Calendar, Clock, User, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
+import Logo from './Logo';
 import SelectionGrid from './SelectionGrid';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -153,7 +154,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                     <div className="flex flex-col md:flex-row h-full">
                         {/* Left Decor */}
                         <div className="hidden md:flex w-full md:w-[300px] bg-gold/5 p-10 border-r border-gold/10 flex-col justify-center">
-                            <Sparkles className="text-gold mb-6" size={40} />
+                            <Logo className="h-10 w-10 mb-6" color="#997B3D" />
                             <h3 className="font-serif text-3xl text-charcoal mb-4 italic leading-tight">Tailor Your Ritual</h3>
                             <p className="text-charcoal-light leading-relaxed">
                                 Experience the heritage of Hilot and the luxury of gold in a sanctuary designed for your rebirth.
@@ -248,7 +249,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                     {loading ? (
                                         <Loader2 className="animate-spin" />
                                     ) : (
-                                        <>Request Booking <Sparkles className="ml-2 group-hover:animate-pulse" size={18} /></>
+                                        <>Request Booking <Logo className="h-4 w-4 ml-2 mt-1 group-hover:animate-pulse" color="white" /></>
                                     )}
                                 </button>
                             </form>

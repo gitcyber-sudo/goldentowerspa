@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Home, ArrowRight, Loader2, Sparkles, MapPin } from 'lucide-react';
+import { Home, ArrowRight, Loader2, MapPin } from 'lucide-react';
+import Logo from './Logo';
 import { supabase } from '../lib/supabase';
 
 interface ServiceItem {
@@ -137,7 +138,7 @@ const HomeService: React.FC<HomeServiceProps> = ({ onBookClick }) => {
                                 </div>
                                 <div className="flex items-start gap-4">
                                     <div className="bg-gold/10 p-3 rounded-xl">
-                                        <Sparkles className="text-gold" size={20} />
+                                        <Logo className="h-5 w-5" color="#997B3D" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-charcoal text-sm uppercase tracking-wider mb-1">Full Setup</h4>

@@ -8,12 +8,13 @@ import {
     ArrowDownRight,
     Clock,
     Users,
-    Sparkles,
     ChevronDown,
     BarChart3,
     PieChart,
     Activity
 } from 'lucide-react';
+
+import Logo from './Logo';
 
 interface Booking {
     id: string;
@@ -405,7 +406,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                             <h3 className="font-semibold text-charcoal">Top Services</h3>
                             <p className="text-[10px] md:text-xs text-charcoal/50">Revenue by service</p>
                         </div>
-                        <Sparkles className="w-5 h-5 text-gold" />
+                        <Logo className="h-5 w-5" color="#997B3D" />
                     </div>
                     {stats.topServices.length > 0 ? (
                         <div className="space-y-1">
