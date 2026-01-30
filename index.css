@@ -13,6 +13,27 @@
 
   :root {
     --gold-dark: #A6803E;
+    /* Mobile Motion Variables */
+    --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ease-in-out-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
+    --ease-entrance: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --duration-micro: 150ms;
+    --duration-short: 300ms;
+    --duration-medium: 500ms;
+    --duration-entrance: 800ms;
+    --cta-gold: #C5A059;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
@@ -83,6 +104,74 @@
   .card-express:hover {
     transform: skewX(-2deg) translateY(-5px);
     box-shadow: 5px 5px 15px rgba(197, 160, 89, 0.2);
+  }
+
+  /* Mobile Motion Utilities */
+  .reveal {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+    will-change: transform, opacity;
+    transition: transform var(--duration-entrance) var(--ease-entrance), opacity var(--duration-entrance) var(--ease-entrance);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* Hero Zoom (Mobile Optimized) */
+  .hero-bg {
+    transform-origin: center;
+    transition: transform 10s linear;
+    will-change: transform;
+  }
+
+  .hero-bg.zoomed {
+    transform: scale(1.1);
+  }
+
+  /* CTA Shimmer */
+  .cta-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--cta-gold);
+    opacity: 0.2;
+    transform: translateX(-100%);
+    transition: transform 0s;
+    pointer-events: none;
+  }
+
+  .cta-shimmer.shimmering::after {
+    transform: translateX(100%);
+    transition: transform 1s ease-in-out;
+  }
+
+  /* Tactile Button Feedback */
+  .btn-tactile {
+    transition: transform var(--duration-micro) ease-out, box-shadow var(--duration-micro) ease-out;
+    will-change: transform, box-shadow;
+  }
+
+  .btn-tactile:active {
+    transform: scale(0.96);
+  }
+
+  /* Portrait Reveal */
+  .portrait-reveal {
+    filter: blur(8px);
+    opacity: 0;
+    transition: filter 1s var(--ease-entrance), opacity 1s var(--ease-entrance);
+  }
+
+  .portrait-reveal.visible {
+    filter: blur(0);
+    opacity: 1;
   }
 }
 

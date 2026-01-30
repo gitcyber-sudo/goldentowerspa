@@ -70,6 +70,24 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
     return () => { mounted = false; };
   }, []);
 
+  useEffect(() => {
+    if (loading) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    const elements = document.querySelectorAll('.reveal');
+    elements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [loading, services]);
+
   const processedServices = (services || []).map(s => ({
     ...s
   }));
@@ -107,10 +125,11 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
             <div className="flex justify-center py-10"><Loader2 className="animate-spin text-gold" size={32} /></div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[...signatureTreatments, ...regularServices].map((service) => (
+              {[...signatureTreatments, ...regularServices].map((service, index) => (
                 <div
                   key={service.id}
-                  className={`group transition-all duration-700 rounded-2xl p-4 ${service.title.toLowerCase().includes('signature')
+                  style={{ transitionDelay: `${index * 100}ms` }}
+                  className={`group transition-all duration-700 rounded-2xl p-4 reveal ${service.title.toLowerCase().includes('signature')
                     ? 'card-signature'
                     : 'bg-cream/30 border border-gold/10 hover:-translate-y-2 hover:shadow-lg'
                     }`}
@@ -126,7 +145,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                   </p>
                   <button
                     onClick={() => onBookClick(service.id)}
-                    className="text-gold text-xs font-bold uppercase tracking-widest flex items-center hover:text-gold-dark transition-colors"
+                    className="text-gold text-xs font-bold uppercase tracking-widest flex items-center hover:text-gold-dark transition-colors btn-tactile"
                   >
                     Book Massage <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
                   </button>
@@ -148,10 +167,11 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
             <div className="flex justify-center py-10"><Loader2 className="animate-spin text-gold" size={32} /></div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {expressMassages.map((service) => (
+              {expressMassages.map((service, index) => (
                 <div
                   key={service.id}
-                  className="group card-express p-4 rounded-xl"
+                  style={{ transitionDelay: `${index * 100}ms` }}
+                  className="group card-express p-4 rounded-xl reveal"
                 >
                   <div className="relative h-[240px] w-full overflow-hidden mb-6 rounded-lg">
                     <img src={service.image_url} alt={service.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
@@ -166,7 +186,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                   </p>
                   <button
                     onClick={() => onBookClick(service.id)}
-                    className="text-gold text-xs font-bold uppercase tracking-widest flex items-center hover:text-gold-dark transition-colors"
+                    className="text-gold text-xs font-bold uppercase tracking-widest flex items-center hover:text-gold-dark transition-colors btn-tactile"
                   >
                     Select Express <ArrowRight size={14} className="ml-2 group-hover:translate-x-2 transition-transform" />
                   </button>
@@ -189,10 +209,11 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
             <div className="flex justify-center py-20"><Loader2 className="animate-spin text-gold" size={32} /></div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-              {luxuryPackages.map((pkg) => (
+              {luxuryPackages.map((pkg, index) => (
                 <div
                   key={pkg.id}
-                  className="bg-[#Fdfbf7]/80 backdrop-blur-sm border-2 border-gold/10 rounded-3xl overflow-hidden hover:border-gold/50 transition-all duration-500 group shadow-sm hover:shadow-2xl hover:shadow-gold/10 p-8 flex flex-col justify-between min-h-[300px]"
+                  style={{ transitionDelay: `${index * 150}ms` }}
+                  className="bg-[#Fdfbf7]/80 backdrop-blur-sm border-2 border-gold/10 rounded-3xl overflow-hidden hover:border-gold/50 transition-all duration-500 group shadow-sm hover:shadow-2xl hover:shadow-gold/10 p-8 flex flex-col justify-between min-h-[300px] reveal"
                 >
                   <div>
                     <div className="flex justify-between items-start mb-6">
@@ -212,7 +233,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                     <span className="text-[10px] uppercase tracking-widest text-charcoal/50 font-bold">{pkg.duration} Total Duration</span>
                     <button
                       onClick={() => onBookClick(pkg.id)}
-                      className="text-gold text-xs font-bold uppercase tracking-widest flex items-center group-hover:translate-x-1 transition-transform cursor-pointer"
+                      className="text-gold text-xs font-bold uppercase tracking-widest flex items-center group-hover:translate-x-1 transition-transform cursor-pointer btn-tactile"
                     >
                       Select Package <ArrowRight size={14} className="ml-2" />
                     </button>

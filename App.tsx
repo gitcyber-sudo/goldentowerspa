@@ -58,15 +58,18 @@ const MainLayout: React.FC<{
 
         <Therapists onBookClick={() => handleBookingAttempt()} />
       </main>
-      <Footer />
+      <div className="section-reveal will-change-transform">
+        <Footer />
+      </div>
 
       {/* Mobile Floating Action Button (FAB) */}
       <button
         onClick={() => handleBookingAttempt()}
-        className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-gold text-white rounded-full shadow-[0_8px_30px_rgb(197,160,89,0.5)] flex items-center justify-center z-[90] active:scale-90 transition-transform hover:bg-gold-dark ring-4 ring-white"
+        className="md:hidden fixed bottom-6 right-6 px-6 py-3 bg-gold text-white rounded-full shadow-[0_8px_30px_rgb(197,160,89,0.5)] flex items-center justify-center z-[90] active:scale-95 transition-all hover:bg-gold-dark ring-4 ring-white font-bold uppercase tracking-wider text-sm gap-2 btn-tactile"
         aria-label="Book a Treatment"
       >
-        <Sparkles size={24} />
+        <Sparkles size={18} />
+        <span>Book Now</span>
       </button>
 
       <BookingModal

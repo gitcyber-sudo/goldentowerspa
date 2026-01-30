@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef, useState, useEffect } from 'react';
 import { ChevronDown, Star } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -16,16 +16,17 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const badgeRef = useRef<HTMLSpanElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
+  const bgWrapperRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Timeline for entrance sequence
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-
-      // Initial state set (opacity 0 handled by CSS/tailwind usually, but ensuring here)
-      // Background Parallax
-      gsap.to(bgRef.current, {
+      // Parallax on the wrapper
+      gsap.to(bgWrapperRef.current, {
         yPercent: 30,
         ease: 'none',
         scrollTrigger: {
@@ -36,39 +37,64 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
         }
       });
 
-      // Animate elements in
-      tl.fromTo(badgeRef.current,
-        { y: -50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, delay: 0.2 }
-      )
-        .fromTo(titleLine1Ref.current,
-          { y: 100, opacity: 0, rotateX: -45 },
-          { y: 0, opacity: 1, rotateX: 0, duration: 1.2, stagger: 0.05 },
-          "-=0.5"
-        )
-        .fromTo(titleLine2Ref.current,
-          { scale: 1.5, opacity: 0, filter: "blur(10px)" },
-          { scale: 1, opacity: 1, filter: "blur(0px)", duration: 1.5, ease: "slow(0.7, 0.7, false)" },
-          "-=1"
-        )
-        .fromTo(subtitleRef.current,
-          { y: 30, opacity: 0 },
-          { y: 0, opacity: 1, duration: 1 },
-          "-=0.8"
-        )
-        .fromTo(ctaRef.current,
-          { scale: 0.8, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.7)" },
-          "-=0.6"
-        );
+      const mm = gsap.matchMedia();
 
-      // Continuous floating animation for the "Spa" text or other elements
-      gsap.to(titleLine2Ref.current, {
-        y: 10,
-        repeat: -1,
-        yoyo: true,
-        duration: 2,
-        ease: "sine.inOut"
+      // Desktop Animations (Complex)
+      mm.add("(min-width: 768px)", () => {
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        tl.fromTo(badgeRef.current,
+          { y: -50, opacity: 0 },
+          { y: 0, opacity: 1, duration: 1, delay: 0.2 }
+        )
+          .fromTo(titleLine1Ref.current,
+            { y: 100, opacity: 0, rotateX: -45 },
+            { y: 0, opacity: 1, rotateX: 0, duration: 1.2, stagger: 0.05 },
+            "-=0.5"
+          )
+          .fromTo(titleLine2Ref.current,
+            { scale: 1.5, opacity: 0, filter: "blur(10px)" },
+            { scale: 1, opacity: 1, filter: "blur(0px)", duration: 1.5, ease: "slow(0.7, 0.7, false)" },
+            "-=1"
+          )
+          .fromTo(subtitleRef.current,
+            { y: 30, opacity: 0 },
+            { y: 0, opacity: 1, duration: 1 },
+            "-=0.8"
+          )
+          .fromTo(ctaRef.current,
+            { scale: 0.8, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.7)" },
+            "-=0.6"
+          );
+
+        // Hover/Float effects
+        gsap.to(titleLine2Ref.current, {
+          y: 10, repeat: -1, yoyo: true, duration: 2, ease: "sine.inOut"
+        });
+      });
+
+      // Mobile Animations (Simplified & High Performance)
+      mm.add("(max-width: 767px)", () => {
+        const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+        tl.fromTo(badgeRef.current,
+          { y: -20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, delay: 0.1 }
+        )
+          .fromTo([titleLine1Ref.current, titleLine2Ref.current],
+            { y: 40, opacity: 0, scale: 0.95 },
+            { y: 0, opacity: 1, scale: 1, duration: 1, stagger: 0.2 },
+            "-=0.4"
+          )
+          .fromTo(subtitleRef.current,
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.8 },
+            "-=0.6"
+          )
+          .fromTo(ctaRef.current,
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.8 },
+            "-=0.4"
+          );
       });
 
     }, containerRef);
@@ -78,22 +104,22 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
 
   return (
     <section ref={containerRef} className="relative h-screen w-full overflow-hidden flex items-center justify-center hero-section perspective-1000">
-      {/* Background Image with Parallax */}
+      {/* Background Image with Parallax & Zoom */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div
-          ref={bgRef}
-          className="absolute inset-0 w-full h-[120%] bg-cover bg-center"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070&auto=format&fit=crop')",
-            top: '-10%' // Initial offset for parallax
-          }}
-        />
+        <div ref={bgWrapperRef} className="absolute inset-0 w-full h-[120%] -top-[10%]">
+          <div
+            className={`w-full h-full bg-cover bg-center hero-bg ${isMounted ? 'zoomed' : ''}`}
+            style={{
+              backgroundImage: "url('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070&auto=format&fit=crop')"
+            }}
+          />
+        </div>
         {/* Cinematic Overlays */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-cream/90" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-transparent via-black/10 to-black/40" />
       </div>
 
-      {/* Particles/Sparkles (Static CSS animation for now, could be canvas) */}
+      {/* Particles/Sparkles (Static CSS animation) */}
       <div className="absolute inset-0 z-[1] opacity-30 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 animate-pulse text-gold"><Star size={16} /></div>
         <div className="absolute top-1/3 right-1/3 animate-pulse delay-700 text-gold-light"><Star size={24} /></div>
@@ -103,7 +129,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-16 md:mt-0 flex flex-col items-center">
 
-        <span ref={badgeRef} className="glass-panel px-8 py-3 rounded-full text-white text-sm md:text-base font-bold uppercase tracking-[0.4em] mb-8 border border-white/30 hero-glow-gold">
+        <span ref={badgeRef} className="glass-panel px-8 py-3 rounded-full text-white text-sm md:text-base font-bold uppercase tracking-[0.4em] mb-8 border border-white/30 hero-glow-gold reveal">
           Luxury Wellness in Quezon City
         </span>
 
@@ -126,10 +152,10 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
         <div ref={ctaRef}>
           <button
             onClick={onBookClick}
-            className="group relative px-10 py-5 bg-gold text-white font-bold uppercase tracking-widest overflow-hidden rounded-full shadow-2xl hover:shadow-gold/50 transition-all duration-300"
+            className="group relative px-10 py-5 bg-gold text-white font-bold uppercase tracking-widest overflow-hidden rounded-full shadow-2xl hover:shadow-gold/50 btn-tactile"
           >
             <span className="relative z-10 flex items-center gap-3">
-              Book Your Escape <ChevronDown className="animate-bounce" size={20} />
+              Book Your Relaxation <ChevronDown className="animate-bounce" size={20} />
             </span>
             <div className="absolute inset-0 bg-white/20 transform -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
             <div className="absolute inset-0 bg-gradient-to-r from-gold via-gold-light to-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
