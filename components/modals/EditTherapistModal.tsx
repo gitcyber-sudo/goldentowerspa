@@ -100,6 +100,10 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
 
             // 3. Update Password if requested
             if (showPasswordReset && newPassword) {
+                if (!therapist.user_id) {
+                    throw new Error("This specialist does not have a login account yet. Please create one by adding them as a 'New Specialist' or contact support to link their account.");
+                }
+
                 const { data, error: passError } = await supabase.functions.invoke('update-therapist-password', {
                     body: {
                         therapist_id: therapist.id,
@@ -109,7 +113,6 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
 
                 if (passError) {
                     console.error("Edge Function Error Context:", passError);
-                    // Try to parse the error context if possible, otherwise throw standard error
                     throw new Error(`Password update failed. ${passError.message || 'Unknown server error'}`);
                 }
             }
@@ -206,12 +209,18 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                             </button>
                         ) : (
                             <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">New Password</label>
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">New Password</label>
+                                    {!therapist.user_id && (
+                                        <span className="text-[10px] text-rose-500 font-bold uppercase">No login account linked</span>
+                                    )}
+                                </div>
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
-                                        placeholder="Enter new password"
-                                        className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold"
+                                        placeholder={therapist.user_id ? "Enter new password" : "Cannot reset - no account"}
+                                        disabled={!therapist.user_id}
+                                        className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold disabled:opacity-50"
                                         value={newPassword}
                                         onChange={e => setNewPassword(e.target.value)}
                                     />
@@ -223,6 +232,9 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                                         <X size={20} />
                                     </button>
                                 </div>
+                                {!therapist.user_id && (
+                                    <p className="text-[10px] text-charcoal/40 italic">Note: To create a login for this specialist, please re-add them using 'Add Specialist'.</p>
+                                )}
                             </div>
                         )}
                     </div>

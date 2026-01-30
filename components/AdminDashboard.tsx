@@ -408,9 +408,9 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Bookings List - Mobile Card View / Desktop Table View */}
-            <div className="bg-white rounded-xl md:rounded-2xl border border-gold/10 overflow-hidden shadow-sm glass-panel">
+            <div className="bg-white rounded-xl md:rounded-2xl border border-gold/10 shadow-sm glass-panel">
                 {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
+                <div className="hidden md:block">
                     <table className="w-full text-left">
                         <thead className="bg-[#Fdfbf7] border-b border-gold/10 text-xs uppercase font-bold text-charcoal/50">
                             <tr>
@@ -442,7 +442,7 @@ const AdminDashboard: React.FC = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <div className="flex justify-end gap-2 relative">
+                                        <div className="flex justify-end gap-2">
                                             {/* Quick Actions */}
                                             {b.status === 'pending' && (
                                                 <button
@@ -474,13 +474,16 @@ const AdminDashboard: React.FC = () => {
                                             {/* More Actions Menu */}
                                             <div className="relative">
                                                 <button
-                                                    onClick={() => setActionMenuOpen(actionMenuOpen === b.id ? null : b.id)}
-                                                    className="p-2 text-charcoal/40 hover:bg-charcoal/5 rounded-lg transition-colors"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setActionMenuOpen(actionMenuOpen === b.id ? null : b.id);
+                                                    }}
+                                                    className="p-2 text-charcoal/40 hover:bg-charcoal/5 rounded-lg transition-colors relative z-10"
                                                 >
                                                     <MoreVertical size={18} />
                                                 </button>
                                                 {actionMenuOpen === b.id && (
-                                                    <div className="absolute right-0 top-full mt-1 bg-white border border-gold/10 rounded-xl shadow-lg py-2 z-10 min-w-[160px]">
+                                                    <div className="absolute right-0 top-full mt-1 bg-white border border-gold/10 rounded-xl shadow-xl py-2 z-[100] min-w-[180px]">
                                                         {b.status !== 'completed' && b.status !== 'cancelled' && (
                                                             <>
                                                                 <button
