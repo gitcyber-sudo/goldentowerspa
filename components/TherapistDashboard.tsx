@@ -38,6 +38,7 @@ const TherapistDashboard: React.FC = () => {
 
     useLayoutEffect(() => {
         const ctx = gsap.context(() => {
+            // Animate stats
             gsap.from(".dashboard-stat", {
                 y: 20,
                 opacity: 0,
@@ -45,17 +46,25 @@ const TherapistDashboard: React.FC = () => {
                 stagger: 0.1,
                 ease: "power2.out"
             });
-            gsap.from(".booking-card", {
-                y: 30,
-                opacity: 0,
-                duration: 0.5,
-                stagger: 0.05,
-                delay: 0.3,
-                ease: "back.out(1.2)"
-            });
+
+            // Animate booking cards with fromTo to ensure visibility
+            const cards = document.querySelectorAll(".booking-card");
+            if (cards.length > 0) {
+                gsap.fromTo(".booking-card",
+                    { y: 20, opacity: 0 },
+                    {
+                        y: 0,
+                        opacity: 1,
+                        duration: 0.5,
+                        stagger: 0.05,
+                        delay: 0.2,
+                        ease: "power2.out"
+                    }
+                );
+            }
         });
         return () => ctx.revert();
-    }, [loading, activeFilter]);
+    }, [loading, activeFilter, bookings]); // Added bookings to dependencies
 
     useEffect(() => {
         if (user) {
@@ -276,10 +285,10 @@ const TherapistDashboard: React.FC = () => {
                 <div className="flex gap-4 mb-8 border-b border-gold/10">
                     <button
                         onClick={() => setActiveFilter('upcoming')}
-                        className={`pb - 4 px - 2 font - bold uppercase tracking - widest text - sm transition - all relative ${activeFilter === 'upcoming'
+                        className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeFilter === 'upcoming'
                             ? 'text-gold'
                             : 'text-charcoal/40 hover:text-charcoal/60'
-                            } `}
+                            }`}
                     >
                         Upcoming Sessions
                         {activeFilter === 'upcoming' && (
@@ -288,10 +297,10 @@ const TherapistDashboard: React.FC = () => {
                     </button>
                     <button
                         onClick={() => setActiveFilter('completed')}
-                        className={`pb - 4 px - 2 font - bold uppercase tracking - widest text - sm transition - all relative ${activeFilter === 'completed'
+                        className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeFilter === 'completed'
                             ? 'text-gold'
                             : 'text-charcoal/40 hover:text-charcoal/60'
-                            } `}
+                            }`}
                     >
                         Past Sessions
                         {activeFilter === 'completed' && (
