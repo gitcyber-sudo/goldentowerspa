@@ -40,6 +40,24 @@ const HomeService: React.FC<HomeServiceProps> = ({ onBookClick }) => {
         fetchHomeService();
     }, []);
 
+    useEffect(() => {
+        if (loading || !service) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        const elements = document.querySelectorAll('#home-service .reveal');
+        elements.forEach(el => observer.observe(el));
+
+        return () => observer.disconnect();
+    }, [loading, service]);
+
     if (loading) {
         return (
             <div className="py-24 flex justify-center items-center">
@@ -73,7 +91,7 @@ const HomeService: React.FC<HomeServiceProps> = ({ onBookClick }) => {
                             {/* Badge Overlay */}
                             <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 shadow-lg border border-gold/20">
                                 <Home size={16} className="text-gold" />
-                                <span className="text-charcoal text-[10px] uppercase font-bold tracking-widest">Premium Home Service</span>
+                                <span className="text-charcoal text-[10px] uppercase font-bold tracking-widest">Home Service</span>
                             </div>
 
                             <div className="absolute bottom-8 left-8 right-8">
