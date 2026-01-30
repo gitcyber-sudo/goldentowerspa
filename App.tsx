@@ -19,6 +19,7 @@ import { useAuth } from './context/AuthContext';
 import { AnalyticsProvider } from './context/AnalyticsContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const MainLayout: React.FC<{
   openBooking: (id?: string) => void;
@@ -140,6 +141,7 @@ const App: React.FC = () => {
           }
         />
       </Routes>
+      <SpeedInsights />
     </AnalyticsProvider>
   );
 };
