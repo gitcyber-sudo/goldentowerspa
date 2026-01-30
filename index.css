@@ -48,3 +48,74 @@
 .hero-glow-gold {
   filter: drop-shadow(0 0 10px rgba(197, 160, 89, 0.4));
 }
+
+@layer utilities {
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#C5A059] via-[#E5C585] to-[#C5A059];
+  }
+
+  .glass-panel {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+
+  .card-signature {
+    @apply relative overflow-hidden bg-white shadow-xl z-10 scale-105 border-none;
+  }
+
+  .card-signature::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: conic-gradient(from 0deg, #C5A059, #F9F7F2, #997B3D, #F9F7F2, #C5A059);
+    border-radius: inherit;
+    animation: border-rotate 4s linear infinite;
+    z-index: -1;
+  }
+
+  .card-express {
+    @apply relative overflow-hidden border border-gold/10 bg-gradient-to-br from-cream/20 to-white/60 hover:border-gold/30 transition-all duration-300;
+  }
+
+  .card-express:hover {
+    transform: skewX(-2deg) translateY(-5px);
+    box-shadow: 5px 5px 15px rgba(197, 160, 89, 0.2);
+  }
+}
+
+@keyframes border-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+    top: -100%;
+  }
+
+  20% {
+    left: 100%;
+    top: 100%;
+  }
+
+  100% {
+    left: 100%;
+    top: 100%;
+  }
+}
+
+.shimmer-effect::after {
+  content: '';
+  position: absolute;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: rotate(45deg);
+  animation: shine 6s ease-in-out infinite;
+  pointer-events: none;
+}

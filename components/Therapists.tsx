@@ -130,10 +130,11 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
     <section
       ref={sectionRef}
       id="specialists"
-      className="bg-cream py-24 md:py-32 overflow-hidden relative"
+      className="bg-gradient-to-b from-cream/50 to-white py-24 md:py-32 overflow-hidden relative"
     >
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"></div>
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dust.png')] opacity-20 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gold/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 mix-blend-multiply"></div>
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2 mix-blend-multiply"></div>
 
       <div className="container mx-auto px-6 md:px-12 relative z-10">
 

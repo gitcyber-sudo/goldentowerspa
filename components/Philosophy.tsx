@@ -47,9 +47,10 @@ const Philosophy: React.FC = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} id="philosophy" className="py-24 md:py-32 bg-cream relative overflow-hidden">
+    <section ref={sectionRef} id="philosophy" className="py-24 md:py-32 bg-gradient-to-b from-cream via-[#f4efe6] to-white relative overflow-hidden">
       {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="absolute top-0 left-0 w-full h-full opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent pointer-events-none"></div>
+      <div className="absolute top-0 left-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
 
       <div className="container mx-auto px-6 md:px-12 relative z-10">

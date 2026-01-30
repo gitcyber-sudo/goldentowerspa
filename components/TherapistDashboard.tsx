@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useLayoutEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { formatTimeTo12h } from '../lib/utils';
+import gsap from 'gsap';
 import {
     Calendar,
     Clock,
@@ -34,6 +35,27 @@ const TherapistDashboard: React.FC = () => {
     const [therapistInfo, setTherapistInfo] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [activeFilter, setActiveFilter] = useState<'upcoming' | 'completed'>('upcoming');
+
+    useLayoutEffect(() => {
+        const ctx = gsap.context(() => {
+            gsap.from(".dashboard-stat", {
+                y: 20,
+                opacity: 0,
+                duration: 0.6,
+                stagger: 0.1,
+                ease: "power2.out"
+            });
+            gsap.from(".booking-card", {
+                y: 30,
+                opacity: 0,
+                duration: 0.5,
+                stagger: 0.05,
+                delay: 0.3,
+                ease: "back.out(1.2)"
+            });
+        });
+        return () => ctx.revert();
+    }, [loading, activeFilter]);
 
     useEffect(() => {
         if (user) {
@@ -109,15 +131,17 @@ const TherapistDashboard: React.FC = () => {
     const renderBookingCard = (booking: Booking) => (
         <div
             key={booking.id}
-            className="bg-white rounded-xl border border-gold/10 p-6 hover:shadow-lg transition-all"
+            className="booking-card bg-white rounded-xl border border-gold/10 p-6 hover:shadow-xl hover:border-gold/30 transition-all group relative overflow-hidden"
         >
-            <div className="flex justify-between items-start mb-4">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gold/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-gold/10 transition-colors"></div>
+
+            <div className="flex justify-between items-start mb-4 relative z-10">
                 <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center ring-2 ring-gold/20">
                         <User className="text-gold" size={20} />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-charcoal">
+                        <h3 className="font-semibold text-charcoal group-hover:text-gold transition-colors">
                             {booking.profiles?.full_name || 'Guest'}
                         </h3>
                         <p className="text-xs text-charcoal/60 flex items-center gap-1">
@@ -126,14 +150,22 @@ const TherapistDashboard: React.FC = () => {
                         </p>
                     </div>
                 </div>
-                <span
-                    className={`px - 3 py - 1 rounded - full text - xs font - bold uppercase tracking - widest ${getStatusColor(booking.status)} `}
-                >
-                    {booking.status}
-                </span>
+                <div className="flex flex-col items-end gap-2">
+                    <span
+                        className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${getStatusColor(booking.status)}`}
+                    >
+                        {booking.status}
+                    </span>
+                    {/* Focus Tag */}
+                    {booking.services?.title.toLowerCase().includes('massage') && (
+                        <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-gold/80 bg-gold/5 px-2 py-0.5 rounded-md border border-gold/10">
+                            <Sparkles size={10} /> Focus: Relaxation
+                        </span>
+                    )}
+                </div>
             </div>
 
-            <div className="bg-cream/30 rounded-lg p-4 mb-3">
+            <div className="bg-cream/30 rounded-lg p-4 mb-3 border border-gold/5 group-hover:bg-cream/50 transition-colors relative z-10">
                 <p className="font-serif text-lg text-charcoal mb-2">
                     {booking.services?.title || 'Service'}
                 </p>
@@ -151,14 +183,14 @@ const TherapistDashboard: React.FC = () => {
                         {formatTimeTo12h(booking.booking_time)}
                     </div>
                     {booking.services?.duration && (
-                        <div className="text-gold">
+                        <div className="text-gold font-bold bg-white px-2 py-0.5 rounded shadow-sm">
                             {booking.services.duration} min
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="text-xs text-charcoal/50">
+            <div className="text-xs text-charcoal/40 font-medium">
                 Booked {new Date(booking.created_at).toLocaleDateString()}
             </div>
         </div>
@@ -205,7 +237,7 @@ const TherapistDashboard: React.FC = () => {
             <main className="max-w-6xl mx-auto px-6 py-12">
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                    <div className="bg-white p-6 rounded-xl border border-gold/10">
+                    <div className="dashboard-stat bg-white p-6 rounded-xl border border-gold/10">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
                                 <Calendar className="text-gold" size={20} />
@@ -216,7 +248,7 @@ const TherapistDashboard: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-xl border border-gold/10">
+                    <div className="dashboard-stat bg-white p-6 rounded-xl border border-gold/10">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
                                 <Clock3 className="text-amber-600" size={20} />
@@ -227,7 +259,7 @@ const TherapistDashboard: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-xl border border-gold/10">
+                    <div className="dashboard-stat bg-white p-6 rounded-xl border border-gold/10">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
                                 <CheckCircle2 className="text-emerald-600" size={20} />
@@ -245,8 +277,8 @@ const TherapistDashboard: React.FC = () => {
                     <button
                         onClick={() => setActiveFilter('upcoming')}
                         className={`pb - 4 px - 2 font - bold uppercase tracking - widest text - sm transition - all relative ${activeFilter === 'upcoming'
-                                ? 'text-gold'
-                                : 'text-charcoal/40 hover:text-charcoal/60'
+                            ? 'text-gold'
+                            : 'text-charcoal/40 hover:text-charcoal/60'
                             } `}
                     >
                         Upcoming Sessions
@@ -257,8 +289,8 @@ const TherapistDashboard: React.FC = () => {
                     <button
                         onClick={() => setActiveFilter('completed')}
                         className={`pb - 4 px - 2 font - bold uppercase tracking - widest text - sm transition - all relative ${activeFilter === 'completed'
-                                ? 'text-gold'
-                                : 'text-charcoal/40 hover:text-charcoal/60'
+                            ? 'text-gold'
+                            : 'text-charcoal/40 hover:text-charcoal/60'
                             } `}
                     >
                         Past Sessions

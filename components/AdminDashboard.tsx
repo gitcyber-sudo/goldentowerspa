@@ -399,7 +399,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Bookings List - Mobile Card View / Desktop Table View */}
-            <div className="bg-white rounded-xl md:rounded-2xl border border-gold/10 overflow-hidden shadow-sm">
+            <div className="bg-white rounded-xl md:rounded-2xl border border-gold/10 overflow-hidden shadow-sm glass-panel">
                 {/* Desktop Table View */}
                 <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">

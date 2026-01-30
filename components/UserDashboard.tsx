@@ -1,8 +1,9 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { formatTimeTo12h } from '../lib/utils';
+import gsap from 'gsap';
 import {
     Calendar,
     Clock,
@@ -21,7 +22,8 @@ import {
     MapPin,
     Heart,
     TrendingUp,
-    Star
+    Star,
+    Crown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from './LoadingScreen';
@@ -48,6 +50,35 @@ const UserDashboard: React.FC = () => {
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState('');
     const [submittingFeedback, setSubmittingFeedback] = useState(false);
+
+    const bannerRef = useRef(null);
+    const statsRef = useRef(null);
+
+    useLayoutEffect(() => {
+        const ctx = gsap.context(() => {
+            gsap.from(bannerRef.current, { y: 20, opacity: 0, duration: 0.8, ease: "power2.out" });
+
+            // Stagger animation for stats
+            if (statsRef.current) {
+                gsap.from((statsRef.current as HTMLElement).children, {
+                    y: 30,
+                    opacity: 0,
+                    stagger: 0.1,
+                    duration: 0.6,
+                    delay: 0.3,
+                    ease: "back.out(1.2)"
+                });
+            }
+
+            gsap.from(".fade-up-item", {
+                y: 20,
+                opacity: 0,
+                duration: 0.6,
+                delay: 0.6
+            });
+        });
+        return () => ctx.revert();
+    }, []);
 
     // Data fetching logic
     useEffect(() => {
@@ -250,11 +281,12 @@ const UserDashboard: React.FC = () => {
             </header>
 
             <main className="max-w-6xl mx-auto px-6 py-12">
-                {/* Member Info Banner */}
-                <div className="bg-gradient-to-r from-gold/10 via-gold/5 to-transparent rounded-2xl p-6 mb-8 border border-gold/10">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                {/* Member Info Banner - Animated */}
+                <div ref={bannerRef} className="bg-gradient-to-r from-gold/10 via-gold/5 to-transparent rounded-2xl p-6 mb-8 border border-gold/10 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center shadow-lg">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center shadow-lg ring-4 ring-gold/20">
                                 <User className="text-white" size={28} />
                             </div>
                             <div>
@@ -277,11 +309,39 @@ const UserDashboard: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Wellness Journey Section (New) */}
+                <div className="mb-8 fade-up-item">
+                    <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm relative overflow-hidden">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Crown className="text-gold" size={20} />
+                            <h3 className="font-serif text-xl text-charcoal">Your Wellness Journey</h3>
+                        </div>
+                        <div className="w-full bg-cream/50 rounded-full h-4 mb-4 overflow-hidden relative">
+                            {/* Simulated progress based on completed bookings (cap at 10 for demo tier) */}
+                            <div
+                                className="bg-gradient-to-r from-gold to-gold-light h-full rounded-full relative transition-all duration-1000 ease-out"
+                                style={{ width: `${Math.min((completedBookings.length / 10) * 100, 100)}%` }}
+                            >
+                                <div className="absolute top-0 left-0 w-full h-full bg-white/20 animate-pulse"></div>
+                            </div>
+                        </div>
+                        <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-charcoal/40">
+                            <span>Bronze</span>
+                            <span>Silver</span>
+                            <span>Gold</span>
+                            <span>Platinum</span>
+                        </div>
+                        <p className="text-xs text-charcoal/60 mt-3 italic">
+                            {10 - (completedBookings.length % 10)} more treatments to reach next tier reward.
+                        </p>
+                    </div>
+                </div>
+
                 {/* Stats Grid - Improved */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-white p-5 rounded-xl border border-gold/10 hover:shadow-md transition-all">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" ref={statsRef}>
+                    <div className="bg-white p-5 rounded-xl border border-gold/10 hover:shadow-md transition-all group hover:-translate-y-1">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center group-hover:bg-amber-100 transition-colors">
                                 <Clock3 className="text-amber-600" size={22} />
                             </div>
                             <div>
@@ -290,9 +350,9 @@ const UserDashboard: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white p-5 rounded-xl border border-gold/10 hover:shadow-md transition-all">
+                    <div className="bg-white p-5 rounded-xl border border-gold/10 hover:shadow-md transition-all group hover:-translate-y-1">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
                                 <CheckCircle2 className="text-emerald-600" size={22} />
                             </div>
                             <div>
@@ -301,9 +361,9 @@ const UserDashboard: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white p-5 rounded-xl border border-gold/10 hover:shadow-md transition-all">
+                    <div className="bg-white p-5 rounded-xl border border-gold/10 hover:shadow-md transition-all group hover:-translate-y-1">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center group-hover:bg-gold/20 transition-colors">
                                 <Sparkles className="text-gold" size={22} />
                             </div>
                             <div>
@@ -312,9 +372,10 @@ const UserDashboard: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="bg-gradient-to-br from-gold to-gold-dark p-5 rounded-xl shadow-lg hover:shadow-xl transition-all">
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                    <div className="bg-gradient-to-br from-gold to-gold-dark p-5 rounded-xl shadow-lg hover:shadow-xl transition-all group hover:-translate-y-1 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-xl translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
+                        <div className="flex items-center gap-3 relative z-10">
+                            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
                                 <DollarSign className="text-white" size={22} />
                             </div>
                             <div>

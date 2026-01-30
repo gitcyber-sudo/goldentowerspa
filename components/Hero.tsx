@@ -1,67 +1,141 @@
-import React from 'react';
-import { ChevronDown } from 'lucide-react';
+import React, { useLayoutEffect, useRef } from 'react';
+import { ChevronDown, Star } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Helper to split text for character animations
-const SplitText = ({ text, className = "" }: { text: string, className?: string }) => (
-  <span className={`inline-block ${className}`} aria-label={text}>
-    {text.split('').map((char, i) => (
-      <span
-        key={i}
-        className="char-animate inline-block opacity-0 translate-y-8 will-change-transform"
-        style={{ transition: 'opacity 0s' }} // Let GSAP handle transition
-      >
-        {char === ' ' ? '\u00A0' : char}
-      </span>
-    ))}
-  </span>
-);
+gsap.registerPlugin(ScrollTrigger);
 
 interface HeroProps {
   onBookClick: () => void;
 }
 
 const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleLine1Ref = useRef<HTMLDivElement>(null);
+  const titleLine2Ref = useRef<HTMLDivElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const badgeRef = useRef<HTMLSpanElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      // Timeline for entrance sequence
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      // Initial state set (opacity 0 handled by CSS/tailwind usually, but ensuring here)
+      // Background Parallax
+      gsap.to(bgRef.current, {
+        yPercent: 30,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+
+      // Animate elements in
+      tl.fromTo(badgeRef.current,
+        { y: -50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1, delay: 0.2 }
+      )
+        .fromTo(titleLine1Ref.current,
+          { y: 100, opacity: 0, rotateX: -45 },
+          { y: 0, opacity: 1, rotateX: 0, duration: 1.2, stagger: 0.05 },
+          "-=0.5"
+        )
+        .fromTo(titleLine2Ref.current,
+          { scale: 1.5, opacity: 0, filter: "blur(10px)" },
+          { scale: 1, opacity: 1, filter: "blur(0px)", duration: 1.5, ease: "slow(0.7, 0.7, false)" },
+          "-=1"
+        )
+        .fromTo(subtitleRef.current,
+          { y: 30, opacity: 0 },
+          { y: 0, opacity: 1, duration: 1 },
+          "-=0.8"
+        )
+        .fromTo(ctaRef.current,
+          { scale: 0.8, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.7)" },
+          "-=0.6"
+        );
+
+      // Continuous floating animation for the "Spa" text or other elements
+      gsap.to(titleLine2Ref.current, {
+        y: 10,
+        repeat: -1,
+        yoyo: true,
+        duration: 2,
+        ease: "sine.inOut"
+      });
+
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="relative h-screen w-full overflow-hidden flex items-center justify-center hero-section">
+    <section ref={containerRef} className="relative h-screen w-full overflow-hidden flex items-center justify-center hero-section perspective-1000">
       {/* Background Image with Parallax */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <div
-          className="parallax-bg w-full h-[120%] bg-cover bg-center"
+          ref={bgRef}
+          className="absolute inset-0 w-full h-[120%] bg-cover bg-center"
           style={{
             backgroundImage: "url('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070&auto=format&fit=crop')",
-            transform: 'translateY(0%)'
+            top: '-10%' // Initial offset for parallax
           }}
         />
-        {/* Gradient Overlay - Darkened at top for better text visibility */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-cream/10 to-cream/90" />
+        {/* Cinematic Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-cream/90" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-transparent via-black/10 to-black/40" />
+      </div>
+
+      {/* Particles/Sparkles (Static CSS animation for now, could be canvas) */}
+      <div className="absolute inset-0 z-[1] opacity-30 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 animate-pulse text-gold"><Star size={16} /></div>
+        <div className="absolute top-1/3 right-1/3 animate-pulse delay-700 text-gold-light"><Star size={24} /></div>
+        <div className="absolute bottom-1/3 left-1/3 animate-pulse delay-1000 text-gold"><Star size={12} /></div>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-16 md:mt-0">
-        <span className="fade-up inline-block bg-black/60 backdrop-blur-md px-6 py-2 rounded-full text-white text-sm md:text-base font-bold uppercase tracking-[0.4em] mb-6 shadow-xl border border-gold/30 whitespace-nowrap">
+      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-16 md:mt-0 flex flex-col items-center">
+
+        <span ref={badgeRef} className="glass-panel px-8 py-3 rounded-full text-white text-sm md:text-base font-bold uppercase tracking-[0.4em] mb-8 border border-white/30 hero-glow-gold">
           Luxury Wellness in Quezon City
         </span>
 
-        <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-charcoal mb-8 leading-[1.1] hero-title-trigger drop-shadow-2xl">
-          <div className="block overflow-hidden">
-            <SplitText text="Golden Tower" />
+        <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl text-charcoal mb-6 leading-[1] drop-shadow-2xl flex flex-col items-center">
+          <div ref={titleLine1Ref} className="text-white hero-text-shadow">
+            Golden Tower
           </div>
-          <div className="block overflow-hidden mt-2">
-            <span className="char-animate inline-block opacity-0 translate-y-8 italic font-light text-gold-dark">Spa</span>
+          <div ref={titleLine2Ref} className="text-gradient-gold italic mt-2 relative">
+            Spa
+            {/* Decorative line */}
+            <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gold rounded-full opacity-60"></div>
           </div>
         </h1>
 
-        <p className="fade-up text-charcoal text-lg md:text-xl font-medium mb-12 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-          Escape the ordinary and ascend to a state of pure tranquility.
-          Experience the golden touch of traditional healing.
+        <p ref={subtitleRef} className="text-white/90 text-lg md:text-2xl font-medium mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-lg font-serif">
+          Escape the ordinary. Ascend to tranquility. <br />
+          <span className="text-gold-light italic">Experience the golden touch.</span>
         </p>
 
+        <div ref={ctaRef}>
+          <button
+            onClick={onBookClick}
+            className="group relative px-10 py-5 bg-gold text-white font-bold uppercase tracking-widest overflow-hidden rounded-full shadow-2xl hover:shadow-gold/50 transition-all duration-300"
+          >
+            <span className="relative z-10 flex items-center gap-3">
+              Book Your Escape <ChevronDown className="animate-bounce" size={20} />
+            </span>
+            <div className="absolute inset-0 bg-white/20 transform -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+            <div className="absolute inset-0 bg-gradient-to-r from-gold via-gold-light to-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </button>
+        </div>
 
-      </div>
-
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce text-charcoal/50">
-        <ChevronDown size={32} />
       </div>
     </section>
   );
