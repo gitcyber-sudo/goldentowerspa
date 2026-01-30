@@ -363,24 +363,33 @@ const AdminDashboard: React.FC = () => {
                 ))}
             </div>
 
-            {/* Revenue Summary (Mobile-friendly) */}
-            <div className="bg-gradient-to-r from-gold/10 to-gold/5 rounded-xl md:rounded-2xl p-4 md:p-6 mb-6 md:mb-8 border border-gold/20">
-                <div className="flex items-center gap-2 mb-4">
-                    <DollarSign className="text-gold" size={20} />
-                    <h3 className="font-semibold text-charcoal">Revenue Overview</h3>
+            {/* Revenue Summary - Enhanced Glassmorphism */}
+            <div className="bg-gradient-to-br from-charcoal to-charcoal/90 rounded-2xl p-8 mb-8 border border-white/10 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover:bg-gold/20 transition-all duration-1000" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2" />
+
+                <div className="flex items-center gap-3 mb-8 relative z-10">
+                    <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center border border-gold/30">
+                        <DollarSign className="text-gold" size={20} />
+                    </div>
+                    <h3 className="font-serif text-xl text-white tracking-wide">Revenue Highlight</h3>
                 </div>
-                <div className="grid grid-cols-3 gap-3 md:gap-6">
-                    <div className="text-center">
-                        <p className="text-lg md:text-2xl font-serif text-gold">₱{revenueStats.todayRevenue.toLocaleString()}</p>
-                        <p className="text-[10px] md:text-xs text-charcoal/60 uppercase">Today</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 relative z-10">
+                    <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors">
+                        <p className="text-gold/60 text-[10px] uppercase font-bold tracking-[0.2em] mb-2">Today's Rituals</p>
+                        <p className="text-3xl font-serif text-white">₱{revenueStats.todayRevenue.toLocaleString()}</p>
+                        <div className="w-12 h-1 bg-gold/30 mt-4 rounded-full" />
                     </div>
-                    <div className="text-center border-x border-gold/20">
-                        <p className="text-lg md:text-2xl font-serif text-emerald-600">₱{revenueStats.totalRevenue.toLocaleString()}</p>
-                        <p className="text-[10px] md:text-xs text-charcoal/60 uppercase">Completed</p>
+                    <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors">
+                        <p className="text-emerald-400/60 text-[10px] uppercase font-bold tracking-[0.2em] mb-2">Vault (Completed)</p>
+                        <p className="text-3xl font-serif text-white">₱{revenueStats.totalRevenue.toLocaleString()}</p>
+                        <div className="w-12 h-1 bg-emerald-500/30 mt-4 rounded-full" />
                     </div>
-                    <div className="text-center">
-                        <p className="text-lg md:text-2xl font-serif text-blue-600">₱{revenueStats.pendingRevenue.toLocaleString()}</p>
-                        <p className="text-[10px] md:text-xs text-charcoal/60 uppercase">Pending</p>
+                    <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors">
+                        <p className="text-blue-400/60 text-[10px] uppercase font-bold tracking-[0.2em] mb-2">Projected Flow</p>
+                        <p className="text-3xl font-serif text-white">₱{revenueStats.pendingRevenue.toLocaleString()}</p>
+                        <div className="w-12 h-1 bg-blue-500/30 mt-4 rounded-full" />
                     </div>
                 </div>
             </div>

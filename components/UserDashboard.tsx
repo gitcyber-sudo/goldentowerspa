@@ -22,8 +22,7 @@ import {
     MapPin,
     Heart,
     TrendingUp,
-    Star,
-    Crown
+    Star
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from './LoadingScreen';
@@ -309,33 +308,39 @@ const UserDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Wellness Journey Section (New) */}
-                <div className="mb-8 fade-up-item">
-                    <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm relative overflow-hidden">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Crown className="text-gold" size={20} />
-                            <h3 className="font-serif text-xl text-charcoal">Your Wellness Journey</h3>
-                        </div>
-                        <div className="w-full bg-cream/50 rounded-full h-4 mb-4 overflow-hidden relative">
-                            {/* Simulated progress based on completed bookings (cap at 10 for demo tier) */}
-                            <div
-                                className="bg-gradient-to-r from-gold to-gold-light h-full rounded-full relative transition-all duration-1000 ease-out"
-                                style={{ width: `${Math.min((completedBookings.length / 10) * 100, 100)}%` }}
-                            >
-                                <div className="absolute top-0 left-0 w-full h-full bg-white/20 animate-pulse"></div>
+                {/* Appointment Countdown Section (New) */}
+                {currentBookings.length > 0 && (
+                    <div className="mb-8 fade-up-item">
+                        <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-gold/10 transition-all duration-700" />
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
+                                        <Clock className="text-gold animate-pulse" size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-serif text-xl text-charcoal">Your Next Escape</h3>
+                                        <p className="text-xs text-charcoal/50 uppercase font-bold tracking-widest">
+                                            {currentBookings[0].services?.title}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    {[
+                                        { label: 'Days', value: Math.floor((new Date(currentBookings[0].booking_date + 'T' + currentBookings[0].booking_time).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) },
+                                        { label: 'Hours', value: Math.floor(((new Date(currentBookings[0].booking_date + 'T' + currentBookings[0].booking_time).getTime() - new Date().getTime()) / (1000 * 60 * 60)) % 24) },
+                                        { label: 'Mins', value: Math.floor(((new Date(currentBookings[0].booking_date + 'T' + currentBookings[0].booking_time).getTime() - new Date().getTime()) / (1000 * 60)) % 60) }
+                                    ].map((time, i) => (
+                                        <div key={i} className="text-center min-w-[60px]">
+                                            <p className="text-2xl md:text-3xl font-serif text-gold leading-none">{Math.max(0, time.value)}</p>
+                                            <p className="text-[9px] uppercase font-black tracking-widest text-charcoal/40 mt-1">{time.label}</p>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
-                        <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-charcoal/40">
-                            <span>Bronze</span>
-                            <span>Silver</span>
-                            <span>Gold</span>
-                            <span>Platinum</span>
-                        </div>
-                        <p className="text-xs text-charcoal/60 mt-3 italic">
-                            {10 - (completedBookings.length % 10)} more treatments to reach next tier reward.
-                        </p>
                     </div>
-                </div>
+                )}
 
                 {/* Stats Grid - Improved */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" ref={statsRef}>

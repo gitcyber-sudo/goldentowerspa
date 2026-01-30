@@ -307,25 +307,55 @@ const TherapistDashboard: React.FC = () => {
                         <p className="text-charcoal/40 mt-4 italic">Loading your schedule...</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-12">
                         {activeFilter === 'upcoming' ? (
                             upcomingBookings.length === 0 ? (
-                                <div className="col-span-full text-center py-16">
+                                <div className="text-center py-16">
                                     <Sparkles className="text-gold/20 mx-auto mb-4" size={48} />
                                     <p className="text-charcoal/40 italic">No upcoming sessions scheduled</p>
                                 </div>
                             ) : (
-                                upcomingBookings.map(renderBookingCard)
+                                <>
+                                    {[
+                                        { title: "Morning Rituals", icon: "🌅", range: [0, 12] },
+                                        { title: "Afternoon Glow", icon: "🌤️", range: [12, 17] },
+                                        { title: "Evening Serenity", icon: "🌙", range: [17, 24] }
+                                    ].map((bucket, i) => {
+                                        const bucketBookings = upcomingBookings.filter(b => {
+                                            const hour = parseInt(b.booking_time.split(':')[0]);
+                                            return hour >= bucket.range[0] && hour < bucket.range[1];
+                                        });
+
+                                        if (bucketBookings.length === 0) return null;
+
+                                        return (
+                                            <div key={i} className="fade-up-item">
+                                                <div className="flex items-center gap-2 mb-6 border-b border-gold/10 pb-2">
+                                                    <span className="text-2xl">{bucket.icon}</span>
+                                                    <h2 className="font-serif text-xl text-charcoal">{bucket.title}</h2>
+                                                    <span className="ml-auto bg-gold/10 text-gold text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                                        {bucketBookings.length} SESSION{bucketBookings.length > 1 ? 'S' : ''}
+                                                    </span>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    {bucketBookings.map(renderBookingCard)}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </>
                             )
                         ) : (
-                            completedBookings.length === 0 ? (
-                                <div className="col-span-full text-center py-16">
-                                    <CheckCircle2 className="text-charcoal/20 mx-auto mb-4" size={48} />
-                                    <p className="text-charcoal/40 italic">No completed sessions yet</p>
-                                </div>
-                            ) : (
-                                completedBookings.map(renderBookingCard)
-                            )
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {completedBookings.length === 0 ? (
+                                    <div className="col-span-full text-center py-16">
+                                        <CheckCircle2 className="text-charcoal/20 mx-auto mb-4" size={48} />
+                                        <p className="text-charcoal/40 italic">No completed sessions yet</p>
+                                    </div>
+                                ) : (
+                                    completedBookings.map(renderBookingCard)
+                                )}
+                            </div>
                         )}
                     </div>
                 )}

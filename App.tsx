@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import BookingModal from './components/BookingModal';
 import AuthModal from './components/AuthModal';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
+import { Sparkles } from 'lucide-react';
 
 import { Routes, Route } from 'react-router-dom';
 import AdminDashboard from './components/AdminDashboard';
@@ -19,7 +20,7 @@ import { useAuth } from './context/AuthContext';
 import { AnalyticsProvider } from './context/AnalyticsContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
-import { SpeedInsights } from '@vercel/speed-insights/react';
+// import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const MainLayout: React.FC<{
   openBooking: (id?: string) => void;
@@ -58,6 +59,15 @@ const MainLayout: React.FC<{
         <Therapists onBookClick={() => handleBookingAttempt()} />
       </main>
       <Footer />
+
+      {/* Mobile Floating Action Button (FAB) */}
+      <button
+        onClick={() => handleBookingAttempt()}
+        className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-gold text-white rounded-full shadow-[0_8px_30px_rgb(197,160,89,0.5)] flex items-center justify-center z-[90] active:scale-90 transition-transform hover:bg-gold-dark ring-4 ring-white"
+        aria-label="Book a Treatment"
+      >
+        <Sparkles size={24} />
+      </button>
 
       <BookingModal
         isOpen={isBookingOpen}
@@ -141,7 +151,6 @@ const App: React.FC = () => {
           }
         />
       </Routes>
-      <SpeedInsights />
     </AnalyticsProvider>
   );
 };

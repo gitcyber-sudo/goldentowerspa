@@ -10,6 +10,10 @@
   body {
     @apply bg-cream text-charcoal font-sans antialiased;
   }
+
+  :root {
+    --gold-dark: #A6803E;
+  }
 }
 
 /* Custom Scrollbar */
