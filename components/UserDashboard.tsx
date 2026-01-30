@@ -50,6 +50,8 @@ const UserDashboard: React.FC = () => {
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState('');
     const [submittingFeedback, setSubmittingFeedback] = useState(false);
+    const [existingFeedback, setExistingFeedback] = useState<any>(null);
+    const [isEditMode, setIsEditMode] = useState(false);
 
     const bannerRef = useRef(null);
     const statsRef = useRef(null);
@@ -139,25 +141,81 @@ const UserDashboard: React.FC = () => {
         navigate('/');
     };
 
+    const openFeedbackModal = async (booking: Booking) => {
+        setSelectedBooking(booking);
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('therapist_feedback')
+                .select('*')
+                .eq('booking_id', booking.id)
+                .single();
+
+            if (data) {
+                setExistingFeedback(data);
+                setRating(data.rating);
+                setComment(data.comment);
+                setIsEditMode(true);
+            } else {
+                setExistingFeedback(null);
+                setRating(5);
+                setComment('');
+                setIsEditMode(false);
+            }
+            setFeedbackModalOpen(true);
+        } catch (err) {
+            console.error('Error fetching existing feedback:', err);
+            setExistingFeedback(null);
+            setRating(5);
+            setComment('');
+            setIsEditMode(false);
+            setFeedbackModalOpen(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const submitFeedback = async () => {
         if (!selectedBooking || !user) return;
         setSubmittingFeedback(true);
         try {
-            const { error } = await supabase
-                .from('therapist_feedback')
-                .insert({
-                    booking_id: selectedBooking.id,
-                    user_id: user.id,
-                    therapist_id: selectedBooking.therapist_id,
-                    rating,
-                    comment
-                });
-            if (error) throw error;
+            if (isEditMode && existingFeedback) {
+                if (existingFeedback.edit_count >= 1) {
+                    alert('Review can only be edited once.');
+                    return;
+                }
+
+                const { error } = await supabase
+                    .from('therapist_feedback')
+                    .update({
+                        rating,
+                        comment,
+                        previous_rating: existingFeedback.rating,
+                        previous_comment: existingFeedback.comment,
+                        edit_count: 1,
+                        edited_at: new Date().toISOString()
+                    })
+                    .eq('id', existingFeedback.id);
+
+                if (error) throw error;
+                alert('Review updated successfully!');
+            } else {
+                const { error } = await supabase
+                    .from('therapist_feedback')
+                    .insert({
+                        booking_id: selectedBooking.id,
+                        user_id: user.id,
+                        therapist_id: selectedBooking.therapist_id,
+                        rating,
+                        comment
+                    });
+                if (error) throw error;
+                alert('Thank you for your feedback!');
+            }
 
             setFeedbackModalOpen(false);
             setComment('');
             setRating(5);
-            alert('Thank you for your feedback!');
         } catch (err) {
             console.error('Error submitting feedback:', err);
             alert('Failed to submit feedback');
@@ -229,10 +287,7 @@ const UserDashboard: React.FC = () => {
                 )}
                 {booking.status === 'completed' && (
                     <button
-                        onClick={() => {
-                            setSelectedBooking(booking);
-                            setFeedbackModalOpen(true);
-                        }}
+                        onClick={() => openFeedbackModal(booking)}
                         className="text-gold hover:text-gold-dark text-sm font-bold flex items-center gap-2 bg-gold/10 px-4 py-2 rounded-full transition-all border border-gold/20"
                     >
                         <Star size={16} fill="currentColor" />
@@ -548,12 +603,19 @@ const UserDashboard: React.FC = () => {
                         </div>
 
                         <div className="p-8">
+                            {isEditMode && existingFeedback?.edit_count >= 1 && (
+                                <div className="mb-6 p-4 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700 italic">
+                                    This review has already been edited and is now read-only.
+                                </div>
+                            )}
+
                             <div className="flex justify-center gap-2 mb-8">
                                 {[1, 2, 3, 4, 5].map((s) => (
                                     <button
                                         key={s}
+                                        disabled={isEditMode && existingFeedback?.edit_count >= 1}
                                         onClick={() => setRating(s)}
-                                        className={`transition-all ${s <= rating ? 'text-gold scale-110' : 'text-gold/20'}`}
+                                        className={`transition-all ${s <= rating ? 'text-gold scale-110' : 'text-gold/20'} disabled:opacity-50`}
                                     >
                                         <Star size={32} fill={s <= rating ? 'currentColor' : 'none'} />
                                     </button>
@@ -563,7 +625,8 @@ const UserDashboard: React.FC = () => {
                             <div className="mb-6">
                                 <label className="block text-[10px] uppercase tracking-widest font-black text-charcoal/40 mb-2">Your Feedback</label>
                                 <textarea
-                                    className="w-full bg-cream/50 border border-gold/10 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-gold/20 min-h-[120px]"
+                                    disabled={isEditMode && existingFeedback?.edit_count >= 1}
+                                    className="w-full bg-cream/50 border border-gold/10 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-gold/20 min-h-[120px] disabled:opacity-50"
                                     placeholder="Tell us about your massage session..."
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
@@ -577,13 +640,15 @@ const UserDashboard: React.FC = () => {
                                 >
                                     Cancel
                                 </button>
-                                <button
-                                    onClick={submitFeedback}
-                                    disabled={submittingFeedback}
-                                    className="flex-1 bg-gold hover:bg-gold-dark text-white py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg transition-all disabled:opacity-50"
-                                >
-                                    {submittingFeedback ? 'Submitting...' : 'Submit Review'}
-                                </button>
+                                {!(isEditMode && existingFeedback?.edit_count >= 1) && (
+                                    <button
+                                        onClick={submitFeedback}
+                                        disabled={submittingFeedback}
+                                        className="flex-1 bg-gold hover:bg-gold-dark text-white py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg transition-all disabled:opacity-50"
+                                    >
+                                        {submittingFeedback ? 'Submitting...' : isEditMode ? 'Update Review' : 'Submit Review'}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

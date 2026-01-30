@@ -86,6 +86,8 @@ const AdminDashboard: React.FC = () => {
     const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
     const [editFormData, setEditFormData] = useState<any>({});
     const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
+    const [viewingReview, setViewingReview] = useState<any>(null);
+    const [feedbacks, setFeedbacks] = useState<Record<string, any>>({});
 
     // Redundant auth check removed - handled by ProtectedRoute in App.tsx
 
@@ -113,6 +115,19 @@ const AdminDashboard: React.FC = () => {
                 .order('created_at', { ascending: false });
             if (error) throw error;
             if (data) setBookings(data as any);
+
+            // Fetch all feedbacks
+            const { data: feedbackData } = await supabase
+                .from('therapist_feedback')
+                .select('*');
+
+            if (feedbackData) {
+                const feedbackMap: Record<string, any> = {};
+                feedbackData.forEach(f => {
+                    feedbackMap[f.booking_id] = f;
+                });
+                setFeedbacks(feedbackMap);
+            }
         } catch (err) {
             console.error('Error fetching bookings:', err);
         } finally {
@@ -332,6 +347,67 @@ const AdminDashboard: React.FC = () => {
         )
     );
 
+    const renderViewReviewModal = () => (
+        viewingReview && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
+                <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+
+                    <div className="flex justify-between items-center mb-6 relative z-10">
+                        <div>
+                            <h2 className="font-serif text-2xl text-charcoal">Treatment Review</h2>
+                            <p className="text-xs text-charcoal/40 uppercase font-black tracking-widest mt-1">Feedback from {viewingReview.booking.guest_name || viewingReview.booking.user_email}</p>
+                        </div>
+                        <button onClick={() => setViewingReview(null)} className="text-charcoal/40 hover:text-charcoal transition-colors">
+                            <X size={24} />
+                        </button>
+                    </div>
+
+                    <div className="space-y-6 relative z-10">
+                        {/* Current Review */}
+                        <div className="bg-gold/5 p-6 rounded-2xl border border-gold/10">
+                            <div className="flex justify-between items-center mb-3">
+                                <div className="flex gap-1">
+                                    {[1, 2, 3, 4, 5].map(s => (
+                                        <Star key={s} size={16} className={s <= viewingReview.feedback.rating ? 'text-gold fill-gold' : 'text-gold/20'} />
+                                    ))}
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-gold/60">Current Review</span>
+                            </div>
+                            <p className="text-charcoal leading-relaxed italic">"{viewingReview.feedback.comment}"</p>
+                            <div className="mt-4 flex justify-between items-end">
+                                <p className="text-[10px] text-charcoal/40">Therapist: <span className="font-bold">{viewingReview.booking.therapists?.name}</span></p>
+                                <p className="text-[10px] text-charcoal/40">{new Date(viewingReview.feedback.created_at).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+
+                        {/* History if edited */}
+                        {viewingReview.feedback.edit_count > 0 && (
+                            <div className="opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="h-[1px] flex-1 bg-gold/10" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-charcoal/40">Original Review (Past)</span>
+                                    <div className="h-[1px] flex-1 bg-gold/10" />
+                                </div>
+                                <div className="p-5 border border-dashed border-gold/20 rounded-xl bg-cream/20">
+                                    <div className="flex gap-1 mb-2">
+                                        {[1, 2, 3, 4, 5].map(s => (
+                                            <Star key={s} size={12} className={s <= viewingReview.feedback.previous_rating ? 'text-gold fill-gold' : 'text-gold/10'} />
+                                        ))}
+                                    </div>
+                                    <p className="text-sm text-charcoal/60 italic">"{viewingReview.feedback.previous_comment}"</p>
+                                    <p className="text-[9px] text-charcoal/30 mt-3">Modified on {new Date(viewingReview.feedback.edited_at).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <button onClick={() => setViewingReview(null)} className="w-full py-4 bg-charcoal text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-black transition-colors">Close Review</button>
+                    </div>
+                </div>
+            </div>
+        )
+    );
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'pending': return 'bg-amber-100 text-amber-700';
@@ -471,6 +547,15 @@ const AdminDashboard: React.FC = () => {
                                                     <Edit3 size={18} />
                                                 </button>
                                             )}
+                                            {b.status === 'completed' && feedbacks[b.id] && (
+                                                <button
+                                                    onClick={() => setViewingReview({ booking: b, feedback: feedbacks[b.id] })}
+                                                    className="p-2 text-gold hover:bg-gold/10 rounded-lg transition-colors"
+                                                    title="View Review"
+                                                >
+                                                    <Star size={18} fill={feedbacks[b.id].rating >= 4 ? 'currentColor' : 'none'} />
+                                                </button>
+                                            )}
                                             {/* More Actions Menu */}
                                             <div className="relative">
                                                 <button
@@ -580,6 +665,14 @@ const AdminDashboard: React.FC = () => {
                                             <XCircle size={14} /> Cancel
                                         </button>
                                     </>
+                                )}
+                                {b.status === 'completed' && feedbacks[b.id] && (
+                                    <button
+                                        onClick={() => setViewingReview({ booking: b, feedback: feedbacks[b.id] })}
+                                        className="px-3 py-2 bg-gold/10 text-gold rounded-lg text-xs font-bold flex items-center gap-1"
+                                    >
+                                        <Star size={14} fill="currentColor" /> Review
+                                    </button>
                                 )}
                                 {b.status === 'cancelled' && (
                                     <button
@@ -736,6 +829,7 @@ const AdminDashboard: React.FC = () => {
                     therapists={therapists}
                 />
                 {renderAssignTherapistModal()}
+                {renderViewReviewModal()}
             </main>
 
             {/* Click outside to close action menu */}

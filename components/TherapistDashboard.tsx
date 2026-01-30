@@ -445,6 +445,16 @@ const TherapistDashboard: React.FC = () => {
                                                 </div>
                                             </div>
                                             <p className="text-charcoal/80 italic">"{review.comment}"</p>
+                                            {review.edit_count > 0 && (
+                                                <div className="mt-4 pt-4 border-t border-gold/5 opacity-50">
+                                                    <p className="text-[10px] uppercase tracking-widest font-bold text-charcoal/40 mb-2">Original Review</p>
+                                                    <div className="flex items-center gap-1 mb-1">
+                                                        <Star size={10} className="text-gold fill-gold" />
+                                                        <span className="text-[10px] font-bold text-gold">{review.previous_rating}.0</span>
+                                                    </div>
+                                                    <p className="text-xs italic">"{review.previous_comment}"</p>
+                                                </div>
+                                            )}
                                         </div>
                                     ))
                                 )}
