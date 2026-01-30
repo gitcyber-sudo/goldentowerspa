@@ -86,18 +86,24 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
 
             // 3. Update Password if requested
             if (showPasswordReset && newPassword) {
-                const { error: passError } = await supabase.functions.invoke('update-therapist-password', {
+                const { data, error: passError } = await supabase.functions.invoke('update-therapist-password', {
                     body: {
                         therapist_id: therapist.id,
                         new_password: newPassword
                     }
                 });
-                if (passError) throw passError;
+
+                if (passError) {
+                    console.error("Edge Function Error Context:", passError);
+                    // Try to parse the error context if possible, otherwise throw standard error
+                    throw new Error(`Password update failed. ${passError.message || 'Unknown server error'}`);
+                }
             }
 
             onSuccess();
             onClose();
         } catch (err: any) {
+            console.error("Full Error Object:", err);
             alert('Error updating therapist: ' + err.message);
         } finally {
             setLoading(false);

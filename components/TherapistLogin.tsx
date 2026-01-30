@@ -20,36 +20,18 @@ const TherapistLogin: React.FC = () => {
         setLoading(true);
 
         try {
-            let email = '';
-            const normalizedName = formData.name.trim().toLowerCase();
+            // Auto-generate email from name matching creation logic
+            const generatedEmail = `${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@goldentower.internal`;
 
-            // Special handling for Test Therapist
-            if (normalizedName === 'test therapist') {
-                email = 'test-therapist@goldentowerspa.ph';
-            } else {
-                // Try to find the therapist by name in the profiles table
-                const { data: profile, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('email, role')
-                    .ilike('full_name', formData.name.trim())
-                    .eq('role', 'therapist')
-                    .single();
-
-                if (profileError || !profile) {
-                    throw new Error('Therapist not found. Please check your name.');
-                }
-                email = profile.email;
-            }
-
-            // Sign in with the resolved email
+            // Sign in with the generated email
             const { error: signInError } = await supabase.auth.signInWithPassword({
-                email,
+                email: generatedEmail,
                 password: formData.password
             });
 
             if (signInError) throw signInError;
 
-            // Success redirect is handled by AuthContext but we'll force it here for speed
+            // Success redirect
             navigate('/therapist');
         } catch (err: any) {
             console.error('Therapist Login Error:', err);

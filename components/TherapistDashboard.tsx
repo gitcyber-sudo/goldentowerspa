@@ -332,6 +332,30 @@ const TherapistDashboard: React.FC = () => {
                             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
                         )}
                     </button>
+                    <button
+                        onClick={() => setActiveFilter('reviews')}
+                        className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeFilter === 'reviews'
+                            ? 'text-gold'
+                            : 'text-charcoal/40 hover:text-charcoal/60'
+                            }`}
+                    >
+                        Reviews
+                        {activeFilter === 'reviews' && (
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setActiveFilter('profile')}
+                        className={`pb-4 px-2 font-bold uppercase tracking-widest text-sm transition-all relative ${activeFilter === 'profile'
+                            ? 'text-gold'
+                            : 'text-charcoal/40 hover:text-charcoal/60'
+                            }`}
+                    >
+                        My Profile
+                        {activeFilter === 'profile' && (
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
+                        )}
+                    </button>
                 </div>
 
                 {/* Bookings Grid */}
@@ -342,7 +366,7 @@ const TherapistDashboard: React.FC = () => {
                     </div>
                 ) : (
                     <div className="space-y-12">
-                        {activeFilter === 'upcoming' ? (
+                        {activeFilter === 'upcoming' && (
                             upcomingBookings.length === 0 ? (
                                 <div className="text-center py-16">
                                     <Logo className="h-12 w-12 mx-auto mb-4 opacity-20" color="#997B3D" />
@@ -379,7 +403,9 @@ const TherapistDashboard: React.FC = () => {
                                     })}
                                 </>
                             )
-                        ) : (
+                        )}
+
+                        {activeFilter === 'completed' && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {completedBookings.length === 0 ? (
                                     <div className="col-span-full text-center py-16">

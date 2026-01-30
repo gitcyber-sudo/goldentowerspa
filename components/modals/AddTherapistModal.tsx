@@ -12,7 +12,7 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
-        email: '',
+        name: '',
         password: '',
         specialty: '',
         bio: '',
@@ -53,10 +53,14 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
                 imageUrl = publicUrl;
             }
 
+            // Auto-generate email from name
+            const generatedEmail = `${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@goldentower.internal`;
+
             // 2. Call Edge Function to create user and therapist record
             const { data, error } = await supabase.functions.invoke('create-therapist', {
                 body: {
                     ...formData,
+                    email: generatedEmail,
                     image_url: imageUrl
                 }
             });
@@ -66,7 +70,7 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
             onSuccess();
             onClose();
             // Reset form
-            setFormData({ name: '', email: '', password: '', specialty: '', bio: '', image_url: '' });
+            setFormData({ name: '', password: '', specialty: '', bio: '', image_url: '' });
             setImageFile(null);
             setImagePreview(null);
         } catch (err: any) {
@@ -128,16 +132,7 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
                         </div>
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Email (For Sign In)</label>
-                        <input
-                            required
-                            type="email"
-                            className="w-full p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold"
-                            value={formData.email}
-                            onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        />
-                    </div>
+
 
                     <div className="space-y-1">
                         <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Password</label>
