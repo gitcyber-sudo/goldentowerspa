@@ -11,11 +11,22 @@ import {
     CheckCircle2,
     Clock3,
     ArrowLeft,
-    Mail
+    Mail,
+    Star,
+    MessageSquare,
+    UserCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from './LoadingScreen';
 import Logo from './Logo';
+
+interface Review {
+    id: string;
+    rating: number;
+    comment: string;
+    created_at: string;
+    profiles: { full_name: string };
+}
 
 interface Booking {
     id: string;
@@ -34,7 +45,8 @@ const TherapistDashboard: React.FC = () => {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [therapistInfo, setTherapistInfo] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [activeFilter, setActiveFilter] = useState<'upcoming' | 'completed'>('upcoming');
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [activeFilter, setActiveFilter] = useState<'upcoming' | 'completed' | 'reviews' | 'profile'>('upcoming');
 
     useLayoutEffect(() => {
         const ctx = gsap.context(() => {
@@ -102,6 +114,19 @@ const TherapistDashboard: React.FC = () => {
 
             if (error) throw error;
             if (data) setBookings(data as any);
+
+            // Fetch Reviews
+            const { data: reviewData, error: reviewError } = await supabase
+                .from('therapist_feedback')
+                .select(`
+                    *,
+                    profiles(full_name)
+                `)
+                .eq('therapist_id', therapist.id)
+                .order('created_at', { ascending: false });
+
+            if (reviewData) setReviews(reviewData as any);
+
         } catch (err) {
             console.error('Error fetching therapist bookings:', err);
         } finally {
@@ -116,7 +141,7 @@ const TherapistDashboard: React.FC = () => {
 
     const upcomingBookings = bookings.filter(
         b => (b.status === 'pending' || b.status === 'confirmed') &&
-            new Date(b.booking_date) >= new Date()
+            new Date(b.booking_date).setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0)
     );
 
     const completedBookings = bookings.filter(
@@ -364,6 +389,89 @@ const TherapistDashboard: React.FC = () => {
                                 ) : (
                                     completedBookings.map(renderBookingCard)
                                 )}
+                            </div>
+                        )}
+
+
+                        {activeFilter === 'reviews' && (
+                            <div className="max-w-3xl mx-auto space-y-6">
+                                {reviews.length === 0 ? (
+                                    <div className="text-center py-16">
+                                        <MessageSquare className="text-charcoal/20 mx-auto mb-4" size={48} />
+                                        <p className="text-charcoal/40 italic">No reviews yet</p>
+                                    </div>
+                                ) : (
+                                    reviews.map(review => (
+                                        <div key={review.id} className="bg-white p-6 rounded-xl border border-gold/10">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center font-serif text-gold font-bold">
+                                                        {review.profiles?.full_name?.charAt(0) || 'G'}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-semibold text-charcoal">{review.profiles?.full_name || 'Guest'}</p>
+                                                        <p className="text-xs text-charcoal/40">{new Date(review.created_at).toLocaleDateString()}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1 bg-gold/5 px-2 py-1 rounded-lg">
+                                                    <Star size={14} className="text-gold fill-gold" />
+                                                    <span className="text-sm font-bold text-gold">{review.rating}.0</span>
+                                                </div>
+                                            </div>
+                                            <p className="text-charcoal/80 italic">"{review.comment}"</p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+
+                        {activeFilter === 'profile' && therapistInfo && (
+                            <div className="max-w-3xl mx-auto">
+                                <div className="bg-white rounded-2xl border border-gold/10 overflow-hidden shadow-sm">
+                                    <div className="h-32 bg-charcoal relative">
+                                        <div className="absolute inset-0 bg-gold/10 pattern-grid-lg opacity-20" />
+                                    </div>
+                                    <div className="px-8 pb-8">
+                                        <div className="relative -mt-16 mb-6 flex justify-between items-end">
+                                            <div className="w-32 h-32 rounded-full border-4 border-white bg-white overflow-hidden shadow-lg">
+                                                {therapistInfo.image_url ? (
+                                                    <img src={therapistInfo.image_url} alt={therapistInfo.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gold/10 flex items-center justify-center text-gold">
+                                                        <UserCircle size={64} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="mb-2">
+                                                <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                                    {therapistInfo.active ? 'Active Status' : 'Inactive'}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <h2 className="font-serif text-3xl text-charcoal mb-2">{therapistInfo.name}</h2>
+                                        <p className="text-gold font-bold uppercase tracking-widest text-sm mb-6">{therapistInfo.specialty}</p>
+
+                                        <div className="space-y-6">
+                                            <div>
+                                                <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-2">About Me</h3>
+                                                <p className="text-charcoal/70 leading-relaxed">{therapistInfo.bio || 'No bio available.'}</p>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="p-4 rounded-xl bg-gold/5 border border-gold/10">
+                                                    <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Passcode</h3>
+                                                    <p className="text-charcoal font-mono">••••••••</p>
+                                                </div>
+                                                <div className="p-4 rounded-xl bg-gold/5 border border-gold/10">
+                                                    <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal/40 mb-1">Joined</h3>
+                                                    <p className="text-charcoal">{new Date(therapistInfo.created_at).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>

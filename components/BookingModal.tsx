@@ -57,7 +57,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
 
     const fetchData = async () => {
         const { data: s } = await supabase.from('services').select('*');
-        const { data: t } = await supabase.from('therapists').select('*').order('name');
+        const { data: t } = await supabase.from('therapists').select('*').eq('active', true).order('name');
 
         if (s) {
             const sortedServices = [...s].sort((a, b) => {

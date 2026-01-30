@@ -84,7 +84,7 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
                                 onChange={e => setData({ ...data, therapist_id: e.target.value })}
                             >
                                 <option value="">-- Choose Specialist --</option>
-                                {therapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                {therapists.filter(t => t.active !== false).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                             </select>
                         </div>
                         <div>
