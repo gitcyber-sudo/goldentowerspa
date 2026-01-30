@@ -34,7 +34,8 @@ import {
     ChevronLeft,
     PlayCircle,
     MoreVertical,
-    Trash2
+    Trash2,
+    Star
 } from 'lucide-react';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import RevenueDashboard from './RevenueDashboard';

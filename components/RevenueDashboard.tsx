@@ -189,6 +189,27 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             });
         }
 
+        // Peak booking hours
+        const hourCounts: Record<number, number> = {};
+        completed.forEach(b => {
+            const hour = parseInt(b.booking_time.split(':')[0]);
+            hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+        });
+        const peakHours = Object.entries(hourCounts)
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 3)
+            .map(([hour, count]) => ({ hour: parseInt(hour), count }));
+
+        // Client retention
+        const userBookings: Record<string, number> = {};
+        bookings.forEach(b => {
+            const email = b.user_email;
+            userBookings[email] = (userBookings[email] || 0) + 1;
+        });
+        const returningClients = Object.values(userBookings).filter(count => count > 1).length;
+        const totalClients = Object.keys(userBookings).length;
+        const retentionRate = totalClients > 0 ? (returningClients / totalClients) * 100 : 0;
+
         return {
             totalRevenue,
             pendingRevenue,
@@ -201,7 +222,10 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             dailyRevenue,
             topServices,
             topTherapists,
-            weeklyRevenue
+            weeklyRevenue,
+            peakHours,
+            retentionRate,
+            totalClients
         };
     }, [filteredBookings, bookings, timeRange, customMonth, customYear]);
 
@@ -232,25 +256,122 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         </div>
     );
 
-    const BarChart = ({ data }: { data: { week: string; revenue: number; bookings: number }[] }) => {
-        const max = Math.max(...data.map(d => d.revenue), 1);
+    const LineChart = ({ data }: { data: { week: string; revenue: number; bookings: number }[] }) => {
+        const height = 240;
+        const width = 800;
+        const padding = 40;
+
+        // Use fixed increments up to 7000, or higher if data exceeds it
+        const maxDataValue = Math.max(...data.map(d => d.revenue), 1);
+        const yMax = Math.max(7000, Math.ceil(maxDataValue / 1000) * 1000);
+
+        const yTicks = [1000, 2000, 3000, 4000, 5000, 6000, 7000];
+        if (yMax > 7000) {
+            // Add more ticks if we exceed 7k
+            for (let t = 8000; t <= yMax; t += 1000) yTicks.push(t);
+        }
+
+        const getX = (i: number) => padding + (i * (width - padding * 2)) / (data.length - 1 || 1);
+        const getY = (v: number) => height - padding - (v / yMax) * (height - padding * 2);
+
+        const points = data.map((d, i) => `${getX(i)},${getY(d.revenue)}`).join(' ');
+
+        const areaPoints = [
+            `${getX(0)},${height - padding}`,
+            ...data.map((d, i) => `${getX(i)},${getY(d.revenue)}`),
+            `${getX(data.length - 1)},${height - padding}`
+        ].join(' ');
 
         return (
-            <div className="flex items-end gap-1 md:gap-2 h-32 md:h-40">
-                {data.map((item, index) => (
-                    <div key={index} className="flex-1 flex flex-col items-center group relative">
-                        <div
-                            className="w-full bg-gradient-to-t from-gold to-gold/60 rounded-t transition-all duration-300 hover:from-gold/80 cursor-pointer"
-                            style={{ height: `${(item.revenue / max) * 100}%`, minHeight: item.revenue > 0 ? '8px' : '0' }}
+            <div className="w-full overflow-x-auto no-scrollbar">
+                <div className="min-w-[500px] relative">
+                    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible">
+                        {/* Grid Lines */}
+                        {yTicks.map(tick => (
+                            <g key={tick} className="opacity-10">
+                                <line
+                                    x1={padding}
+                                    y1={getY(tick)}
+                                    x2={width - padding}
+                                    y2={getY(tick)}
+                                    stroke="currentColor"
+                                    strokeWidth="1"
+                                    strokeDasharray="4 4"
+                                />
+                                <text
+                                    x={padding - 10}
+                                    y={getY(tick)}
+                                    textAnchor="end"
+                                    alignmentBaseline="middle"
+                                    className="text-[10px] fill-charcoal font-bold"
+                                >
+                                    {tick >= 1000 ? `${tick / 1000}k` : tick}
+                                </text>
+                            </g>
+                        ))}
+
+                        {/* X-Axis labels */}
+                        {data.map((item, i) => (
+                            <text
+                                key={i}
+                                x={getX(i)}
+                                y={height - padding + 20}
+                                textAnchor="middle"
+                                className="text-[10px] fill-charcoal/40 font-medium"
+                            >
+                                {item.week.split(' ')[1]}
+                            </text>
+                        ))}
+
+                        {/* Gradient Area */}
+                        <defs>
+                            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#997B3D" stopOpacity="0.3" />
+                                <stop offset="95%" stopColor="#997B3D" stopOpacity="0" />
+                            </linearGradient>
+                        </defs>
+                        <polyline
+                            points={areaPoints}
+                            fill="url(#chartGradient)"
+                            className="transition-all duration-700"
                         />
-                        <span className="text-[8px] md:text-[10px] text-charcoal/40 mt-1 truncate w-full text-center">{item.week.split(' ')[1]}</span>
-                        {/* Tooltip */}
-                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-charcoal text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                            <p className="font-semibold">₱{item.revenue.toLocaleString()}</p>
-                            <p className="text-white/60">{item.bookings} bookings</p>
-                        </div>
-                    </div>
-                ))}
+
+                        {/* The Line */}
+                        <polyline
+                            points={points}
+                            fill="none"
+                            stroke="#997B3D"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="transition-all duration-700"
+                        />
+
+                        {/* Data Points */}
+                        {data.map((item, i) => (
+                            <g key={i} className="group cursor-pointer">
+                                <circle
+                                    cx={getX(i)}
+                                    cy={getY(item.revenue)}
+                                    r="4"
+                                    className="fill-white stroke-gold stroke-2 transition-transform group-hover:scale-150"
+                                />
+                                <foreignObject
+                                    x={getX(i) - 40}
+                                    y={getY(item.revenue) - 45}
+                                    width="80"
+                                    height="40"
+                                    className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    <div className="bg-charcoal text-white text-[9px] px-2 py-1 rounded shadow-xl text-center">
+                                        <div className="font-bold">₱{item.revenue.toLocaleString()}</div>
+                                        <div className="opacity-60">{item.bookings} sessions</div>
+                                    </div>
+                                </foreignObject>
+                            </g>
+                        ))}
+                    </svg>
+                </div>
             </div>
         );
     };
@@ -385,13 +506,13 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                 <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
                     <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
-                            <h3 className="font-semibold text-charcoal">Weekly Revenue</h3>
-                            <p className="text-[10px] md:text-xs text-charcoal/50">Revenue per week</p>
+                            <h3 className="font-semibold text-charcoal">Revenue Trend</h3>
+                            <p className="text-[10px] md:text-xs text-charcoal/50">Weekly earnings overview</p>
                         </div>
-                        <BarChart3 className="w-5 h-5 text-gold" />
+                        <Activity className="w-5 h-5 text-gold" />
                     </div>
                     {stats.weeklyRevenue.length > 0 ? (
-                        <BarChart data={stats.weeklyRevenue} />
+                        <LineChart data={stats.weeklyRevenue} />
                     ) : (
                         <div className="h-40 flex items-center justify-center text-charcoal/40 text-sm">
                             No data available
@@ -462,43 +583,86 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                     )}
                 </div>
 
-                {/* Quick Insights */}
-                <div className="bg-gradient-to-br from-charcoal to-charcoal/90 rounded-xl md:rounded-2xl p-4 md:p-6 text-white">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 md:p-3 bg-gold/20 rounded-xl">
-                            <Activity className="w-5 h-5 md:w-6 md:h-6 text-gold" />
+                {/* Advanced Insights */}
+                <div className="bg-gradient-to-br from-charcoal to-charcoal/95 rounded-xl md:rounded-2xl p-6 md:p-8 text-white relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+
+                    <div className="flex items-center gap-3 mb-8 relative z-10">
+                        <div className="p-3 bg-gold/20 rounded-xl backdrop-blur-md">
+                            <TrendingUp className="w-6 h-6 text-gold" />
                         </div>
                         <div>
-                            <h3 className="font-semibold">Quick Insights</h3>
-                            <p className="text-[10px] md:text-xs text-white/60">Performance summary</p>
+                            <h3 className="font-serif text-xl md:text-2xl">Advanced Business Insights</h3>
+                            <p className="text-xs text-white/40 uppercase tracking-widest mt-1">Efficiency and Growth Metrics</p>
                         </div>
                     </div>
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl">
-                            <span className="text-sm text-white/80">Conversion Rate</span>
-                            <span className="text-lg font-serif text-gold">
-                                {filteredBookings.length > 0
-                                    ? ((stats.completedCount / filteredBookings.length) * 100).toFixed(1)
-                                    : 0}%
-                            </span>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                        {/* Peak Hours */}
+                        <div className="bg-white/5 p-5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Clock size={16} className="text-gold" />
+                                <span className="text-xs font-bold uppercase tracking-widest text-white/60">Peak Ritual Times</span>
+                            </div>
+                            <div className="space-y-3">
+                                {stats.peakHours.length > 0 ? stats.peakHours.map((p, i) => (
+                                    <div key={i} className="flex justify-between items-center text-sm">
+                                        <span className="text-white/80">{formatTimeTo12h(`${p.hour}:00`)}</span>
+                                        <span className="text-gold font-bold">{p.count} sessions</span>
+                                    </div>
+                                )) : (
+                                    <p className="text-xs text-white/40 italic">Not enough data</p>
+                                )}
+                            </div>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl">
-                            <span className="text-sm text-white/80">Cancellation Rate</span>
-                            <span className="text-lg font-serif text-rose-400">
-                                {filteredBookings.length > 0
-                                    ? ((stats.cancelledCount / filteredBookings.length) * 100).toFixed(1)
-                                    : 0}%
-                            </span>
+
+                        {/* Client Retention */}
+                        <div className="bg-white/5 p-5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Users size={16} className="text-gold" />
+                                <span className="text-xs font-bold uppercase tracking-widest text-white/60">Client Loyalty</span>
+                            </div>
+                            <div className="text-center py-2">
+                                <p className="text-3xl font-serif text-gold mb-1">{stats.retentionRate.toFixed(1)}%</p>
+                                <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">Retention Rate</p>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-white/5 flex justify-between text-[10px] text-white/60">
+                                <span>{stats.totalClients} Total Clients</span>
+                            </div>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl">
-                            <span className="text-sm text-white/80">Total Bookings</span>
-                            <span className="text-lg font-serif text-gold">{filteredBookings.length}</span>
-                        </div>
-                        <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl">
-                            <span className="text-sm text-white/80">Avg. Daily Revenue</span>
-                            <span className="text-lg font-serif text-emerald-400">
-                                ₱{Math.round(stats.totalRevenue / (timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : timeRange === 'custom' ? new Date(customYear, customMonth + 1, 0).getDate() : 365)).toLocaleString()}
-                            </span>
+
+                        {/* Conversion & Value */}
+                        <div className="bg-white/5 p-5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
+                            <div className="flex items-center gap-2 mb-4">
+                                <PieChart size={16} className="text-gold" />
+                                <span className="text-xs font-bold uppercase tracking-widest text-white/60">Session Value</span>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between text-[10px] text-white/40 uppercase mb-1">
+                                        <span>Ritual Conversion</span>
+                                        <span>{((stats.completedCount / Math.max(filteredBookings.length, 1)) * 100).toFixed(0)}%</span>
+                                    </div>
+                                    <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-gold"
+                                            style={{ width: `${(stats.completedCount / Math.max(filteredBookings.length, 1)) * 100}%` }}
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-[10px] text-white/40 uppercase mb-1">
+                                        <span>Cancellation Rate</span>
+                                        <span>{((stats.cancelledCount / Math.max(filteredBookings.length, 1)) * 100).toFixed(0)}%</span>
+                                    </div>
+                                    <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-rose-500"
+                                            style={{ width: `${(stats.cancelledCount / Math.max(filteredBookings.length, 1)) * 100}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
