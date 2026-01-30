@@ -377,17 +377,17 @@ const AdminDashboard: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 relative z-10">
                     <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors">
-                        <p className="text-gold/60 text-[10px] uppercase font-bold tracking-[0.2em] mb-2">Today's Rituals</p>
+                        <p className="text-gold/60 text-[10px] uppercase font-bold tracking-[0.2em] mb-2">Today</p>
                         <p className="text-3xl font-serif text-white">₱{revenueStats.todayRevenue.toLocaleString()}</p>
                         <div className="w-12 h-1 bg-gold/30 mt-4 rounded-full" />
                     </div>
                     <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors">
-                        <p className="text-emerald-400/60 text-[10px] uppercase font-bold tracking-[0.2em] mb-2">Vault (Completed)</p>
+                        <p className="text-emerald-400/60 text-[10px] uppercase font-bold tracking-[0.2em] mb-2">Completed</p>
                         <p className="text-3xl font-serif text-white">₱{revenueStats.totalRevenue.toLocaleString()}</p>
                         <div className="w-12 h-1 bg-emerald-500/30 mt-4 rounded-full" />
                     </div>
                     <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors">
-                        <p className="text-blue-400/60 text-[10px] uppercase font-bold tracking-[0.2em] mb-2">Projected Flow</p>
+                        <p className="text-blue-400/60 text-[10px] uppercase font-bold tracking-[0.2em] mb-2">Pending</p>
                         <p className="text-3xl font-serif text-white">₱{revenueStats.pendingRevenue.toLocaleString()}</p>
                         <div className="w-12 h-1 bg-blue-500/30 mt-4 rounded-full" />
                     </div>
@@ -686,8 +686,7 @@ const AdminDashboard: React.FC = () => {
                                 <RefreshCcw size={18} className="text-charcoal/60" />
                             </button>
                             <button onClick={() => setShowManualBooking(true)} className="bg-gold text-white px-3 lg:px-4 py-2 rounded-xl text-xs lg:text-sm font-bold flex items-center gap-1 lg:gap-2">
-                                <span className="hidden sm:inline">Manual Booking</span>
-                                <span className="sm:hidden">+ Add New</span>
+                                <span>Manual Booking</span>
                             </button>
                         </div>
                     </div>

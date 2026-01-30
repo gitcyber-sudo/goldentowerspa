@@ -165,7 +165,9 @@ const UserDashboard: React.FC = () => {
         }
     };
 
-    const currentBookings = bookings.filter(b => b.status === 'pending' || b.status === 'confirmed');
+    const currentBookings = bookings
+        .filter(b => b.status === 'pending' || b.status === 'confirmed')
+        .sort((a, b) => new Date(a.booking_date + 'T' + a.booking_time).getTime() - new Date(b.booking_date + 'T' + b.booking_time).getTime());
     const pastBookings = bookings.filter(b => b.status === 'completed' || b.status === 'cancelled');
     const completedBookings = pastBookings.filter(b => b.status === 'completed');
 
@@ -240,6 +242,73 @@ const UserDashboard: React.FC = () => {
         </div>
     );
 
+    const BookingCountdown: React.FC<{ booking: Booking }> = ({ booking }) => {
+        const [timeLeft, setTimeLeft] = useState({
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0
+        });
+
+        useEffect(() => {
+            const calculate = () => {
+                const now = new Date().getTime();
+                const target = new Date(booking.booking_date + 'T' + (booking.booking_time.length === 5 ? booking.booking_time : booking.booking_time.substring(0, 5))).getTime();
+                const difference = target - now;
+
+                if (difference > 0) {
+                    setTimeLeft({
+                        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+                        minutes: Math.floor((difference / 1000 / 60) % 60),
+                        seconds: Math.floor((difference / 1000) % 60)
+                    });
+                } else {
+                    setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+                }
+            };
+
+            calculate();
+            const timer = setInterval(calculate, 1000);
+            return () => clearInterval(timer);
+        }, [booking]);
+
+        return (
+            <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm relative overflow-hidden group mb-4">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-gold/10 transition-all duration-700" />
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
+                            <Clock className="text-gold animate-pulse" size={24} />
+                        </div>
+                        <div>
+                            <h3 className="font-serif text-xl text-charcoal">Your Next Massage</h3>
+                            <p className="text-xs text-charcoal/50 uppercase font-bold tracking-widest mt-1">
+                                {booking.services?.title}
+                            </p>
+                            <p className="text-[10px] text-gold/60 mt-1 uppercase tracking-widest font-bold">
+                                This is the time remaining before the scheduled massage
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex gap-4">
+                        {[
+                            { label: 'Days', value: timeLeft.days },
+                            { label: 'Hours', value: timeLeft.hours },
+                            { label: 'Mins', value: timeLeft.minutes },
+                            { label: 'Secs', value: timeLeft.seconds }
+                        ].map((time, i) => (
+                            <div key={i} className="text-center min-w-[50px] md:min-w-[60px]">
+                                <p className="text-2xl md:text-3xl font-serif text-gold leading-none">{time.value.toString().padStart(2, '0')}</p>
+                                <p className="text-[9px] uppercase font-black tracking-widest text-charcoal/40 mt-1">{time.label}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     if (authLoading) {
         return <LoadingScreen message="Restoring your session" />;
     }
@@ -308,37 +377,12 @@ const UserDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Appointment Countdown Section (New) */}
+                {/* Appointment Countdown Section */}
                 {currentBookings.length > 0 && (
                     <div className="mb-8 fade-up-item">
-                        <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-gold/10 transition-all duration-700" />
-                            <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
-                                        <Clock className="text-gold animate-pulse" size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-serif text-xl text-charcoal">Your Next Escape</h3>
-                                        <p className="text-xs text-charcoal/50 uppercase font-bold tracking-widest">
-                                            {currentBookings[0].services?.title}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-4">
-                                    {[
-                                        { label: 'Days', value: Math.floor((new Date(currentBookings[0].booking_date + 'T' + currentBookings[0].booking_time).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) },
-                                        { label: 'Hours', value: Math.floor(((new Date(currentBookings[0].booking_date + 'T' + currentBookings[0].booking_time).getTime() - new Date().getTime()) / (1000 * 60 * 60)) % 24) },
-                                        { label: 'Mins', value: Math.floor(((new Date(currentBookings[0].booking_date + 'T' + currentBookings[0].booking_time).getTime() - new Date().getTime()) / (1000 * 60)) % 60) }
-                                    ].map((time, i) => (
-                                        <div key={i} className="text-center min-w-[60px]">
-                                            <p className="text-2xl md:text-3xl font-serif text-gold leading-none">{Math.max(0, time.value)}</p>
-                                            <p className="text-[9px] uppercase font-black tracking-widest text-charcoal/40 mt-1">{time.label}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                        {currentBookings.map((booking) => (
+                            <BookingCountdown key={booking.id} booking={booking} />
+                        ))}
                     </div>
                 )}
 

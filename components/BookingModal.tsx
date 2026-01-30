@@ -65,9 +65,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
 
                 const getPriority = (item: any, title: string) => {
                     if (item.category === 'signature' || title.includes('SIGNATURE')) return 1;
-                    if (item.category === 'express' || title.includes('EXPRESS')) return 2;
                     if (title.includes('PACKAGE')) return 4;
-                    return 3;
+                    if (item.category === 'express' || title.includes('EXPRESS')) return 3;
+                    return 2; // Regular treatments
                 };
 
                 const pA = getPriority(a, aTitle);
