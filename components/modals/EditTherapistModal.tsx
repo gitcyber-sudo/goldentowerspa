@@ -56,17 +56,28 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
             // 1. Upload new Image if selected
             if (imageFile) {
                 const fileExt = imageFile.name.split('.').pop();
-                const fileName = `${Math.random()}.${fileExt}`;
+                // Use timestamp and random string to ensure uniqueness and avoid browser caching of distinct files
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+                console.log('Uploading new image:', fileName);
+
                 const { error: uploadError } = await supabase.storage
                     .from('therapist-photos')
-                    .upload(fileName, imageFile);
+                    .upload(fileName, imageFile, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
 
-                if (uploadError) throw uploadError;
+                if (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    throw uploadError;
+                }
 
                 const { data: { publicUrl } } = supabase.storage
                     .from('therapist-photos')
                     .getPublicUrl(fileName);
 
+                console.log('New image URL generated:', publicUrl);
                 imageUrl = publicUrl;
             }
 
