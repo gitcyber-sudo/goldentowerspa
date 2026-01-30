@@ -18,6 +18,31 @@ serve(async (req) => {
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         )
 
+        // Manual Session verification
+        const authHeader = req.headers.get('Authorization')
+        if (!authHeader) {
+            throw new Error('Missing Authorization header')
+        }
+
+        const token = authHeader.replace('Bearer ', '')
+        const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token)
+
+        if (userError || !user) {
+            console.error('Auth Error:', userError)
+            throw new Error('Invalid or expired session')
+        }
+
+        // Check if user is admin
+        const { data: profile, error: profileError } = await supabaseAdmin
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+
+        if (profileError || profile?.role !== 'admin') {
+            throw new Error('Unauthorized: Only admins can create/link specialist accounts')
+        }
+
         const { email, password, name, bio, specialty, image_url, existing_therapist_id } = await req.json()
 
         console.log(`Creating/Linking therapist: ${name} (${email})`)
@@ -97,7 +122,7 @@ serve(async (req) => {
         return new Response(
             JSON.stringify({ message: 'Therapist created successfully', userId }),
             {
-                \n        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 200,
             }
         )
@@ -106,7 +131,7 @@ serve(async (req) => {
         return new Response(
             JSON.stringify({ error: error.message }),
             {
-                \n        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 400,
             }
         )

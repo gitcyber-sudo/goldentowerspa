@@ -91,7 +91,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: error.message }),
       {
-      \n        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400, // Return 400 for client errors so frontend can catch it
       }
     )
