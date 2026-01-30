@@ -91,7 +91,7 @@ const TherapistLogin: React.FC = () => {
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gold/40 group-focus-within:text-gold transition-colors" size={18} />
                                     <input
                                         type="password"
-                                        placeholder="Your password"
+                                        placeholder="6-Digit Access PIN"
                                         required
                                         className="w-full bg-cream/30 border border-gold/10 pl-12 pr-4 py-4 rounded-xl focus:outline-none focus:border-gold focus:bg-white transition-all text-charcoal placeholder:text-charcoal/20"
                                         value={formData.password}
