@@ -153,6 +153,9 @@ const AdminDashboard: React.FC = () => {
         try {
             const updateData: any = { status: newStatus };
             if (therapistId) updateData.therapist_id = therapistId;
+            if (newStatus === 'completed') {
+                updateData.completed_at = new Date().toISOString();
+            }
             const { error } = await supabase.from('bookings').update(updateData).eq('id', id);
             if (error) throw error;
             setAssigningBooking(null);
@@ -259,6 +262,7 @@ const AdminDashboard: React.FC = () => {
                 booking_date: editFormData.booking_date,
                 booking_time: editFormData.booking_time,
                 status: editFormData.status,
+                completed_at: editFormData.status === 'completed' ? new Date().toISOString() : null,
                 user_email: editFormData.guest_email || editingBooking.user_email
             }).eq('id', editingBooking.id);
 

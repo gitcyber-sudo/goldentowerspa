@@ -28,6 +28,7 @@ interface Booking {
     services: { title: string; price: number };
     therapists?: { name: string };
     created_at: string;
+    completed_at?: string;
 }
 
 interface RevenueDashboardProps {
@@ -51,54 +52,48 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
     const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
     const getTimeFilter = (): { start: Date | null; end: Date | null } => {
-        // Get current time in Manila
         const now = new Date();
-        const formatter = new Intl.DateTimeFormat('en-US', {
-            timeZone: 'Asia/Manila',
-            year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-            hour12: false
-        });
-
-        const parts = formatter.formatToParts(now);
-        const map: Record<string, string> = {};
-        parts.forEach(p => map[p.type] = p.value);
-
-        // Construct a Date object that represents Manila local time
-        const manilaNow = new Date(
-            parseInt(map.year),
-            parseInt(map.month) - 1,
-            parseInt(map.day),
-            parseInt(map.hour),
-            parseInt(map.minute),
-            parseInt(map.second)
-        );
+        // A "Business Day" starts at 4 PM (16:00).
+        // If it is currently before 4 AM, "Today" in business terms is yesterday.
+        const currentHour = now.getHours();
+        const businessTodayStart = new Date(now);
+        if (currentHour < 4) {
+            businessTodayStart.setDate(businessTodayStart.getDate() - 1);
+        }
+        businessTodayStart.setHours(16, 0, 0, 0);
 
         switch (timeRange) {
             case '7d':
-                return { start: new Date(manilaNow.getTime() - 7 * 24 * 60 * 60 * 1000), end: manilaNow };
+                return { start: new Date(businessTodayStart.getTime() - 6 * 24 * 60 * 60 * 1000), end: now };
             case '30d':
-                return { start: new Date(manilaNow.getTime() - 30 * 24 * 60 * 60 * 1000), end: manilaNow };
+                return { start: new Date(businessTodayStart.getTime() - 29 * 24 * 60 * 60 * 1000), end: now };
             case '90d':
-                return { start: new Date(manilaNow.getTime() - 90 * 24 * 60 * 60 * 1000), end: manilaNow };
+                return { start: new Date(businessTodayStart.getTime() - 89 * 24 * 60 * 60 * 1000), end: now };
             case 'custom':
-                const start = new Date(customYear, customMonth, 1);
-                const end = new Date(customYear, customMonth + 1, 0, 23, 59, 59);
+                const start = new Date(customYear, customMonth, 1, 16, 0, 0);
+                const end = new Date(customYear, customMonth + 1, 0, 15, 59, 59);
                 return { start, end };
             default:
                 return { start: null, end: null };
         }
     };
 
+    // Helper to get the Business/Shift date
+    const getShiftDateLabel = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const hour = date.getHours();
+        const displayDate = new Date(date);
+        if (hour < 4) {
+            displayDate.setDate(displayDate.getDate() - 1);
+        }
+        return displayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    };
+
     const filteredBookings = useMemo(() => {
         const { start, end } = getTimeFilter();
         if (!start || !end) return bookings;
         return bookings.filter(b => {
-            const date = new Date(b.created_at);
+            const date = new Date(b.completed_at || b.created_at);
             return date >= start && date <= end;
         });
     }, [bookings, timeRange, customMonth, customYear]);
@@ -112,11 +107,11 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         const pendingRevenue = pending.reduce((sum, b) => sum + (b.services?.price || 0), 0);
         const lostRevenue = cancelled.reduce((sum, b) => sum + (b.services?.price || 0), 0);
 
-        // Calculate daily revenue
+        // Calculate shift revenue (grouped by business day)
         const dailyRevenue: Record<string, number> = {};
         completed.forEach(b => {
-            const date = new Date(b.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            dailyRevenue[date] = (dailyRevenue[date] || 0) + (b.services?.price || 0);
+            const dateLabel = getShiftDateLabel(b.completed_at || b.created_at);
+            dailyRevenue[dateLabel] = (dailyRevenue[dateLabel] || 0) + (b.services?.price || 0);
         });
 
         // Service breakdown
@@ -161,7 +156,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         const previousPeriodEnd = new Date(now.getTime() - periodLength * 24 * 60 * 60 * 1000);
 
         const previousPeriodBookings = bookings.filter(b => {
-            const date = new Date(b.created_at);
+            const date = new Date(b.completed_at || b.created_at);
             return date >= previousPeriodStart && date < previousPeriodEnd && b.status === 'completed';
         });
 
@@ -177,7 +172,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
 
             const weekBookings = completed.filter(b => {
-                const date = new Date(b.booking_date);
+                const date = new Date(b.completed_at || b.created_at);
                 return date >= weekStart && date < weekEnd;
             });
 
@@ -189,10 +184,11 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             });
         }
 
-        // Peak booking hours
+        // Peak booking hours (Based on when they occurred/finished)
         const hourCounts: Record<number, number> = {};
         completed.forEach(b => {
-            const hour = parseInt(b.booking_time.split(':')[0]);
+            const date = new Date(b.completed_at || b.created_at);
+            const hour = date.getHours();
             hourCounts[hour] = (hourCounts[hour] || 0) + 1;
         });
         const peakHours = Object.entries(hourCounts)
