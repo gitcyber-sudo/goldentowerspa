@@ -121,8 +121,8 @@ const UserDashboard: React.FC = () => {
                 `);
 
             if (user) {
-                // If logged in, prioritize user_id but also check visitor_id for orphaned bookings
-                query = query.or(`user_id.eq.${user.id},and(visitor_id.eq.${visitorId},user_id.is.null)`);
+                // If logged in, prioritize user_id but also check visitor_id or user_email for orphaned bookings
+                query = query.or(`user_id.eq.${user.id},and(visitor_id.eq.${visitorId},user_id.is.null),and(user_email.eq.${user.email},user_id.is.null)`);
             } else if (visitorId) {
                 // If guest, show only visitor bookings
                 query = query.eq('visitor_id', visitorId);
@@ -320,10 +320,10 @@ const UserDashboard: React.FC = () => {
                     <button
                         onClick={() => openFeedbackModal(booking)}
                         className={`text-sm font-bold flex items-center gap-2 px-4 py-2 rounded-full transition-all border ${(booking as any).therapist_feedback?.[0]
-                                ? (booking as any).therapist_feedback[0].edit_count >= 1
-                                    ? 'text-charcoal/40 bg-charcoal/5 border-charcoal/10 hover:bg-charcoal/10'
-                                    : 'text-gold-dark bg-gold/20 border-gold/30 hover:bg-gold/30'
-                                : 'text-gold bg-gold/10 border-gold/20 hover:bg-gold/20'
+                            ? (booking as any).therapist_feedback[0].edit_count >= 1
+                                ? 'text-charcoal/40 bg-charcoal/5 border-charcoal/10 hover:bg-charcoal/10'
+                                : 'text-gold-dark bg-gold/20 border-gold/30 hover:bg-gold/30'
+                            : 'text-gold bg-gold/10 border-gold/20 hover:bg-gold/20'
                             }`}
                     >
                         {(booking as any).therapist_feedback?.[0] ? (

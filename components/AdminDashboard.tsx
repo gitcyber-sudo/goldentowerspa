@@ -200,8 +200,19 @@ const AdminDashboard: React.FC = () => {
         }
         setLoading(true);
         try {
+            // Check if a profile exists with this email
+            let linkedUserId = null;
+            if (manualBookingData.guest_email) {
+                const { data: profileData } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('email', manualBookingData.guest_email)
+                    .single();
+                if (profileData) linkedUserId = profileData.id;
+            }
+
             const { error } = await supabase.from('bookings').insert([{
-                user_id: null,
+                user_id: linkedUserId,
                 guest_name: manualBookingData.guest_name,
                 guest_email: manualBookingData.guest_email || null,
                 guest_phone: manualBookingData.guest_phone || null,
@@ -253,7 +264,19 @@ const AdminDashboard: React.FC = () => {
 
         setLoading(true);
         try {
+            // Check if a profile exists with the potentially new email
+            let linkedUserId = editingBooking.user_id;
+            if (editFormData.guest_email && editFormData.guest_email !== (editingBooking.guest_email || editingBooking.user_email)) {
+                const { data: profileData } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('email', editFormData.guest_email)
+                    .single();
+                if (profileData) linkedUserId = profileData.id;
+            }
+
             const { error } = await supabase.from('bookings').update({
+                user_id: linkedUserId,
                 guest_name: editFormData.guest_name,
                 guest_email: editFormData.guest_email,
                 guest_phone: editFormData.guest_phone,

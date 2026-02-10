@@ -53,14 +53,14 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
 
     const getTimeFilter = (): { start: Date | null; end: Date | null } => {
         const now = new Date();
-        // A "Business Day" starts at 4 PM (16:00).
-        // If it is currently before 4 AM, "Today" in business terms is yesterday.
+        // A "Business Day" starts at 6 AM (06:00).
+        // If it is currently before 6 AM, the current shift belongs to the previous calendar day.
         const currentHour = now.getHours();
         const businessTodayStart = new Date(now);
-        if (currentHour < 4) {
+        if (currentHour < 6) {
             businessTodayStart.setDate(businessTodayStart.getDate() - 1);
         }
-        businessTodayStart.setHours(16, 0, 0, 0);
+        businessTodayStart.setHours(6, 0, 0, 0);
 
         switch (timeRange) {
             case '7d':
@@ -70,20 +70,20 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             case '90d':
                 return { start: new Date(businessTodayStart.getTime() - 89 * 24 * 60 * 60 * 1000), end: now };
             case 'custom':
-                const start = new Date(customYear, customMonth, 1, 16, 0, 0);
-                const end = new Date(customYear, customMonth + 1, 0, 15, 59, 59);
+                const start = new Date(customYear, customMonth, 1, 6, 0, 0);
+                const end = new Date(customYear, customMonth + 1, 0, 5, 59, 59);
                 return { start, end };
             default:
                 return { start: null, end: null };
         }
     };
 
-    // Helper to get the Business/Shift date
+    // Helper to get the Business/Shift date (6 AM boundary)
     const getShiftDateLabel = (dateStr: string) => {
         const date = new Date(dateStr);
         const hour = date.getHours();
         const displayDate = new Date(date);
-        if (hour < 4) {
+        if (hour < 6) {
             displayDate.setDate(displayDate.getDate() - 1);
         }
         return displayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -106,6 +106,14 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         const totalRevenue = completed.reduce((sum, b) => sum + (b.services?.price || 0), 0);
         const pendingRevenue = pending.reduce((sum, b) => sum + (b.services?.price || 0), 0);
         const lostRevenue = cancelled.reduce((sum, b) => sum + (b.services?.price || 0), 0);
+
+        // In-Spa vs Home Service Breakdown
+        const homeServiceBookings = completed.filter(b =>
+            (b.services?.title || '').toLowerCase().includes('home')
+        );
+        const homeRevenue = homeServiceBookings.reduce((sum, b) => sum + (b.services?.price || 0), 0);
+        const inSpaRevenue = totalRevenue - homeRevenue;
+        const homePercentage = totalRevenue > 0 ? (homeRevenue / totalRevenue) * 100 : 0;
 
         // Calculate shift revenue (grouped by business day)
         const dailyRevenue: Record<string, number> = {};
@@ -210,6 +218,10 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             totalRevenue,
             pendingRevenue,
             lostRevenue,
+            homeRevenue,
+            inSpaRevenue,
+            homePercentage,
+            homeCount: homeServiceBookings.length,
             completedCount: completed.length,
             pendingCount: pending.length,
             cancelledCount: cancelled.length,
@@ -631,35 +643,57 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                         <div className="bg-white/5 p-5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
                             <div className="flex items-center gap-2 mb-4">
                                 <PieChart size={16} className="text-gold" />
-                                <span className="text-xs font-bold uppercase tracking-widest text-white/60">Session Value</span>
+                                <span className="text-xs font-bold uppercase tracking-widest text-white/60">Service Mix</span>
                             </div>
                             <div className="space-y-4">
                                 <div>
                                     <div className="flex justify-between text-[10px] text-white/40 uppercase mb-1">
-                                        <span>Ritual Conversion</span>
-                                        <span>{((stats.completedCount / Math.max(filteredBookings.length, 1)) * 100).toFixed(0)}%</span>
+                                        <span>Home Service</span>
+                                        <span>{stats.homePercentage.toFixed(0)}%</span>
                                     </div>
                                     <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-gold"
-                                            style={{ width: `${(stats.completedCount / Math.max(filteredBookings.length, 1)) * 100}%` }}
+                                            style={{ width: `${stats.homePercentage}%` }}
                                         />
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex justify-between text-[10px] text-white/40 uppercase mb-1">
-                                        <span>Cancellation Rate</span>
-                                        <span>{((stats.cancelledCount / Math.max(filteredBookings.length, 1)) * 100).toFixed(0)}%</span>
+                                        <span>In-Spa Rituals</span>
+                                        <span>{(100 - stats.homePercentage).toFixed(0)}%</span>
                                     </div>
                                     <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-rose-500"
-                                            style={{ width: `${(stats.cancelledCount / Math.max(filteredBookings.length, 1)) * 100}%` }}
+                                            className="h-full bg-white/40"
+                                            style={{ width: `${100 - stats.homePercentage}%` }}
                                         />
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* In-Spa vs Home Summary Overlay */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white p-6 rounded-2xl border border-gold/10 flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] uppercase tracking-widest font-black text-charcoal/30 mb-1">In-Spa Revenue</p>
+                        <p className="text-2xl font-serif text-charcoal">₱{stats.inSpaRevenue.toLocaleString()}</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-[10px] uppercase font-bold text-gold">{stats.completedCount - stats.homeCount} Sessions</p>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-2xl border border-gold/10 flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] uppercase tracking-widest font-black text-charcoal/30 mb-1">Home Service Revenue</p>
+                        <p className="text-2xl font-serif text-gold">₱{stats.homeRevenue.toLocaleString()}</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-[10px] uppercase font-bold text-charcoal/40">{stats.homeCount} Mobilizations</p>
                     </div>
                 </div>
             </div>

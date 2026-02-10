@@ -14,7 +14,8 @@ import {
     Mail,
     Star,
     MessageSquare,
-    UserCircle
+    UserCircle,
+    MapPin
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from './LoadingScreen';
@@ -190,12 +191,19 @@ const TherapistDashboard: React.FC = () => {
                     >
                         {booking.status}
                     </span>
-                    {/* Focus Tag */}
-                    {booking.services?.title.toLowerCase().includes('massage') && (
-                        <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-gold/80 bg-gold/5 px-2 py-0.5 rounded-md border border-gold/10">
-                            <Logo className="h-3 w-3" color="#997B3D" /> Focus: Relaxation
-                        </span>
-                    )}
+                    {/* Focus Tag & Home Service Badge */}
+                    <div className="flex flex-col items-end gap-1">
+                        {booking.services?.title.toLowerCase().includes('massage') && (
+                            <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-gold/80 bg-gold/5 px-2 py-0.5 rounded-md border border-gold/10">
+                                <Logo className="h-3 w-3" color="#997B3D" /> Focus: Relaxation
+                            </span>
+                        )}
+                        {booking.services?.title.toLowerCase().includes('home') && (
+                            <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 animate-pulse">
+                                <MapPin size={10} /> Home Service
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
 
