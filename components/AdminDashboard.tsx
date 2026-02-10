@@ -551,10 +551,16 @@ const AdminDashboard: React.FC = () => {
                                             {b.status === 'completed' && feedbacks[b.id] && (
                                                 <button
                                                     onClick={() => setViewingReview({ booking: b, feedback: feedbacks[b.id] })}
-                                                    className="p-2 text-gold hover:bg-gold/10 rounded-lg transition-colors"
+                                                    className="p-2 text-gold hover:bg-gold/10 rounded-lg transition-colors group relative"
                                                     title="View Review"
                                                 >
                                                     <Star size={18} fill={feedbacks[b.id].rating >= 4 ? 'currentColor' : 'none'} />
+                                                    {feedbacks[b.id].edit_count > 0 && (
+                                                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75"></span>
+                                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-gold border border-white"></span>
+                                                        </span>
+                                                    )}
                                                 </button>
                                             )}
                                             {/* More Actions Menu */}

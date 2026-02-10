@@ -22,11 +22,14 @@ import {
     MapPin,
     Heart,
     TrendingUp,
-    Star
+    Star,
+    Shield
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from './LoadingScreen';
 import Logo from './Logo';
+import BookingModal from './BookingModal';
+import AuthModal from './AuthModal';
 
 interface Booking {
     id: string;
@@ -52,6 +55,11 @@ const UserDashboard: React.FC = () => {
     const [submittingFeedback, setSubmittingFeedback] = useState(false);
     const [existingFeedback, setExistingFeedback] = useState<any>(null);
     const [isEditMode, setIsEditMode] = useState(false);
+
+    // New Modals State
+    const [isBookingOpen, setIsBookingOpen] = useState(false);
+    const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [selectedServiceId, setSelectedServiceId] = useState<string | undefined>(undefined);
 
     const bannerRef = useRef(null);
     const statsRef = useRef(null);
@@ -194,9 +202,11 @@ const UserDashboard: React.FC = () => {
     };
 
     const submitFeedback = async () => {
-        if (!selectedBooking || !user) return;
+        if (!selectedBooking) return;
         setSubmittingFeedback(true);
         try {
+            const visitorId = localStorage.getItem('gt_visitor_id');
+
             if (isEditMode && existingFeedback) {
                 if (existingFeedback.edit_count >= 1) {
                     alert('Review can only be edited once.');
@@ -222,7 +232,8 @@ const UserDashboard: React.FC = () => {
                     .from('therapist_feedback')
                     .insert({
                         booking_id: selectedBooking.id,
-                        user_id: user.id,
+                        user_id: user?.id || null,
+                        visitor_id: visitorId,
                         therapist_id: selectedBooking.therapist_id,
                         rating,
                         comment
@@ -400,7 +411,7 @@ const UserDashboard: React.FC = () => {
                     </p>
                 </div>
                 <button
-                    onClick={() => navigate('/')}
+                    onClick={() => setIsAuthOpen(true)}
                     className="bg-gold hover:bg-gold-dark text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(197,160,89,0.3)] hover:shadow-gold/40 transform hover:-translate-y-1 flex items-center gap-2 group"
                 >
                     <User size={18} />
@@ -485,7 +496,10 @@ const UserDashboard: React.FC = () => {
                         </div>
                         <div className="flex gap-3">
                             <button
-                                onClick={() => navigate('/')}
+                                onClick={() => {
+                                    setSelectedServiceId(undefined);
+                                    setIsBookingOpen(true);
+                                }}
                                 className="flex items-center gap-2 bg-gold hover:bg-gold-dark text-white px-6 py-3 rounded-full transition-all shadow-md hover:shadow-lg font-bold uppercase tracking-widest text-[10px]"
                             >
                                 <Logo className="h-4 w-4" color="white" />
@@ -556,7 +570,10 @@ const UserDashboard: React.FC = () => {
                 {/* Quick Actions */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <button
-                        onClick={() => navigate('/')}
+                        onClick={() => {
+                            setSelectedServiceId(undefined);
+                            setIsBookingOpen(true);
+                        }}
                         className="bg-white p-4 rounded-xl border border-gold/10 hover:border-gold/30 hover:shadow-md transition-all flex items-center gap-4 group"
                     >
                         <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center group-hover:bg-gold/20 transition-all">
@@ -631,7 +648,13 @@ const UserDashboard: React.FC = () => {
                                     </div>
                                     <h3 className="font-serif text-xl text-charcoal mb-2">No Active Bookings</h3>
                                     <p className="text-charcoal/50 mb-6 max-w-sm mx-auto">Ready for some relaxation? Book your next treatment and let us take care of you.</p>
-                                    <button onClick={() => navigate('/')} className="bg-gradient-to-r from-gold to-gold-dark text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest hover:shadow-lg transition-all">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedServiceId(undefined);
+                                            setIsBookingOpen(true);
+                                        }}
+                                        className="bg-gradient-to-r from-gold to-gold-dark text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest hover:shadow-lg transition-all"
+                                    >
                                         <Logo className="h-4 w-4 inline mr-2" color="white" />
                                         Book a Treatment
                                     </button>
@@ -668,41 +691,71 @@ const UserDashboard: React.FC = () => {
 
                         <div className="p-8">
                             {isEditMode && existingFeedback?.edit_count >= 1 && (
-                                <div className="mb-6 p-4 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700 italic">
-                                    This review has already been edited and is now read-only.
+                                <div className="mb-6 p-4 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700 italic flex items-center gap-2">
+                                    <Shield size={14} />
+                                    <span>This review has already been edited and is now read-only.</span>
                                 </div>
                             )}
 
-                            <div className="flex justify-center gap-2 mb-8">
-                                {[1, 2, 3, 4, 5].map((s) => (
-                                    <button
-                                        key={s}
-                                        disabled={isEditMode && existingFeedback?.edit_count >= 1}
-                                        onClick={() => setRating(s)}
-                                        className={`transition-all ${s <= rating ? 'text-gold scale-110' : 'text-gold/20'} disabled:opacity-50`}
-                                    >
-                                        <Star size={32} fill={s <= rating ? 'currentColor' : 'none'} />
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="mb-6">
-                                <label className="block text-[10px] uppercase tracking-widest font-black text-charcoal/40 mb-2">Your Feedback</label>
+                            {/* Current / New Review Section */}
+                            <div className="mb-8">
+                                <div className="flex justify-between items-center mb-4">
+                                    <label className="block text-[10px] uppercase tracking-widest font-black text-gold mb-0">
+                                        {isEditMode ? 'Your Updated Review' : 'Your Review'}
+                                    </label>
+                                    <div className="flex gap-1">
+                                        {[1, 2, 3, 4, 5].map((s) => (
+                                            <button
+                                                key={s}
+                                                type="button"
+                                                disabled={isEditMode && existingFeedback?.edit_count >= 1}
+                                                onClick={() => setRating(s)}
+                                                className={`transition-all ${s <= rating ? 'text-gold' : 'text-gold/20'} disabled:cursor-default`}
+                                            >
+                                                <Star size={18} fill={s <= rating ? 'currentColor' : 'none'} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                                 <textarea
                                     disabled={isEditMode && existingFeedback?.edit_count >= 1}
-                                    className="w-full bg-cream/50 border border-gold/10 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-gold/20 min-h-[120px] disabled:opacity-50"
+                                    className="w-full bg-cream/50 border border-gold/10 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-gold/20 min-h-[100px] disabled:opacity-70 disabled:bg-gold/5"
                                     placeholder="Tell us about your massage session..."
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
                                 />
+                                {isEditMode && existingFeedback?.edit_count >= 1 && (
+                                    <p className="text-[9px] text-charcoal/30 mt-2 text-right">Last updated on {new Date(existingFeedback.edited_at).toLocaleDateString()}</p>
+                                )}
                             </div>
 
-                            <div className="flex gap-3">
+                            {/* History Section */}
+                            {isEditMode && existingFeedback?.edit_count >= 1 && (
+                                <div className="mt-8 pt-8 border-t border-gold/10 relative">
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-4">
+                                        <History size={16} className="text-gold/30" />
+                                    </div>
+                                    <div className="bg-charcoal/5 rounded-2xl p-5 border border-dashed border-gold/20">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-charcoal/40">Original Review</span>
+                                            <div className="flex gap-0.5">
+                                                {[1, 2, 3, 4, 5].map((s) => (
+                                                    <Star key={s} size={10} className={s <= existingFeedback.previous_rating ? 'text-gold fill-gold' : 'text-gold/10'} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-charcoal/60 leading-relaxed italic">"{existingFeedback.previous_comment}"</p>
+                                        <p className="text-[9px] text-charcoal/30 mt-3 text-right">Published on {new Date(existingFeedback.created_at).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 mt-8">
                                 <button
                                     onClick={() => setFeedbackModalOpen(false)}
                                     className="flex-1 py-4 text-xs font-bold uppercase tracking-widest text-charcoal/40 hover:text-charcoal transition-all"
                                 >
-                                    Cancel
+                                    {isEditMode && existingFeedback?.edit_count >= 1 ? 'Close' : 'Cancel'}
                                 </button>
                                 {!(isEditMode && existingFeedback?.edit_count >= 1) && (
                                     <button
@@ -718,6 +771,23 @@ const UserDashboard: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            <BookingModal
+                isOpen={isBookingOpen}
+                onClose={() => setIsBookingOpen(false)}
+                initialServiceId={selectedServiceId}
+                onAuthRequired={() => setIsAuthOpen(true)}
+            />
+
+            <AuthModal
+                isOpen={isAuthOpen}
+                onClose={() => setIsAuthOpen(false)}
+                onSuccess={() => {
+                    setIsAuthOpen(false);
+                    // Refresh if needed, though most changes are live
+                    fetchBookings();
+                }}
+            />
 
             <style dangerouslySetInnerHTML={{
                 __html: `

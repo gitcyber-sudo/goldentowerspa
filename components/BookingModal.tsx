@@ -201,7 +201,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                                 <input
                                                     required
                                                     type="text"
-                                                    placeholder="Enter your full name"
+                                                    placeholder="Enter your name"
                                                     className="w-full bg-white border border-gold/20 p-4 rounded-xl focus:outline-none focus:border-gold"
                                                     value={formData.guest_name}
                                                     onChange={(e) => setFormData({ ...formData, guest_name: e.target.value })}
