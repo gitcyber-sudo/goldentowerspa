@@ -177,7 +177,9 @@ const UserDashboard: React.FC = () => {
                 .from('therapist_feedback')
                 .select('*')
                 .eq('booking_id', booking.id)
-                .single();
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
 
             if (data) {
                 setExistingFeedback(data);
