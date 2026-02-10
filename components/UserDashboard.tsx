@@ -59,6 +59,7 @@ const UserDashboard: React.FC = () => {
     // New Modals State
     const [isBookingOpen, setIsBookingOpen] = useState(false);
     const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
     const [selectedServiceId, setSelectedServiceId] = useState<string | undefined>(undefined);
 
     const bannerRef = useRef(null);
@@ -115,7 +116,8 @@ const UserDashboard: React.FC = () => {
                 .select(`
                     *,
                     services (title, duration, price),
-                    therapists (name)
+                    therapists (name),
+                    therapist_feedback (*)
                 `);
 
             if (user) {
@@ -317,10 +319,31 @@ const UserDashboard: React.FC = () => {
                 {booking.status === 'completed' && (
                     <button
                         onClick={() => openFeedbackModal(booking)}
-                        className="text-gold hover:text-gold-dark text-sm font-bold flex items-center gap-2 bg-gold/10 px-4 py-2 rounded-full transition-all border border-gold/20"
+                        className={`text-sm font-bold flex items-center gap-2 px-4 py-2 rounded-full transition-all border ${(booking as any).therapist_feedback?.[0]
+                                ? (booking as any).therapist_feedback[0].edit_count >= 1
+                                    ? 'text-charcoal/40 bg-charcoal/5 border-charcoal/10 hover:bg-charcoal/10'
+                                    : 'text-gold-dark bg-gold/20 border-gold/30 hover:bg-gold/30'
+                                : 'text-gold bg-gold/10 border-gold/20 hover:bg-gold/20'
+                            }`}
                     >
-                        <Star size={16} fill="currentColor" />
-                        Rate Therapist
+                        {(booking as any).therapist_feedback?.[0] ? (
+                            (booking as any).therapist_feedback[0].edit_count >= 1 ? (
+                                <>
+                                    <History size={16} />
+                                    <span>Review History</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles size={16} fill="currentColor" />
+                                    <span>Update Review</span>
+                                </>
+                            )
+                        ) : (
+                            <>
+                                <Star size={16} fill="currentColor" />
+                                <span>Rate Therapist</span>
+                            </>
+                        )}
                     </button>
                 )}
             </div>
@@ -411,7 +434,10 @@ const UserDashboard: React.FC = () => {
                     </p>
                 </div>
                 <button
-                    onClick={() => setIsAuthOpen(true)}
+                    onClick={() => {
+                        setAuthMode('signup');
+                        setIsAuthOpen(true);
+                    }}
                     className="bg-gold hover:bg-gold-dark text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(197,160,89,0.3)] hover:shadow-gold/40 transform hover:-translate-y-1 flex items-center gap-2 group"
                 >
                     <User size={18} />
@@ -466,7 +492,10 @@ const UserDashboard: React.FC = () => {
                             </button>
                         ) : (
                             <button
-                                onClick={() => navigate('/')}
+                                onClick={() => {
+                                    setAuthMode('login');
+                                    setIsAuthOpen(true);
+                                }}
                                 className="flex items-center gap-2 text-gold hover:text-gold-dark transition-colors font-bold uppercase tracking-widest text-[10px] md:border-l md:border-gold/20 md:pl-6"
                             >
                                 <User size={16} />
@@ -782,6 +811,7 @@ const UserDashboard: React.FC = () => {
             <AuthModal
                 isOpen={isAuthOpen}
                 onClose={() => setIsAuthOpen(false)}
+                initialMode={authMode}
                 onSuccess={() => {
                     setIsAuthOpen(false);
                     // Refresh if needed, though most changes are live

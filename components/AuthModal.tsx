@@ -8,11 +8,19 @@ interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    initialMode?: 'login' | 'signup';
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
     const navigate = useNavigate();
-    const [isSignUp, setIsSignUp] = useState(false);
+    const [isSignUp, setIsSignUp] = React.useState(initialMode === 'signup');
+
+    // Synchronize mode when modal opens
+    React.useEffect(() => {
+        if (isOpen) {
+            setIsSignUp(initialMode === 'signup');
+        }
+    }, [isOpen, initialMode]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
