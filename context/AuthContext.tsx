@@ -64,34 +64,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (!mounted) return;
 
-            // Update session and user states
             setSession(session);
             const currentUser = session?.user ?? null;
             setUser(currentUser);
 
             if (currentUser) {
-                // Only fetch profile if it's a new login or a fresh session recovery
-                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
-                    if (fetchProfileRef.current !== currentUser.id) {
-                        fetchProfileRef.current = currentUser.id;
-                        const profileData = await fetchProfile(currentUser.id);
+                // If we already have this profile in state from initAuth, just stop loading
+                if (fetchProfileRef.current === currentUser.id && profile) {
+                    setLoading(false);
+                    return;
+                }
 
-                        // REVISION: Claim any guest bookings made on this device
-                        const visitorId = localStorage.getItem('gt_visitor_id');
-                        if (visitorId) {
-                            await claimGuestBookings(currentUser.id, currentUser.email || '', visitorId);
-                        }
+                // Otherwise, fetch it if not already fetching
+                if (fetchProfileRef.current !== currentUser.id) {
+                    setLoading(true); // Ensure loading is true while we fetch
+                    fetchProfileRef.current = currentUser.id;
+                    const profileData = await fetchProfile(currentUser.id);
 
-                        // AUTO-REDIRECT after login/session load if on home page
-                        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && (window.location.pathname === '/' || window.location.pathname === '/index.html')) {
-                            console.log(`Auto-redirecting to dashboard after ${event}...`);
-                            const r = profileData?.role || 'user';
-                            const path = r === 'admin' ? '/admin' : (r === 'therapist' ? '/therapist' : '/dashboard');
-                            window.location.replace(path);
-                        }
-                    } else {
-                        // Already fetching or loaded, just ensure loading is off
-                        setLoading(false);
+                    // Claim guest bookings (ONLY for regular users, prevent admin/therapist pollution)
+                    const visitorId = localStorage.getItem('gt_visitor_id');
+                    if (visitorId && profileData?.role === 'user') {
+                        await claimGuestBookings(currentUser.id, currentUser.email || '', visitorId);
+                    }
+
+                    // Role-based auto-redirect on home page
+                    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') &&
+                        (window.location.pathname === '/' || window.location.pathname === '/index.html')) {
+                        const r = profileData?.role || 'user';
+                        const path = r === 'admin' ? '/admin' : (r === 'therapist' ? '/therapist' : '/dashboard');
+                        console.log(`Auto-redirecting to ${path}...`);
+                        window.location.replace(path);
                     }
                 }
             } else {
@@ -183,8 +185,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (error) {
                 console.warn('Profile fetch error:', error.message);
-                const fallback = { role: 'user' };
+                // IF it's a "Not Found" error, we assume it's a new user and create a basic profile or default
                 if (error.code === 'PGRST116') {
+                    const fallback = { id: userId, role: 'user' };
                     setProfile(fallback);
                     return fallback;
                 }
@@ -199,9 +202,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return null;
         } catch (error) {
             console.error('Unexpected error during profile fetch:', error);
-            const fallback = { role: 'user' };
-            if (!profile) setProfile(fallback);
-            return fallback;
+            return null;
         } finally {
             setLoading(false);
         }
