@@ -84,26 +84,38 @@ const UserDashboard: React.FC = () => {
 
     // Data fetching logic
     useEffect(() => {
-        if (!authLoading && user) {
+        if (!authLoading) {
             fetchBookings();
-        } else if (!authLoading && !user) {
-            setLoading(false);
         }
     }, [user, authLoading]);
 
     const fetchBookings = async (retryCount = 0) => {
         setLoading(true);
         try {
-            console.log("Dashboard: Fetching for user:", user?.id);
-            const { data, error } = await supabase
+            console.log("Dashboard: Fetching for user/visitor:", user?.id || "guest");
+
+            const visitorId = localStorage.getItem('gt_visitor_id');
+
+            let query = supabase
                 .from('bookings')
                 .select(`
                     *,
                     services (title, duration, price),
                     therapists (name)
-                `)
-                .eq('user_id', user?.id)
-                .order('booking_date', { ascending: false });
+                `);
+
+            if (user) {
+                // If logged in, prioritize user_id but also check visitor_id for orphaned bookings
+                query = query.or(`user_id.eq.${user.id},and(visitor_id.eq.${visitorId},user_id.is.null)`);
+            } else if (visitorId) {
+                // If guest, show only visitor bookings
+                query = query.eq('visitor_id', visitorId);
+            } else {
+                setLoading(false);
+                return;
+            }
+
+            const { data, error } = await query.order('booking_date', { ascending: false });
 
             if (error) throw error;
 
@@ -369,6 +381,10 @@ const UserDashboard: React.FC = () => {
         return <LoadingScreen message="Restoring your session" />;
     }
 
+    /* 
+    REVISION: Dashboard is now viewable by guests to see their "Persistent Device" bookings.
+    */
+    /*
     if (!user) {
         return (
             <div className="min-h-screen bg-cream flex items-center justify-center">
@@ -379,6 +395,7 @@ const UserDashboard: React.FC = () => {
             </div>
         );
     }
+    */
 
     return (
         <div className="min-h-screen bg-[#F9F7F2]">
@@ -393,13 +410,23 @@ const UserDashboard: React.FC = () => {
                     </button>
                     <div className="flex flex-col md:flex-row items-center gap-6">
                         <p className="text-xl font-serif text-charcoal text-center md:text-left">Welcome, <span className="text-gold italic">{profile?.full_name || user.email}</span></p>
-                        <button
-                            onClick={handleSignOut}
-                            className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors font-bold uppercase tracking-widest text-[10px] md:border-l md:border-gold/20 md:pl-6"
-                        >
-                            <LogOut size={16} />
-                            <span>Sign Out</span>
-                        </button>
+                        {user ? (
+                            <button
+                                onClick={handleSignOut}
+                                className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors font-bold uppercase tracking-widest text-[10px] md:border-l md:border-gold/20 md:pl-6"
+                            >
+                                <LogOut size={16} />
+                                <span>Sign Out</span>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => navigate('/')}
+                                className="flex items-center gap-2 text-gold hover:text-gold-dark transition-colors font-bold uppercase tracking-widest text-[10px] md:border-l md:border-gold/20 md:pl-6"
+                            >
+                                <User size={16} />
+                                <span>Sign In</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             </header>

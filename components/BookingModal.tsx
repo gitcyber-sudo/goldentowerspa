@@ -26,7 +26,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
         service_id: initialServiceId || '',
         therapist_id: '',
         date: '',
-        time: ''
+        time: '',
+        guest_name: '',
+        guest_phone: ''
     });
 
     useEffect(() => {
@@ -38,11 +40,17 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
     useEffect(() => {
         if (isOpen) {
             // Check if user is authenticated
+            /* 
+               REVISION: Relaxed auth requirement.
+               Even non-registered users can book.
+            */
+            /*
             if (!user) {
                 onAuthRequired();
                 onClose();
                 return;
             }
+            */
 
             document.body.style.overflow = 'hidden';
             fetchData();
@@ -86,18 +94,25 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
     const handleBooking = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        /* 
         if (!user) {
             alert('Please sign in to book');
             onAuthRequired();
             return;
         }
+        */
+
+        const visitorId = localStorage.getItem('gt_visitor_id');
 
         setLoading(true);
 
         try {
             const { error } = await supabase.from('bookings').insert([{
-                user_id: user.id,
-                user_email: user.email,
+                user_id: user?.id || null,
+                user_email: user?.email || null,
+                guest_name: user ? profile?.full_name : formData.guest_name,
+                guest_phone: formData.guest_phone,
+                visitor_id: visitorId,
                 service_id: formData.service_id,
                 therapist_id: formData.therapist_id || null,
                 booking_date: formData.date,
@@ -141,7 +156,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                         </div>
                         <h2 className="font-serif text-4xl text-charcoal mb-4">Reservation Confirmed</h2>
                         <p className="text-charcoal-light mb-8 max-w-sm mx-auto">
-                            Your ritual at Golden Tower Spa has been requested. We will send a confirmation to {user?.email} shortly.
+                            Your ritual at Golden Tower Spa has been requested. {user?.email ? `We will send a confirmation to ${user.email} shortly.` : 'Please arrive on your selected time.'}
                         </p>
                         <button
                             onClick={onClose}
@@ -168,15 +183,45 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                         {/* Form Side */}
                         <div className="flex-1 p-8 md:p-12">
                             <form onSubmit={handleBooking} className="space-y-6">
-                                <div className="bg-gold/10 border border-gold/20 rounded-lg p-4 mb-6">
-                                    <div className="flex items-center gap-2 text-charcoal">
-                                        <User size={16} className="text-gold" />
-                                        <div>
-                                            <p className="text-xs uppercase tracking-widest font-bold text-gold">Booking for</p>
-                                            <p className="text-sm font-medium">{profile?.full_name || user?.email}</p>
+                                {user ? (
+                                    <div className="bg-gold/10 border border-gold/20 rounded-lg p-4 mb-6">
+                                        <div className="flex items-center gap-2 text-charcoal">
+                                            <User size={16} className="text-gold" />
+                                            <div>
+                                                <p className="text-xs uppercase tracking-widest font-bold text-gold">Booking for</p>
+                                                <p className="text-sm font-medium">{profile?.full_name || user?.email}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="space-y-4 mb-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="text-xs uppercase tracking-widest font-bold text-gold mb-2 block">Your Name</label>
+                                                <input
+                                                    required
+                                                    type="text"
+                                                    placeholder="Enter your full name"
+                                                    className="w-full bg-white border border-gold/20 p-4 rounded-xl focus:outline-none focus:border-gold"
+                                                    value={formData.guest_name}
+                                                    onChange={(e) => setFormData({ ...formData, guest_name: e.target.value })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs uppercase tracking-widest font-bold text-gold mb-2 block">Phone Number</label>
+                                                <input
+                                                    required
+                                                    type="tel"
+                                                    placeholder="For confirmation"
+                                                    className="w-full bg-white border border-gold/20 p-4 rounded-xl focus:outline-none focus:border-gold"
+                                                    value={formData.guest_phone}
+                                                    onChange={(e) => setFormData({ ...formData, guest_phone: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+                                        <p className="text-[10px] text-charcoal/40 italic">We use your device ID to track your booking. No account required.</p>
+                                    </div>
+                                )}
 
                                 <div className="space-y-6">
                                     <SelectionGrid

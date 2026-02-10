@@ -76,6 +76,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         fetchProfileRef.current = currentUser.id;
                         const profileData = await fetchProfile(currentUser.id);
 
+                        // REVISION: Claim any guest bookings made on this device
+                        const visitorId = localStorage.getItem('gt_visitor_id');
+                        if (visitorId) {
+                            await claimGuestBookings(currentUser.id, currentUser.email || '', visitorId);
+                        }
+
                         // AUTO-REDIRECT after login/session load if on home page
                         if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && (window.location.pathname === '/' || window.location.pathname === '/index.html')) {
                             console.log(`Auto-redirecting to dashboard after ${event}...`);
@@ -136,6 +142,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             events.forEach(event => document.removeEventListener(event, resetTimer));
         };
     }, [user]);
+
+    const claimGuestBookings = async (userId: string, email: string, visitorId: string) => {
+        try {
+            console.log("Claiming guest bookings for:", userId, "on visitor:", visitorId);
+            const { error } = await supabase
+                .from('bookings')
+                .update({
+                    user_id: userId,
+                    user_email: email
+                })
+                .eq('visitor_id', visitorId)
+                .is('user_id', null);
+
+            if (error) throw error;
+            console.log("Guest bookings successfully claimed");
+        } catch (err) {
+            console.warn("Failed to claim guest bookings:", err);
+        }
+    };
 
     const fetchProfile = async (userId: string) => {
         try {
