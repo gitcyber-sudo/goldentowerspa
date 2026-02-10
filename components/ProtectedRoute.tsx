@@ -7,9 +7,10 @@ import { useAuth } from '../context/AuthContext';
 interface ProtectedRouteProps {
     children: React.ReactNode;
     allowedRoles?: ('user' | 'therapist' | 'admin')[];
+    allowGuests?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles, allowGuests }) => {
     const { user, role, loading } = useAuth();
     const location = useLocation();
 
@@ -18,8 +19,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
         return <LoadingScreen message="Verifying access" />;
     }
 
-    // 2. If not logged in at all, go home
+    // 2. If not logged in at all:
     if (!user) {
+        // If guests are allowed (e.g. for guest dashboard), let them through
+        if (allowGuests) return <>{children}</>;
+        // Otherwise, redirect to home
         return <Navigate to="/" state={{ from: location }} replace />;
     }
 

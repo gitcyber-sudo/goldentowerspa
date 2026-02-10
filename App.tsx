@@ -144,7 +144,7 @@ const App: React.FC = () => {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['user']}>
+            <ProtectedRoute allowedRoles={['user']} allowGuests={true}>
               <UserDashboard />
             </ProtectedRoute>
           }
