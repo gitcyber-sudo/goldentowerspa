@@ -30,22 +30,19 @@ const MainLayout: React.FC<{
   setIsBookingOpen: (open: boolean) => void;
   isAuthOpen: boolean;
   setIsAuthOpen: (open: boolean) => void;
+  onLoginClick: () => void;
   selectedServiceId?: string;
   containerRef: React.RefObject<HTMLDivElement>;
-}> = ({ openBooking, isBookingOpen, setIsBookingOpen, isAuthOpen, setIsAuthOpen, selectedServiceId, containerRef }) => {
+}> = ({ openBooking, isBookingOpen, setIsBookingOpen, isAuthOpen, setIsAuthOpen, onLoginClick, selectedServiceId, containerRef }) => {
   const { user } = useAuth();
 
   const handleBookingAttempt = (serviceId?: string) => {
-    if (!user) {
-      setIsAuthOpen(true);
-    } else {
-      openBooking(serviceId);
-    }
+    openBooking(serviceId);
   };
 
   return (
     <div ref={containerRef} className="bg-cream min-h-screen w-full overflow-x-hidden selection:bg-gold selection:text-white">
-      <Header onBookClick={() => handleBookingAttempt()} />
+      <Header onBookClick={() => handleBookingAttempt()} onLoginClick={onLoginClick} />
       <main>
         <Hero onBookClick={() => handleBookingAttempt()} />
         <div className="section-reveal will-change-transform">
@@ -131,6 +128,7 @@ const App: React.FC = () => {
             setIsBookingOpen={setIsBookingOpen}
             isAuthOpen={isAuthOpen}
             setIsAuthOpen={setIsAuthOpen}
+            onLoginClick={() => setIsAuthOpen(true)}
             selectedServiceId={selectedServiceId}
             containerRef={containerRef}
           />

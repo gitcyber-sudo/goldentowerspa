@@ -7,9 +7,10 @@ import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
   onBookClick: () => void;
+  onLoginClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onBookClick }) => {
+const Header: React.FC<HeaderProps> = ({ onBookClick, onLoginClick }) => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -68,12 +69,20 @@ const Header: React.FC<HeaderProps> = ({ onBookClick }) => {
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center space-x-6">
           {!user ? (
-            <button
-              onClick={onBookClick}
-              className="bg-gold hover:bg-gold-dark text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-500 transform hover:scale-105 shadow-lg border border-white/20 hover:shadow-gold/30"
-            >
-              Login
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={onLoginClick}
+                className="text-gold hover:text-gold-dark text-xs font-bold uppercase tracking-widest transition-all duration-300"
+              >
+                Login
+              </button>
+              <button
+                onClick={onBookClick}
+                className="bg-gold hover:bg-gold-dark text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-500 transform hover:scale-105 shadow-lg border border-white/20 hover:shadow-gold/30"
+              >
+                Book Now
+              </button>
+            </div>
           ) : (
             <div className="flex items-center gap-4">
               <button
@@ -123,12 +132,20 @@ const Header: React.FC<HeaderProps> = ({ onBookClick }) => {
         {/* Mobile Action Button */}
         <div className="md:hidden flex items-center gap-2">
           {!user ? (
-            <button
-              onClick={onBookClick}
-              className="bg-gold text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg"
-            >
-              Login
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onLoginClick}
+                className="text-gold text-[10px] font-bold uppercase tracking-widest px-2"
+              >
+                Login
+              </button>
+              <button
+                onClick={onBookClick}
+                className="bg-gold text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg"
+              >
+                Book
+              </button>
+            </div>
           ) : (
             <div className="flex items-center gap-2">
               <button
