@@ -85,9 +85,15 @@ const UserDashboard: React.FC = () => {
     // Data fetching logic
     useEffect(() => {
         if (!authLoading) {
+            // Force redirect admins to /admin if they land here
+            if (user && profile?.role === 'admin') {
+                console.log("Admin detected on user dashboard, redirecting to /admin");
+                navigate('/admin');
+                return;
+            }
             fetchBookings();
         }
-    }, [user, authLoading]);
+    }, [user, profile, authLoading]);
 
     const fetchBookings = async (retryCount = 0) => {
         setLoading(true);
@@ -390,7 +396,7 @@ const UserDashboard: React.FC = () => {
                     </div>
                     <h3 className="font-serif text-3xl text-white mb-3 leading-tight">Elevate Your Experience</h3>
                     <p className="text-white/60 text-sm max-w-xl leading-relaxed">
-                        Create an account to preserve your total ritual history, earn exclusive sanctuary rewards, and enjoy faster bookings across all your devices. Your current guest bookings will be instantly linked to your new profile.
+                        Create an account to preserve your total booking history, earn exclusive rewards, and enjoy faster bookings across all your devices. Your current guest bookings will be instantly linked to your new profile.
                     </p>
                 </div>
                 <button
