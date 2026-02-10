@@ -377,6 +377,33 @@ const UserDashboard: React.FC = () => {
         );
     };
 
+    const GuestRegistrationBanner = () => (
+        <div className="bg-gradient-to-r from-charcoal to-charcoal-light rounded-2xl p-8 mb-8 relative overflow-hidden shadow-2xl group border border-gold/30">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 group-hover:bg-gold/20 transition-all duration-1000" />
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="bg-gold/20 p-2 rounded-lg">
+                            <Sparkles className="text-gold" size={20} />
+                        </div>
+                        <span className="text-gold text-xs font-black uppercase tracking-[0.3em]">Unlock Your Full Journey</span>
+                    </div>
+                    <h3 className="font-serif text-3xl text-white mb-3 leading-tight">Elevate Your Experience</h3>
+                    <p className="text-white/60 text-sm max-w-xl leading-relaxed">
+                        Create an account to preserve your total ritual history, earn exclusive sanctuary rewards, and enjoy faster bookings across all your devices. Your current guest bookings will be instantly linked to your new profile.
+                    </p>
+                </div>
+                <button
+                    onClick={() => navigate('/')}
+                    className="bg-gold hover:bg-gold-dark text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(197,160,89,0.3)] hover:shadow-gold/40 transform hover:-translate-y-1 flex items-center gap-2 group"
+                >
+                    <User size={18} />
+                    <span>Create Free Account</span>
+                </button>
+            </div>
+        </div>
+    );
+
     if (authLoading) {
         return <LoadingScreen message="Restoring your session" />;
     }
@@ -460,7 +487,6 @@ const UserDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Appointment Countdown Section */}
                 {currentBookings.length > 0 && (
                     <div className="mb-8 fade-up-item">
                         {currentBookings.map((booking) => (
@@ -468,6 +494,9 @@ const UserDashboard: React.FC = () => {
                         ))}
                     </div>
                 )}
+
+                {/* Registration Reminder for Guests */}
+                {!user && <GuestRegistrationBanner />}
 
                 {/* Stats Grid - Improved */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" ref={statsRef}>
