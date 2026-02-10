@@ -222,10 +222,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSession(null);
             setProfile(null);
 
-            // 2. Clear ONLY Supabase/Auth related keys from storage
-            // This preserves analytics (gt_visitor_id) and other app state
+            // 2. Clear Auth tokens AND the Guest Identity (to prevent cross-account pollution)
             const storageKey = `sb-${new URL((supabase as any).supabaseUrl).hostname.split('.')[0]}-auth-token`;
             localStorage.removeItem(storageKey);
+            localStorage.removeItem('gt_visitor_id'); // RESET guest identity on logout
 
             // Also clear any other potential supabase keys
             Object.keys(localStorage).forEach(key => {
