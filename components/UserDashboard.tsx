@@ -211,40 +211,19 @@ const UserDashboard: React.FC = () => {
         try {
             const visitorId = localStorage.getItem('gt_visitor_id');
 
-            if (isEditMode && existingFeedback) {
-                if (existingFeedback.edit_count >= 1) {
-                    alert('Review can only be edited once.');
-                    return;
-                }
+            const { error } = await supabase
+                .from('therapist_feedback')
+                .insert({
+                    booking_id: selectedBooking.id,
+                    user_id: user?.id || null,
+                    visitor_id: visitorId,
+                    therapist_id: selectedBooking.therapist_id,
+                    rating,
+                    comment
+                });
 
-                const { error } = await supabase
-                    .from('therapist_feedback')
-                    .update({
-                        rating,
-                        comment,
-                        previous_rating: existingFeedback.rating,
-                        previous_comment: existingFeedback.comment,
-                        edit_count: 1,
-                        edited_at: new Date().toISOString()
-                    })
-                    .eq('id', existingFeedback.id);
-
-                if (error) throw error;
-                alert('Review updated successfully!');
-            } else {
-                const { error } = await supabase
-                    .from('therapist_feedback')
-                    .insert({
-                        booking_id: selectedBooking.id,
-                        user_id: user?.id || null,
-                        visitor_id: visitorId,
-                        therapist_id: selectedBooking.therapist_id,
-                        rating,
-                        comment
-                    });
-                if (error) throw error;
-                alert('Thank you for your feedback!');
-            }
+            if (error) throw error;
+            alert('Thank you for your feedback!');
 
             setFeedbackModalOpen(false);
             setComment('');
@@ -323,24 +302,15 @@ const UserDashboard: React.FC = () => {
                     <button
                         onClick={() => openFeedbackModal(booking)}
                         className={`text-sm font-bold flex items-center gap-2 px-4 py-2 rounded-full transition-all border ${(booking as any).therapist_feedback?.[0]
-                            ? (booking as any).therapist_feedback[0].edit_count >= 1
-                                ? 'text-charcoal/40 bg-charcoal/5 border-charcoal/10 hover:bg-charcoal/10'
-                                : 'text-gold-dark bg-gold/20 border-gold/30 hover:bg-gold/30'
+                            ? 'text-charcoal/40 bg-charcoal/5 border-charcoal/10 hover:bg-charcoal/10'
                             : 'text-gold bg-gold/10 border-gold/20 hover:bg-gold/20'
                             }`}
                     >
                         {(booking as any).therapist_feedback?.[0] ? (
-                            (booking as any).therapist_feedback[0].edit_count >= 1 ? (
-                                <>
-                                    <History size={16} />
-                                    <span>Review History</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Sparkles size={16} fill="currentColor" />
-                                    <span>Update Review</span>
-                                </>
-                            )
+                            <>
+                                <History size={16} />
+                                <span>Review History</span>
+                            </>
                         ) : (
                             <>
                                 <Star size={16} fill="currentColor" />
@@ -722,10 +692,10 @@ const UserDashboard: React.FC = () => {
                         </div>
 
                         <div className="p-8">
-                            {isEditMode && existingFeedback?.edit_count >= 1 && (
+                            {isEditMode && (
                                 <div className="mb-6 p-4 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700 italic flex items-center gap-2">
                                     <Shield size={14} />
-                                    <span>This review has already been edited and is now read-only.</span>
+                                    <span>This review has been submitted and is now read-only.</span>
                                 </div>
                             )}
 
@@ -733,14 +703,14 @@ const UserDashboard: React.FC = () => {
                             <div className="mb-8">
                                 <div className="flex justify-between items-center mb-4">
                                     <label className="block text-[10px] uppercase tracking-widest font-black text-gold mb-0">
-                                        {isEditMode ? 'Your Updated Review' : 'Your Review'}
+                                        {isEditMode ? 'Your Review' : 'Rate Your Ritual'}
                                     </label>
                                     <div className="flex gap-1">
                                         {[1, 2, 3, 4, 5].map((s) => (
                                             <button
                                                 key={s}
                                                 type="button"
-                                                disabled={isEditMode && existingFeedback?.edit_count >= 1}
+                                                disabled={isEditMode}
                                                 onClick={() => setRating(s)}
                                                 className={`transition-all ${s <= rating ? 'text-gold' : 'text-gold/20'} disabled:cursor-default`}
                                             >
@@ -750,7 +720,7 @@ const UserDashboard: React.FC = () => {
                                     </div>
                                 </div>
                                 <textarea
-                                    disabled={isEditMode && existingFeedback?.edit_count >= 1}
+                                    disabled={isEditMode}
                                     className="w-full bg-cream/50 border border-gold/10 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-gold/20 min-h-[100px] disabled:opacity-70 disabled:bg-gold/5"
                                     placeholder="Tell us about your massage session..."
                                     value={comment}
@@ -787,15 +757,15 @@ const UserDashboard: React.FC = () => {
                                     onClick={() => setFeedbackModalOpen(false)}
                                     className="flex-1 py-4 text-xs font-bold uppercase tracking-widest text-charcoal/40 hover:text-charcoal transition-all"
                                 >
-                                    {isEditMode && existingFeedback?.edit_count >= 1 ? 'Close' : 'Cancel'}
+                                    {isEditMode ? 'Close' : 'Cancel'}
                                 </button>
-                                {!(isEditMode && existingFeedback?.edit_count >= 1) && (
+                                {!isEditMode && (
                                     <button
                                         onClick={submitFeedback}
-                                        disabled={submittingFeedback}
+                                        disabled={submittingFeedback || !rating}
                                         className="flex-1 bg-gold hover:bg-gold-dark text-white py-4 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg transition-all disabled:opacity-50"
                                     >
-                                        {submittingFeedback ? 'Submitting...' : isEditMode ? 'Update Review' : 'Submit Review'}
+                                        {submittingFeedback ? 'Submitting...' : 'Submit Review'}
                                     </button>
                                 )}
                             </div>
