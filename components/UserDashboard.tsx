@@ -247,6 +247,7 @@ const UserDashboard: React.FC = () => {
             setFeedbackModalOpen(false);
             setComment('');
             setRating(5);
+            await fetchBookings();
         } catch (err) {
             console.error('Error submitting feedback:', err);
             alert('Failed to submit feedback');

@@ -104,6 +104,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
 
         const visitorId = localStorage.getItem('gt_visitor_id');
 
+        if (!formData.service_id) {
+            alert('TREATMENT REQUIRED: Please choose a massage option before proceeding.');
+            return;
+        }
+
         setLoading(true);
 
         try {
