@@ -442,7 +442,9 @@ const UserDashboard: React.FC = () => {
                         <span>Return to Home</span>
                     </button>
                     <div className="flex flex-col md:flex-row items-center gap-6">
-                        <p className="text-xl font-serif text-charcoal text-center md:text-left">Welcome, <span className="text-gold italic">{profile?.full_name || user.email}</span></p>
+                        <p className="text-xl font-serif text-charcoal text-center md:text-left">
+                            Welcome, <span className="text-gold italic">{profile?.full_name || user?.email || 'Guest'}</span>
+                        </p>
                         {user ? (
                             <button
                                 onClick={handleSignOut}
