@@ -12,6 +12,7 @@ import BookingModal from './components/BookingModal';
 import AuthModal from './components/AuthModal';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
 import { Sparkles } from 'lucide-react';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 import { Routes, Route } from 'react-router-dom';
 import AdminDashboard from './components/AdminDashboard';
@@ -92,6 +93,8 @@ const MainLayout: React.FC<{
           }
         }}
       />
+
+      <PWAInstallPrompt />
     </div>
   );
 };

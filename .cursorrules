@@ -1,0 +1,9 @@
+# PROMPT:
+DO NOT use the `generate_image` tool (referred to as "nano banana") to create images automatically. 
+
+If images are needed for the UI or content:
+1. INFORM the user that image creation is required.
+2. REQUEST the user to provide the images manually.
+3. USE the provided images in the implementation.
+
+This is a global rule for this project.
