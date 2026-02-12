@@ -41,11 +41,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         // 2. Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             setSession(session);
-            setUser(session?.user ?? null);
-            if (session?.user) {
-                fetchProfile(session.user.id);
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
+
+            if (currentUser) {
+                const profileData = await fetchProfile(currentUser.id);
+
+                // Claim guest bookings
+                const visitorId = localStorage.getItem('gt_visitor_id');
+                if (visitorId && profileData?.role === 'user') {
+                    await claimGuestBookings(currentUser.id, currentUser.email || '', visitorId);
+                }
             } else {
                 setProfile(null);
                 setLoading(false);
@@ -54,6 +62,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         return () => subscription.unsubscribe();
     }, []);
+
+    const claimGuestBookings = async (userId: string, email: string, visitorId: string) => {
+        try {
+            const { error } = await supabase
+                .from('bookings')
+                .update({
+                    user_id: userId,
+                    user_email: email
+                })
+                .eq('visitor_id', visitorId)
+                .is('user_id', null);
+
+            if (error) throw error;
+            console.log("Guest bookings successfully claimed");
+        } catch (err) {
+            console.warn("Failed to claim guest bookings:", err);
+        }
+    };
 
     const fetchProfile = async (userId: string) => {
         try {
@@ -65,24 +91,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (!error && data) {
                 setProfile(data);
+                return data;
             } else {
-                // Fallback if profile trigger failed or hasn't run yet
-                setProfile({ role: 'user' });
+                const fallback = { role: 'user' };
+                setProfile(fallback);
+                return fallback;
             }
         } catch (error) {
             console.error('Error fetching profile:', error);
+            return null;
         } finally {
             setLoading(false);
         }
     };
 
     const signIn = async (email: string) => {
-        // Implement OTP or Magic Link logic here if needed, 
-        // but usually we rely on the UI component calling supabase.auth.signInWith...
+        // Implementation for manual triggers if needed
     };
 
     const signOut = async () => {
         await supabase.auth.signOut();
+        localStorage.removeItem('gt_visitor_id'); // Clear guest ID on logout to prevent pollution
         setProfile(null);
     };
 

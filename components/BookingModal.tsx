@@ -25,16 +25,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
         service_id: initialServiceId || '',
         therapist_id: '',
         date: '',
-        time: ''
+        time: '',
+        guest_name: '',
+        guest_phone: ''
     });
 
     useEffect(() => {
         if (isOpen) {
-            if (!user) {
-                onAuthRequired();
-                onClose();
-                return;
-            }
             document.body.style.overflow = 'hidden';
             fetchData();
             if (initialServiceId) {
@@ -46,7 +43,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
             setStep(1);
             setSuccess(false);
         }
-    }, [isOpen, user]);
+    }, [isOpen]);
 
     const fetchData = async () => {
         const { data: s } = await supabase.from('services').select('*');
@@ -58,9 +55,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
     const handleBooking = async () => {
         setLoading(true);
         try {
+            const visitorId = localStorage.getItem('gt_visitor_id');
             const { error } = await supabase.from('bookings').insert([{
-                user_id: user?.id,
-                user_email: user?.email,
+                user_id: user?.id || null,
+                user_email: user?.email || null,
+                guest_name: formData.guest_name || null,
+                guest_phone: formData.guest_phone || null,
+                visitor_id: visitorId,
                 service_id: formData.service_id,
                 therapist_id: formData.therapist_id || null,
                 booking_date: formData.date,
@@ -131,7 +132,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                 </div>
                                 <div className={`flex items-center gap-4 transition-opacity ${step >= 2 ? 'opacity-100' : 'opacity-30'}`}>
                                     <div className="w-8 h-8 rounded-full border border-gold flex items-center justify-center text-gold text-[10px] font-bold">02</div>
-                                    <span className="text-[10px] uppercase tracking-widest text-white font-bold">Timing & Expert</span>
+                                    <span className="text-[10px] uppercase tracking-widest text-white font-bold">Timing & Details</span>
                                 </div>
                                 <div className={`flex items-center gap-4 transition-opacity ${step >= 3 ? 'opacity-100' : 'opacity-30'}`}>
                                     <div className="w-8 h-8 rounded-full border border-gold flex items-center justify-center text-gold text-[10px] font-bold">03</div>
@@ -176,7 +177,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                             <h2 className="text-luxury text-4xl text-charcoal mb-4 italic">Inner Radiance Awaits</h2>
                                             <p className="text-charcoal/60 max-w-sm mb-12 font-light italic">
                                                 Your request has been received. We are preparing the sanctuary for your arrival.
-                                                A confirmation has been sent to your email.
+                                                A confirmation has been sent to your device.
                                             </p>
                                             <button onClick={onClose} className="btn-gold px-12 py-5">
                                                 Close & Return
@@ -212,6 +213,33 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
 
                                             {step === 2 && (
                                                 <motion.div key="step2" variants={stepVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8">
+                                                    {!user && (
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                            <div className="space-y-4">
+                                                                <label className="text-[10px] uppercase tracking-widest font-black text-gold">Name of the Soul</label>
+                                                                <input
+                                                                    type="text"
+                                                                    required
+                                                                    placeholder="Enter your name"
+                                                                    className="w-full bg-white border border-gold/10 p-5 rounded-2xl outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm"
+                                                                    value={formData.guest_name}
+                                                                    onChange={(e) => setFormData({ ...formData, guest_name: e.target.value })}
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-4">
+                                                                <label className="text-[10px] uppercase tracking-widest font-black text-gold">Phone Number</label>
+                                                                <input
+                                                                    type="tel"
+                                                                    required
+                                                                    placeholder="For confirmation"
+                                                                    className="w-full bg-white border border-gold/10 p-5 rounded-2xl outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm"
+                                                                    value={formData.guest_phone}
+                                                                    onChange={(e) => setFormData({ ...formData, guest_phone: e.target.value })}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
+
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                         <div className="space-y-4">
                                                             <label className="text-[10px] uppercase tracking-widest font-black text-gold">The Specialist</label>
@@ -258,7 +286,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                                         </div>
                                                         <button
                                                             onClick={() => setStep(3)}
-                                                            disabled={!formData.date || !formData.time}
+                                                            disabled={!formData.date || !formData.time || (!user && (!formData.guest_name || !formData.guest_phone))}
                                                             className="btn-gold py-3 px-8 text-[10px]"
                                                         >
                                                             Review Details
