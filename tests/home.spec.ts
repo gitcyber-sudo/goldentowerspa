@@ -13,17 +13,17 @@ test.describe('Golden Tower Spa - Home Page', () => {
   test('should display navigation menu', async ({ page }) => {
     const navigation = page.locator('nav');
     await expect(navigation).toBeVisible();
-    
+
     // Check for navigation links
     await expect(page.getByRole('link', { name: 'Home' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Services' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Book Now' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Services' })).toBeVisible();
   });
 
   test('should have responsive design on mobile', async ({ page }) => {
     // Test mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
-    
+
     const mobileMenu = page.locator('[data-testid="mobile-menu"]');
     await expect(mobileMenu).toBeVisible();
   });

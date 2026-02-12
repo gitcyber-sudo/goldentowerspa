@@ -76,12 +76,7 @@ const Header: React.FC<HeaderProps> = ({ onBookClick, onLoginClick }) => {
               >
                 Login
               </button>
-              <button
-                onClick={onBookClick}
-                className="bg-gold hover:bg-gold-dark text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-500 transform hover:scale-105 shadow-lg border border-white/20 hover:shadow-gold/30"
-              >
-                Book Now
-              </button>
+
               <button
                 onClick={() => navigate('/dashboard')}
                 className="text-gold hover:text-gold-dark text-xs font-bold uppercase tracking-widest transition-all duration-300 flex items-center gap-1.5"
@@ -154,12 +149,7 @@ const Header: React.FC<HeaderProps> = ({ onBookClick, onLoginClick }) => {
                 <Calendar size={12} />
                 <span>Bookings</span>
               </button>
-              <button
-                onClick={onBookClick}
-                className="bg-gold text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg"
-              >
-                Book
-              </button>
+
             </div>
           ) : (
             <div className="flex items-center gap-2">
