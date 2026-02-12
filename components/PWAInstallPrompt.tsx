@@ -1,25 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Sparkles } from 'lucide-react';
+import { Download, X, Sparkles, Share } from 'lucide-react';
 
 export const PWAInstallPrompt: React.FC = () => {
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
     const [showPrompt, setShowPrompt] = useState(false);
+    const [isIOS, setIsIOS] = useState(false);
 
     useEffect(() => {
+        // Detect iOS
+        const isIphone = /iPhone|iPad|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
+
+        setIsIOS(isIphone);
+
         const handler = (e: any) => {
             // Prevent the mini-infobar from appearing on mobile
             e.preventDefault();
             // Stash the event so it can be triggered later.
             setDeferredPrompt(e);
-            // Automatically show our custom prompt after a short delay
-            setTimeout(() => setShowPrompt(true), 3000);
+            // Automatically show our custom prompt after a short delay for non-iOS
+            if (!isStandalone) {
+                setTimeout(() => setShowPrompt(true), 3000);
+            }
         };
 
         window.addEventListener('beforeinstallprompt', handler);
 
-        // Check if app is already installed
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            setShowPrompt(false);
+        // For iOS, which doesn't fire beforeinstallprompt, we show the prompt manually if not standalone
+        if (isIphone && !isStandalone) {
+            setTimeout(() => setShowPrompt(true), 3000);
         }
 
         return () => window.removeEventListener('beforeinstallprompt', handler);
@@ -62,19 +71,40 @@ export const PWAInstallPrompt: React.FC = () => {
 
                     <div className="flex-1 pr-4">
                         <h3 className="text-xl font-serif font-bold text-charcoal mb-2 leading-tight">
-                            Bring the Luxury to Your Home Screen
+                            {isIOS ? 'Install on your iPhone' : 'Bring the Luxury to Your Home Screen'}
                         </h3>
-                        <p className="text-charcoal/60 text-sm mb-6 leading-relaxed">
-                            Install the Golden Tower Spa app today for faster booking and exclusive premium offers.
-                        </p>
 
-                        <button
-                            onClick={handleInstallClick}
-                            className="w-full bg-gold hover:bg-gold/90 text-white font-medium py-3.5 px-6 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-lg shadow-gold/20"
-                        >
-                            <Download className="w-5 h-5" />
-                            <span>Install Now</span>
-                        </button>
+                        {isIOS ? (
+                            <div className="text-charcoal/60 text-sm mb-4 space-y-3 leading-relaxed">
+                                <p>To install Golden Tower Spa for the best experience:</p>
+                                <div className="flex items-center gap-3 bg-gold/5 p-3 rounded-xl border border-gold/10">
+                                    <div className="bg-white p-1.5 rounded-lg shadow-sm">
+                                        <Share className="w-5 h-5 text-blue-500" />
+                                    </div>
+                                    <span>Tap the <strong>Share</strong> button below</span>
+                                </div>
+                                <div className="flex items-center gap-3 bg-gold/5 p-3 rounded-xl border border-gold/10">
+                                    <div className="bg-white p-2 rounded-lg shadow-sm">
+                                        <span className="text-xl font-bold text-charcoal">+</span>
+                                    </div>
+                                    <span>Scroll down and select <strong>Add to Home Screen</strong></span>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-charcoal/60 text-sm mb-6 leading-relaxed">
+                                Install the Golden Tower Spa app today for faster booking and exclusive premium offers.
+                            </p>
+                        )}
+
+                        {!isIOS && (
+                            <button
+                                onClick={handleInstallClick}
+                                className="w-full bg-gold hover:bg-gold/90 text-white font-medium py-3.5 px-6 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-lg shadow-gold/20"
+                            >
+                                <Download className="w-5 h-5" />
+                                <span>Install Now</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
