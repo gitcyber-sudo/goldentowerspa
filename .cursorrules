@@ -6,4 +6,11 @@ If images are needed for the UI or content:
 2. REQUEST the user to provide the images manually.
 3. USE the provided images in the implementation.
 
-This is a global rule for this project.
+## AVIATION SAFETY PROTOCOL (GOVERNANCE)
+Every agent MUST follow these "Flight Rules" for project continuity:
+1. **Pre-flight Check**: Read `PROJECT_PLAN.md` and `AGENTS.md` before starting work.
+2. **Flight Recorder**: Initialize every task in `MISSION_LOG.md` and update it upon completion.
+3. **Plan Sync**: Update `PROJECT_PLAN.md` if any structural changes are made to the roadmap.
+4. **Log Maintenance**: Append every bug fix or milestone to `PROJECT_LOG.md` immediately upon completion.
+
+Failure to maintain these logs is considered an "Aviation Safety Violation."

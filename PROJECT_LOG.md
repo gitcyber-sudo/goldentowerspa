@@ -27,6 +27,6 @@
 - **Action Taken**: Swapped the positions of the `Revenue Trend` and `Therapist Performance` components in `RevenueDashboard.tsx`. Therapist performance is now aligned horizontally with top services.
 - **Result/Lesson**: Improved visual hierarchy by grouping specialist performance data with service metrics, providing a more cohesive overview of key business drivers.
 
-### [2026-02-13] Protocol Rename
-- **Action Taken**: Renamed `.agent/rules/flight_protocols.md` to `.agent/rules/PROJECT_PROTOCOLS.md`.
-- **Result/Lesson**: Aligned file naming convention with `PROJECT_PLAN` and `PROJECT_LOG`.
+### [2026-02-13] Fixed Therapist Role Assignment & Trigger
+- **Action Taken**: Identified role mismatch in `profiles` table caused by hardcoded `handle_new_user()` trigger. Updated trigger to respect `user_metadata` role and manually updated Owen's account.
+- **Result/Lesson**: Resolved login failure for Owen and future-proofed specialist account creation. Learned to verify database triggers earlier in authentication debugging.
