@@ -140,8 +140,8 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
           </div>
           <div ref={titleLine2Ref} className="font-bold tracking-[0.2em] mt-2 relative" style={{
             color: '#FFFFFF',
-            textShadow: '0 0 40px rgba(197,160,89,0.6), 0 0 80px rgba(197,160,89,0.3), 0 4px 20px rgba(0,0,0,0.8)',
-            WebkitTextStroke: '1px rgba(197,160,89,0.3)',
+            textShadow: '0 0 20px rgba(197,160,89,0.9), 0 0 60px rgba(197,160,89,0.7), 0 0 120px rgba(197,160,89,0.4), 0 0 200px rgba(197,160,89,0.2), 0 4px 20px rgba(0,0,0,0.8)',
+            WebkitTextStroke: '1px rgba(197,160,89,0.4)',
           }}>
             Spa
             {/* Decorative line */}
