@@ -25,12 +25,11 @@ const ExpressSection: React.FC<ExpressSectionProps> = ({ expressMassages, onBook
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    // Desktop Animation Only
+    // Desktop Animation
     useEffect(() => {
         if (loading || !expressMassages.length || window.innerWidth < 768) return;
 
         const ctx = gsap.context(() => {
-            // Simple fade up for desktop container
             gsap.from(containerRef.current, {
                 scrollTrigger: {
                     trigger: containerRef.current,
@@ -43,6 +42,57 @@ const ExpressSection: React.FC<ExpressSectionProps> = ({ expressMassages, onBook
         });
 
         return () => ctx.revert();
+    }, [loading, expressMassages]);
+
+    // Mobile 3D Cover Flow Animation
+    useEffect(() => {
+        if (loading || !expressMassages.length || window.innerWidth >= 768 || !scrollContainerRef.current) return;
+
+        const container = scrollContainerRef.current;
+        const cards = gsap.utils.toArray('.mobile-express-card') as HTMLElement[];
+
+        // Initial setup
+        gsap.set(container, {
+            perspective: 1000,
+            transformStyle: "preserve-3d"
+        });
+
+        const updateCards = () => {
+            const centerPoint = container.scrollLeft + container.offsetWidth / 2;
+
+            cards.forEach((card) => {
+                const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+                const dist = centerPoint - cardCenter;
+
+                // Normalize distance based on viewport width
+                const normalize = Math.abs(dist) / (container.offsetWidth * 0.65);
+                const factor = Math.min(Math.max(normalize, 0), 1);
+
+                const scale = 1 - (factor * 0.15);    // 1.0 -> 0.85
+                // Rotate: Left cards rotate Y+, Right cards rotate Y-
+                const rotation = dist > 0 ? 30 * factor : -30 * factor;
+
+                const opacity = 1 - (factor * 0.3);   // 1.0 -> 0.7
+                const zIndex = 100 - Math.round(factor * 100);
+
+                gsap.set(card, {
+                    transform: `scale(${scale}) rotateY(${rotation}deg)`,
+                    opacity: opacity,
+                    zIndex: zIndex,
+                    filter: `grayscale(${factor * 0.8}) brightness(${1 - factor * 0.2})`,
+                    transformOrigin: "center center",
+                    overwrite: "auto"
+                });
+            });
+        };
+
+        container.addEventListener('scroll', updateCards);
+        updateCards();
+        setTimeout(updateCards, 100); // settling
+
+        return () => {
+            container.removeEventListener('scroll', updateCards);
+        };
     }, [loading, expressMassages]);
 
     if (loading) return null;
@@ -118,13 +168,14 @@ const ExpressSection: React.FC<ExpressSectionProps> = ({ expressMassages, onBook
                     <div className="md:hidden relative w-screen -ml-6">
                         <div
                             ref={scrollContainerRef}
-                            className="flex overflow-x-auto snap-x snap-mandatory gap-4 px-6 pb-12 w-full no-scrollbar relative z-20"
+                            className="flex overflow-x-auto snap-x snap-mandatory gap-4 px-6 pb-12 w-full no-scrollbar relative z-20 py-8"
                             style={{ scrollBehavior: 'smooth' }}
                         >
                             {expressMassages.map((service, index) => (
                                 <div
                                     key={service.id}
-                                    className="snap-center shrink-0 w-[85vw]"
+                                    className="mobile-express-card snap-center shrink-0 w-[75vw] perspective-1000"
+                                    style={{ willChange: 'transform, opacity, filter' }}
                                 >
                                     <div className="bg-[#111111] border border-gold/30 rounded-[2.5rem] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.6)] h-full flex flex-col ring-1 ring-white/5 relative overflow-hidden group">
                                         {/* Card Glow Effect */}
@@ -170,13 +221,15 @@ const ExpressSection: React.FC<ExpressSectionProps> = ({ expressMassages, onBook
                             ))}
 
                             {/* Spacer at the end for comfortable scrolling */}
-                            <div className="w-2 shrink-0"></div>
+                            <div className="w-6 shrink-0"></div>
                         </div>
 
-                        {/* Scroll Indicator Hint */}
-                        <div className="absolute top-1/2 -right-2 transform -translate-y-1/2 z-30 pointer-events-none animate-pulse opacity-50">
-                            <div className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10">
-                                <ChevronRight className="text-gold w-6 h-6" />
+                        {/* Scroll Indicator Hint - Renovated */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center gap-2 w-full">
+                            <div className="bg-gold/90 backdrop-blur-md text-[#1A1A1A] px-6 py-2 rounded-full border border-white/20 shadow-[0_4px_20px_rgba(197,160,89,0.3)] flex items-center gap-3 animate-pulse-slow">
+                                <ChevronRight className="w-4 h-4 rotate-180 opacity-50" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Swipe to Explore</span>
+                                <ChevronRight className="w-4 h-4" />
                             </div>
                         </div>
                     </div>
