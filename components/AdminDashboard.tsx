@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSEO } from '../hooks/useSEO';
 import { formatTimeTo12h } from '../lib/utils';
 import {
     Calendar,
@@ -60,6 +61,10 @@ interface Booking {
 }
 
 const AdminDashboard: React.FC = () => {
+    useSEO({
+        title: 'Admin Command Center',
+        description: 'Secure administrative portal for Golden Tower Spa management and business analytics.'
+    });
     const { user, role, loading: authLoading, signOut } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('dashboard');

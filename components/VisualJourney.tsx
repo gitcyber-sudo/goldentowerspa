@@ -99,7 +99,8 @@ const VisualJourney: React.FC = () => {
           >
             <img
               src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070&auto=format&fit=crop"
-              alt="Center Spa Moment"
+              alt="Central Spa Experience Moment"
+              loading="lazy"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/5">
@@ -121,7 +122,8 @@ const VisualJourney: React.FC = () => {
             >
               <img
                 src={img.src}
-                alt={`Gallery ${i}`}
+                alt={`Spa Journey Gallery Item ${i + 1}`}
+                loading="lazy"
                 className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000"
               />
             </div>

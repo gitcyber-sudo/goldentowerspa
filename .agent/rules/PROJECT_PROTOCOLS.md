@@ -1,4 +1,4 @@
-# Flight Protocols (Agent Rules)
+# Project Protocols (Agent Rules)
 
 ## 1. Pre-flight Check
 - **Mandatory:** At the start of every session (or when context is lost), you MUST read `AGENTS.md` and `PROJECT_PLAN.md` to ground yourself in the user's profile and current objectives.

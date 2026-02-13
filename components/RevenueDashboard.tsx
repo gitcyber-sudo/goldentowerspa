@@ -35,7 +35,7 @@ interface RevenueDashboardProps {
     bookings: Booking[];
 }
 
-type TimeRange = '7d' | '30d' | '90d' | 'all' | 'custom';
+type TimeRange = 'today' | '7d' | '30d' | '90d' | 'all' | 'custom';
 
 const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
     const [timeRange, setTimeRange] = useState<TimeRange>('30d');
@@ -63,6 +63,8 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         businessTodayStart.setHours(6, 0, 0, 0);
 
         switch (timeRange) {
+            case 'today':
+                return { start: businessTodayStart, end: now };
             case '7d':
                 return { start: new Date(businessTodayStart.getTime() - 6 * 24 * 60 * 60 * 1000), end: now };
             case '30d':
@@ -79,6 +81,14 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
     };
 
     // Helper to get the Business/Shift date (6 AM boundary)
+    const formatTimeTo12h = (time24h: string) => {
+        const [hours, minutes] = time24h.split(':');
+        const h = parseInt(hours);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const displayH = h % 12 || 12;
+        return `${displayH}:${minutes} ${ampm}`;
+    };
+
     const getShiftDateLabel = (dateStr: string) => {
         const date = new Date(dateStr);
         const hour = date.getHours();
@@ -214,6 +224,18 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         const totalClients = Object.keys(userBookings).length;
         const retentionRate = totalClients > 0 ? (returningClients / totalClients) * 100 : 0;
 
+        // Enhanced Metrics: Sessions per Client
+        const avgSessionsPerClient = totalClients > 0 ? (bookings.length / totalClients).toFixed(1) : '0';
+
+        // Enhanced Metrics: Wait Time (Booking Creation vs Booking Date/Time)
+        // This is simplified as "Lead Time"
+        const leadTimes = filteredBookings.map(b => {
+            const createdDate = new Date(b.created_at);
+            const bookingDate = new Date(`${b.booking_date}T${b.booking_time}`);
+            return (bookingDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60); // In hours
+        }).filter(lt => lt > 0);
+        const avgLeadTime = leadTimes.length > 0 ? (leadTimes.reduce((s, v) => s + v, 0) / leadTimes.length).toFixed(1) : '0';
+
         return {
             totalRevenue,
             pendingRevenue,
@@ -233,7 +255,9 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             weeklyRevenue,
             peakHours,
             retentionRate,
-            totalClients
+            totalClients,
+            avgSessionsPerClient,
+            avgLeadTime
         };
     }, [filteredBookings, bookings, timeRange, customMonth, customYear]);
 
@@ -431,6 +455,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                             onChange={(e) => setTimeRange(e.target.value as TimeRange)}
                             className="appearance-none bg-white border border-gold/20 rounded-xl px-3 md:px-4 py-2 pr-8 md:pr-10 text-xs md:text-sm font-medium text-charcoal focus:outline-none focus:border-gold"
                         >
+                            <option value="today">Today</option>
                             <option value="7d">Last 7 Days</option>
                             <option value="30d">Last 30 Days</option>
                             <option value="90d">Last 90 Days</option>
@@ -624,52 +649,40 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                             </div>
                         </div>
 
-                        {/* Client Retention */}
+                        {/* Client Loyalty */}
                         <div className="bg-white/5 p-5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
                             <div className="flex items-center gap-2 mb-4">
                                 <Users size={16} className="text-gold" />
                                 <span className="text-xs font-bold uppercase tracking-widest text-white/60">Client Loyalty</span>
                             </div>
-                            <div className="text-center py-2">
-                                <p className="text-3xl font-serif text-gold mb-1">{stats.retentionRate.toFixed(1)}%</p>
-                                <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">Retention Rate</p>
+                            <div className="text-center py-2 flex items-center justify-around">
+                                <div>
+                                    <p className="text-2xl font-serif text-gold mb-1">{stats.retentionRate.toFixed(1)}%</p>
+                                    <p className="text-[8px] text-white/40 uppercase tracking-widest font-black">Retention</p>
+                                </div>
+                                <div className="w-px h-8 bg-white/10" />
+                                <div>
+                                    <p className="text-2xl font-serif text-gold mb-1">{stats.avgSessionsPerClient}</p>
+                                    <p className="text-[8px] text-white/40 uppercase tracking-widest font-black">Sess/Client</p>
+                                </div>
                             </div>
                             <div className="mt-4 pt-4 border-t border-white/5 flex justify-between text-[10px] text-white/60">
                                 <span>{stats.totalClients} Total Clients</span>
                             </div>
                         </div>
 
-                        {/* Conversion & Value */}
+                        {/* Booking Lead Time */}
                         <div className="bg-white/5 p-5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
                             <div className="flex items-center gap-2 mb-4">
-                                <PieChart size={16} className="text-gold" />
-                                <span className="text-xs font-bold uppercase tracking-widest text-white/60">Service Mix</span>
+                                <Activity size={16} className="text-gold" />
+                                <span className="text-xs font-bold uppercase tracking-widest text-white/60">Lead Time Analysis</span>
                             </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <div className="flex justify-between text-[10px] text-white/40 uppercase mb-1">
-                                        <span>Home Service</span>
-                                        <span>{stats.homePercentage.toFixed(0)}%</span>
-                                    </div>
-                                    <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-gold"
-                                            style={{ width: `${stats.homePercentage}%` }}
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between text-[10px] text-white/40 uppercase mb-1">
-                                        <span>In-Spa Rituals</span>
-                                        <span>{(100 - stats.homePercentage).toFixed(0)}%</span>
-                                    </div>
-                                    <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-white/40"
-                                            style={{ width: `${100 - stats.homePercentage}%` }}
-                                        />
-                                    </div>
-                                </div>
+                            <div className="text-center py-2">
+                                <p className="text-3xl font-serif text-gold mb-1">{stats.avgLeadTime}h</p>
+                                <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">Avg. Booking Lead</p>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-white/5 flex justify-between text-[10px] text-white/60">
+                                <span>Prep time efficiency</span>
                             </div>
                         </div>
                     </div>

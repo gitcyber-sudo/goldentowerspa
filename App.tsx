@@ -23,6 +23,7 @@ import { useAuth } from './context/AuthContext';
 import { AnalyticsProvider } from './context/AnalyticsContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
+import { useSEO } from './hooks/useSEO';
 // import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const MainLayout: React.FC<{
@@ -35,6 +36,10 @@ const MainLayout: React.FC<{
   selectedServiceId?: string;
   containerRef: React.RefObject<HTMLDivElement>;
 }> = ({ openBooking, isBookingOpen, setIsBookingOpen, isAuthOpen, setIsAuthOpen, onLoginClick, selectedServiceId, containerRef }) => {
+  useSEO({
+    title: 'Luxury Wellness & Traditional Hilot',
+    description: 'The premier destination for traditional Hilot massage and luxury wellness treatments in Quezon City. Book your path to tranquility today.'
+  });
   const { user } = useAuth();
 
   const handleBookingAttempt = (serviceId?: string) => {

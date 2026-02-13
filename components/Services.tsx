@@ -137,7 +137,12 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                     }`}
                 >
                   <div className={`relative h-[300px] w-full overflow-hidden mb-6 rounded-lg ${service.title.toLowerCase().includes('signature') ? 'shimmer-effect' : ''}`}>
-                    <img src={service.image_url} alt={service.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                    <img
+                      src={service.image_url}
+                      alt={`Luxury treatment: ${service.title}`}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                    />
                     <div className="absolute bottom-4 right-4 bg-gold text-white px-3 py-1 text-sm font-bold shadow-md">P {service.price}</div>
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] uppercase font-bold tracking-widest">{service.duration}</div>
                   </div>
@@ -176,7 +181,12 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                   className="group card-express p-4 rounded-xl reveal"
                 >
                   <div className="relative h-[240px] w-full overflow-hidden mb-6 rounded-lg">
-                    <img src={service.image_url} alt={service.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                    <img
+                      src={service.image_url}
+                      alt={`Express therapy: ${service.title}`}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                    />
                     <div className="absolute bottom-4 right-4 bg-gold text-white px-3 py-1 text-sm font-bold shadow-md">P {service.price}</div>
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] uppercase font-bold tracking-widest">30 MIN</div>
                   </div>

@@ -162,7 +162,8 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
 
                   <img
                     src={member.image_url || `https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=1000&auto=format&fit=crop`}
-                    alt={member.name}
+                    alt={`Wellness Specialist: ${member.name}`}
+                    loading="lazy"
                     className="w-full h-full object-cover grayscale-[15%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110"
                   />
 

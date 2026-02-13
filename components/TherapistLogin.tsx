@@ -3,9 +3,14 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { User, Lock, Loader2, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useSEO } from '../hooks/useSEO';
 import Logo from './Logo';
 
 const TherapistLogin: React.FC = () => {
+    useSEO({
+        title: 'Therapist Access',
+        description: 'Secure login for Golden Tower Spa wellness specialists.'
+    });
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);

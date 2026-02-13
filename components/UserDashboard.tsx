@@ -30,6 +30,7 @@ import LoadingScreen from './LoadingScreen';
 import Logo from './Logo';
 import BookingModal from './BookingModal';
 import AuthModal from './AuthModal';
+import { useSEO } from '../hooks/useSEO';
 
 interface Booking {
     id: string;
@@ -43,6 +44,10 @@ interface Booking {
 }
 
 const UserDashboard: React.FC = () => {
+    useSEO({
+        title: 'Guest & Member Dashboard',
+        description: 'Manage your wellness bookings, track rewards, and view your massage ritual history.'
+    });
     const { user, profile, role, signOut, loading: authLoading } = useAuth();
     const navigate = useNavigate();
     const [bookings, setBookings] = useState<Booking[]>([]);

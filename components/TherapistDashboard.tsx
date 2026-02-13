@@ -18,6 +18,7 @@ import {
     MapPin
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useSEO } from '../hooks/useSEO';
 import LoadingScreen from './LoadingScreen';
 import Logo from './Logo';
 
@@ -41,6 +42,10 @@ interface Booking {
 }
 
 const TherapistDashboard: React.FC = () => {
+    useSEO({
+        title: 'Specialist Workstation',
+        description: 'Professional dashboard for Golden Tower Spa therapists to manage schedules and client care.'
+    });
     const { user, profile, signOut } = useAuth();
     const navigate = useNavigate();
     const [bookings, setBookings] = useState<Booking[]>([]);

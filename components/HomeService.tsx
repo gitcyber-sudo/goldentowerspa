@@ -84,7 +84,8 @@ const HomeService: React.FC<HomeServiceProps> = ({ onBookClick }) => {
                         <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-3xl border border-gold/20 shadow-2xl">
                             <img
                                 src={service.image_url}
-                                alt={service.title}
+                                alt={`Golden Tower Spa Home Service: ${service.title}`}
+                                loading="lazy"
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3000ms]"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent"></div>

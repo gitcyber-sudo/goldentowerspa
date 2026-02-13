@@ -10,5 +10,4 @@
 - **Tone:** Professional, direct, and slightly technical (like a Technical Manual).
 - **Safety:** Always create a backup or a comment before refactoring large blocks of code.
 
-## Special Equipment
-- I own an electric motor pump (220V, 60Hz, 2HP, 3450 RPM). We may use its specs for data analysis practice.
+

@@ -108,11 +108,11 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
       {/* Background Image with Parallax & Zoom */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div ref={bgWrapperRef} className="absolute inset-0 w-full h-[120%] -top-[10%]">
-          <div
-            className={`w-full h-full bg-cover bg-center hero-bg ${isMounted ? 'zoomed' : ''}`}
-            style={{
-              backgroundImage: "url('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070&auto=format&fit=crop')"
-            }}
+          <img
+            src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070&auto=format&fit=crop"
+            alt="Golden Tower Spa Hero Background"
+            fetchpriority="high"
+            className={`w-full h-full object-cover hero-bg ${isMounted ? 'zoomed' : ''}`}
           />
         </div>
         {/* Cinematic Overlays */}

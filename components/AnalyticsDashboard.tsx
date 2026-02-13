@@ -64,6 +64,11 @@ const AnalyticsDashboard: React.FC = () => {
     const getTimeFilter = () => {
         const now = new Date();
         switch (timeRange) {
+            case 'today': {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return today.toISOString();
+            }
             case '24h':
                 return new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
             case '7d':
@@ -243,20 +248,22 @@ const AnalyticsDashboard: React.FC = () => {
     };
 
     const MiniBarChart = ({ data }: { data: Record<string, number> }) => {
-        const entries = Object.entries(data).slice(-7);
+        const entries = Object.entries(data);
         const max = Math.max(...entries.map(([, v]) => v), 1);
 
         return (
-            <div className="flex items-end gap-1 h-20">
-                {entries.map(([date, value]) => (
-                    <div key={date} className="flex-1 flex flex-col items-center">
-                        <div
-                            className="w-full bg-gradient-to-t from-gold to-gold/60 rounded-t transition-all duration-300 hover:from-gold/80"
-                            style={{ height: `${(value / max) * 100}%`, minHeight: '4px' }}
-                        />
-                        <span className="text-[8px] text-charcoal/40 mt-1 truncate w-full text-center">{date.split(' ')[1]}</span>
-                    </div>
-                ))}
+            <div className="overflow-x-auto no-scrollbar pb-2">
+                <div className="flex items-end gap-1 h-20 min-w-full" style={{ width: entries.length > 7 ? `${entries.length * 30}px` : '100%' }}>
+                    {entries.map(([date, value]) => (
+                        <div key={date} className="flex-1 min-w-[25px] flex flex-col items-center">
+                            <div
+                                className="w-full bg-gradient-to-t from-gold to-gold/60 rounded-t transition-all duration-300 hover:from-gold/80"
+                                style={{ height: `${(value / max) * 100}%`, minHeight: '4px' }}
+                            />
+                            <span className="text-[8px] text-charcoal/40 mt-1 truncate w-full text-center">{date.split(' ')[1]}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     };
@@ -313,6 +320,7 @@ const AnalyticsDashboard: React.FC = () => {
                             onChange={(e) => setTimeRange(e.target.value as TimeRange)}
                             className="appearance-none bg-white border border-gold/20 rounded-xl px-4 py-2 pr-10 text-sm font-medium text-charcoal focus:outline-none focus:border-gold"
                         >
+                            <option value="today">Today</option>
                             <option value="24h">Last 24 Hours</option>
                             <option value="7d">Last 7 Days</option>
                             <option value="30d">Last 30 Days</option>
