@@ -104,7 +104,7 @@ const Sanctuary: React.FC = () => {
                                         <MapPin size={22} className="text-gold" />
                                     </div>
                                     <div className="flex-1">
-                                        <span className="font-bold text-sm tracking-wide block">Navigate to Your Sanctuary</span>
+                                        <span className="font-bold text-sm tracking-wide block">Click here for directions</span>
                                         <span className="text-[11px] text-white/50 font-light">Opens in Google Maps · Just minutes away</span>
                                     </div>
                                     <ArrowUpRight size={20} className="text-gold group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform flex-shrink-0" />
