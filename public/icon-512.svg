@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background gradient -->
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#1E1A14"/>
+      <stop offset="100%" stop-color="#0D0B08"/>
+    </radialGradient>
+    <!-- Gold gradient for logo -->
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D4A84B"/>
+      <stop offset="40%" stop-color="#F2D98B"/>
+      <stop offset="60%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#997B3D"/>
+    </linearGradient>
+    <!-- Subtle glow -->
+    <radialGradient id="glow" cx="50%" cy="45%" r="35%">
+      <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Ring gradient -->
+    <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#997B3D" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#C9A84C" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+
+  <!-- Subtle inner border -->
+  <rect x="3" y="3" width="506" height="506" rx="105" fill="none" stroke="url(#ring-grad)" stroke-width="1.5"/>
+
+  <!-- Ambient glow behind logo -->
+  <circle cx="256" cy="230" r="160" fill="url(#glow)"/>
+
+  <!-- Decorative ring -->
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#997B3D" stroke-opacity="0.1" stroke-width="1"/>
+  <circle cx="256" cy="256" r="140" fill="none" stroke="#997B3D" stroke-opacity="0.06" stroke-width="0.8"/>
+
+  <!-- Horizontal decorative lines -->
+  <line x1="100" y1="380" x2="412" y2="380" stroke="#997B3D" stroke-opacity="0.12" stroke-width="0.8"/>
+
+  <!-- Tower Logo (scaled and centered) -->
+  <g transform="translate(256,225) scale(8.5)" fill="url(#gold)">
+    <path d="M0,-11.3L-0.5,-7.8H0.5L0,-11.3Z"/>
+    <path d="M-0.6,-6.8L-1,-2.8H1L0.6,-6.8H-0.6Z"/>
+    <path d="M-0.9,-1.8L-2,3.7H2L0.9,-1.8H-0.9Z"/>
+    <path d="M0,0.2C0,0.2 -1,0.2 -1,1.2C-1,2.2 0,2.2 0,2.2V0.2Z"/>
+    <path d="M-2.9,5.2L-4.5,8.7H-1.9C-1.9,8.7 -1.7,7.2 0,7.2C1.7,7.2 1.9,8.7 1.9,8.7H4.5L2.9,5.2H-2.9Z"/>
+    <path d="M-5.5,8.7L-6,11.2H-3L-3.5,8.7H-5.5Z"/>
+    <path d="M5.5,8.7L6,11.2H3L3.5,8.7H5.5Z"/>
+  </g>
+
+  <!-- Brand text -->
+  <text x="256" y="355" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="30" fill="#C9A84C" letter-spacing="6" opacity="0.9">GOLDEN TOWER</text>
+  <text x="256" y="395" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#997B3D" letter-spacing="12" opacity="0.6">SPA</text>
+
+  <!-- Small diamond accent -->
+  <g transform="translate(256,425)" fill="#997B3D" opacity="0.3">
+    <polygon points="0,-5 5,0 0,5 -5,0"/>
+  </g>
+</svg>

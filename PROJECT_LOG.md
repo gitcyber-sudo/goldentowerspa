@@ -47,3 +47,6 @@
 - **Action Taken**: Implemented Concept 1 for the `VisualJourney` section. Created a pinned, horizontal scrolling track with four distinct spa sections ("The Entrance", "Modern Rituals", "Pure Alchemy", "Parisian Grace"). Added a gold shimmer overlay and deep parallax effects on imagery and typography.
 - **Result/Lesson**: Transformed the section into a cinematic storytelling experience that emphasizes the "Parisian Elegance meets Filipino Healing" brand identity. Used `containerAnimation` in GSAP to create smooth parallax within the horizontal track.
 
+### [2026-02-13] Admin Notification Research (Deferred)
+- **Action Taken**: Researched various admin notification methods including SMS (Twilio), Facebook Messenger, Viber, Telegram, and Email. Created implementation plans for each.
+- **Result/Lesson**: User decided to defer the implementation of notifications to a later time. All plans have been archived/discarded for now.
