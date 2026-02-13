@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Sparkles, MoveRight, ArrowRight } from 'lucide-react';
+import { Sparkles, MoveRight, ArrowRight, ChevronRight } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -23,54 +23,24 @@ interface ExpressSectionProps {
 
 const ExpressSection: React.FC<ExpressSectionProps> = ({ expressMassages, onBookClick, loading }) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const cardsRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+    // Desktop Animation Only
     useEffect(() => {
-        if (loading || !expressMassages.length) return;
+        if (loading || !expressMassages.length || window.innerWidth < 768) return;
 
         const ctx = gsap.context(() => {
-            // Mobile Only Animation (check if width < 768px)
-            if (window.innerWidth < 768 && cardsRef.current && containerRef.current) {
-
-                const cards = gsap.utils.toArray('.express-card');
-                const totalCards = cards.length;
-
-                // Pin the container - trigger exactly at top
-                const tl = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: containerRef.current,
-                        start: "top top",
-                        end: () => `+=${totalCards * 150}%`,
-                        pin: true,
-                        pinSpacing: true,
-                        scrub: 0.5,
-                        anticipatePin: 1,
-                        invalidateOnRefresh: true,
-                        onEnter: () => {
-                            // Ensure background is solid black/charcoal during pinning
-                            if (containerRef.current) {
-                                containerRef.current.style.backgroundColor = '#1A1A1A';
-                                const spacer = containerRef.current.closest('.pin-spacer');
-                                if (spacer) (spacer as HTMLElement).style.backgroundColor = '#1A1A1A';
-                            }
-                        }
-                    }
-                });
-
-                cards.forEach((card: any, i) => {
-                    if (i === totalCards - 1) return; // Last card stays
-
-                    tl.to(card, {
-                        yPercent: -150,
-                        opacity: 0,
-                        scale: 0.75,
-                        rotation: i % 2 === 0 ? -15 : 15,
-                        duration: 1.2,
-                        ease: "power2.inOut"
-                    }, i * 1);
-                });
-            }
-        }, containerRef);
+            // Simple fade up for desktop container
+            gsap.from(containerRef.current, {
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top 80%",
+                },
+                opacity: 0,
+                y: 50,
+                duration: 0.8
+            });
+        });
 
         return () => ctx.revert();
     }, [loading, expressMassages]);
@@ -81,13 +51,13 @@ const ExpressSection: React.FC<ExpressSectionProps> = ({ expressMassages, onBook
         <div
             id="express"
             ref={containerRef}
-            className="relative mt-24 mb-24 py-20 md:py-32 bg-[#1A1A1A] w-screen left-1/2 -ml-[50vw] px-6 md:px-12 overflow-hidden"
+            className="relative mt-24 mb-24 py-20 md:py-32 bg-[#1A1A1A] w-screen left-1/2 -ml-[50vw] px-0 md:px-12 overflow-hidden"
         >
             {/* Subtle Shimmer Background Layer */}
             <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_50%_50%,_rgba(197,160,89,0.15),transparent_70%)] animate-pulse"></div>
 
-            <div className="container mx-auto relative z-10">
-                <div className="flex flex-col mb-12 md:mb-16 lg:text-center">
+            <div className="container mx-auto relative z-10 px-6 md:px-0">
+                <div className="flex flex-col mb-8 md:mb-16 lg:text-center">
                     <span className="text-gold text-[10px] md:text-xs uppercase tracking-[0.4em] font-black mb-3 block flex lg:justify-center items-center gap-2">
                         <Sparkles size={14} className="animate-spin-slow" /> Timeless Efficiency
                     </span>
@@ -144,63 +114,73 @@ const ExpressSection: React.FC<ExpressSectionProps> = ({ expressMassages, onBook
                         ))}
                     </div>
 
-                    {/* Mobile Scroll-Locked Stack (Visible on < MD) */}
-                    <div
-                        ref={cardsRef}
-                        className="md:hidden relative h-[60vh] w-full"
-                    >
-                        {expressMassages.map((service, index) => (
-                            <div
-                                key={service.id}
-                                className="express-card absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[90vw]"
-                                style={{
-                                    zIndex: expressMassages.length - index,
-                                    opacity: 1
-                                }}
-                            >
-                                <div className="bg-[#111111] border border-gold/30 rounded-[2.5rem] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative overflow-hidden h-[52vh] flex flex-col ring-1 ring-white/5">
-                                    <div className="relative h-[48%] w-full overflow-hidden mb-4 rounded-2xl shadow-2xl ring-1 ring-white/10 flex-shrink-0">
-                                        <img
-                                            src={service.image_url}
-                                            alt={`Express therapy: ${service.title}`}
-                                            loading="lazy"
-                                            className="w-full h-full object-cover grayscale-[20%]"
-                                        />
-                                        <div className="absolute top-3 left-3 bg-gold text-white px-3 py-1 text-[9px] uppercase font-black tracking-widest rounded-full shadow-lg z-20">
-                                            0{index + 1} / 0{expressMassages.length}
-                                        </div>
-                                    </div>
+                    {/* Mobile Horizontal Snap Carousel (Visible on < MD) */}
+                    <div className="md:hidden relative w-screen -ml-6">
+                        <div
+                            ref={scrollContainerRef}
+                            className="flex overflow-x-auto snap-x snap-mandatory gap-4 px-6 pb-12 w-full no-scrollbar relative z-20"
+                            style={{ scrollBehavior: 'smooth' }}
+                        >
+                            {expressMassages.map((service, index) => (
+                                <div
+                                    key={service.id}
+                                    className="snap-center shrink-0 w-[85vw]"
+                                >
+                                    <div className="bg-[#111111] border border-gold/30 rounded-[2.5rem] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.6)] h-full flex flex-col ring-1 ring-white/5 relative overflow-hidden group">
+                                        {/* Card Glow Effect */}
+                                        <div className="absolute top-0 left-0 w-full h-[150px] bg-gradient-to-b from-gold/10 to-transparent opacity-50"></div>
 
-                                    <div className="flex-1 flex flex-col justify-between">
-                                        <div>
-                                            <div className="flex items-center gap-2 text-gold mb-1">
-                                                <Sparkles size={12} />
-                                                <span className="text-[9px] uppercase tracking-[0.2em] font-black">Express Mastery</span>
+                                        <div className="relative h-[260px] w-full overflow-hidden mb-5 rounded-2xl shadow-xl ring-1 ring-white/10 flex-shrink-0">
+                                            <img
+                                                src={service.image_url}
+                                                alt={`Express therapy: ${service.title}`}
+                                                loading="lazy"
+                                                className="w-full h-full object-cover grayscale-[10%]"
+                                            />
+                                            <div className="absolute top-3 left-3 bg-gold text-white px-3 py-1 text-[9px] uppercase font-black tracking-widest rounded-full shadow-lg z-20">
+                                                0{index + 1} / 0{expressMassages.length}
                                             </div>
-                                            <h3 className="font-serif text-2xl text-white mb-1.5 leading-tight">{service.title}</h3>
-                                            <p className="text-cream/50 text-[10px] font-light leading-relaxed line-clamp-3 italic">
-                                                {service.description}
-                                            </p>
+                                            <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-[#111111] to-transparent"></div>
                                         </div>
 
-                                        <div className="flex items-center justify-between gap-4 mt-4">
-                                            <div className="text-white font-serif text-xl font-bold">P {service.price}</div>
-                                            <button
-                                                onClick={() => onBookClick(service.id)}
-                                                className="flex-1 py-3.5 bg-gold text-white text-[9px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 rounded-2xl active:scale-95 transition-transform shadow-xl shadow-gold/10"
-                                            >
-                                                Reserve <ArrowRight size={14} />
-                                            </button>
+                                        <div className="flex-1 flex flex-col justify-between relative z-10">
+                                            <div>
+                                                <div className="flex items-center gap-2 text-gold mb-1.5">
+                                                    <Sparkles size={12} />
+                                                    <span className="text-[9px] uppercase tracking-[0.2em] font-black">Express Mastery</span>
+                                                </div>
+                                                <h3 className="font-serif text-2xl text-white mb-2 leading-tight">{service.title}</h3>
+                                                <p className="text-cream/50 text-xs font-light leading-relaxed line-clamp-3">
+                                                    {service.description}
+                                                </p>
+                                            </div>
+
+                                            <div className="flex items-center justify-between gap-3 mt-6">
+                                                <div className="text-white font-serif text-xl font-bold">P {service.price}</div>
+                                                <button
+                                                    onClick={() => onBookClick(service.id)}
+                                                    className="flex-1 py-3.5 bg-gold text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 rounded-xl active:scale-95 transition-transform shadow-lg shadow-gold/10"
+                                                >
+                                                    Reserve <ArrowRight size={14} />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
 
-                        <div className="absolute -bottom-6 left-0 w-full text-center z-[100] pointer-events-none">
-                            <p className="text-[10px] text-gold/40 uppercase tracking-[0.4em] font-black animate-bounce">Scroll Down to Reveal</p>
+                            {/* Spacer at the end for comfortable scrolling */}
+                            <div className="w-2 shrink-0"></div>
+                        </div>
+
+                        {/* Scroll Indicator Hint */}
+                        <div className="absolute top-1/2 -right-2 transform -translate-y-1/2 z-30 pointer-events-none animate-pulse opacity-50">
+                            <div className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10">
+                                <ChevronRight className="text-gold w-6 h-6" />
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
