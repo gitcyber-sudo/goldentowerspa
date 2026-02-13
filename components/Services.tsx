@@ -83,7 +83,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-    const elements = document.querySelectorAll('.reveal');
+    const elements = document.querySelectorAll('.reveal, .reveal-express');
     elements.forEach(el => observer.observe(el));
 
     return () => observer.disconnect();
@@ -162,7 +162,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
           )}
         </div>
 
-        {/* --- PRESTIGE EXPRESS SECTION --- */}
+        {/* --- EXPRESS MASSAGE SECTION --- */}
         <div
           id="express"
           className="relative mt-24 mb-24 py-24 bg-charcoal -mx-6 md:-mx-12 px-6 md:px-12 overflow-hidden"
@@ -175,11 +175,11 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
               <Sparkles size={14} className="animate-spin-slow" /> Timeless Efficiency
             </span>
             <h2 className="font-serif text-5xl md:text-7xl text-white leading-tight">
-              Prestige <span className="italic text-gold">Rituals</span>
+              Express <span className="italic text-gold">Massage</span>
             </h2>
             <p className="text-cream/40 mt-6 max-w-2xl lg:mx-auto font-light leading-relaxed">
-              Curated precision. Targeted treatments reimagined for the elite traveler
-              and the modern professional. Experience total restoration in 30 minutes.
+              Curated precision. Targeted treatments reimagined for those with
+              limited time but high standards. Experience total restoration in 30 minutes.
             </p>
           </div>
 
@@ -188,11 +188,15 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
           ) : (
             <div className="relative group/carousel">
               {/* Desktop Grid / Mobile Horizontal Carousel */}
-              <div className="flex overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 pb-12 snap-x snap-mandatory hide-scrollbar group transition-all duration-500">
+              <div
+                className="flex overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 pb-12 snap-x snap-mandatory hide-scrollbar group transition-all duration-500 scroll-smooth"
+                style={{ WebkitOverflowScrolling: 'touch' }}
+              >
                 {expressMassages.map((service, index) => (
                   <div
                     key={service.id}
                     className="flex-shrink-0 w-[85vw] md:w-full snap-center reveal-express group/card"
+                    style={{ transitionDelay: `${index * 150}ms` }}
                   >
                     <div className="h-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 transition-all duration-700 hover:bg-white/10 hover:border-gold/30 hover:shadow-2xl hover:shadow-gold/5 flex flex-col relative overflow-hidden">
                       {/* Hover Shimmer */}
@@ -201,7 +205,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                       <div className="relative h-[280px] w-full overflow-hidden mb-8 rounded-2xl ring-1 ring-white/10 group-hover/card:ring-gold/20">
                         <img
                           src={service.image_url}
-                          alt={`Prestige therapy: ${service.title}`}
+                          alt={`Express therapy: ${service.title}`}
                           loading="lazy"
                           className="w-full h-full object-cover grayscale-[30%] group-hover/card:grayscale-0 group-hover/card:scale-105 transition-all duration-1000"
                         />
@@ -220,7 +224,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                           </h3>
                         </div>
                         <p className="text-cream/60 text-sm font-light leading-relaxed italic line-clamp-3 pl-4 border-l border-gold/20">
-                          {service.description}
+                          {service.description.toLowerCase().charAt(0).toUpperCase() + service.description.toLowerCase().slice(1)}
                         </p>
                       </div>
 
@@ -228,7 +232,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                         onClick={() => onBookClick(service.id)}
                         className="mt-auto w-full py-4 bg-transparent border border-gold/40 text-gold text-xs font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-gold hover:text-white transition-all duration-500 btn-tactile group/btn rounded-xl"
                       >
-                        Reserve Prestige <MoveRight size={14} className="group-hover/btn:translate-x-2 transition-transform" />
+                        Express Booking <MoveRight size={14} className="group-hover/btn:translate-x-2 transition-transform" />
                       </button>
                     </div>
                   </div>
@@ -238,7 +242,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
               {/* Swipe Indicator (Mobile Only) */}
               <div className="flex md:hidden items-center justify-center gap-3 text-gold/40 animate-pulse mt-4">
                 <div className="w-8 h-[1px] bg-gold/20"></div>
-                <span className="text-[10px] uppercase tracking-widest font-black">Swipe to Explore</span>
+                <span className="text-[10px] uppercase tracking-widest font-black text-center">Swipe Left for more massage</span>
                 <div className="w-8 h-[1px] bg-gold/20"></div>
               </div>
             </div>

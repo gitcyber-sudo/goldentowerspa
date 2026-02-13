@@ -119,6 +119,26 @@
     transform: translateY(0) scale(1);
   }
 
+  .reveal-express {
+    opacity: 0;
+    transform: translateX(40px) scale(0.9) rotate(2deg);
+    will-change: transform, opacity;
+    transition: transform 1s var(--ease-entrance), opacity 1s var(--ease-entrance);
+  }
+
+  .reveal-express.is-visible {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotate(0deg);
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   /* Hero Zoom (Mobile Optimized) */
   .hero-bg {
     transform-origin: center;
