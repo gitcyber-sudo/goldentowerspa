@@ -34,3 +34,11 @@
 ### [2026-02-13] Implemented Therapist Activity Filtering
 - **Action Taken**: Added `.eq('active', true)` filter to the therapist fetch query in `Therapists.tsx`. Verified filtering logic with a custom script.
 - **Result/Lesson**: Inactive therapists are now correctly hidden from the public homepage, while the admin dashboard and booking preference continue to handle active status correctly.
+
+### [2026-02-13] Map and Hours Refinement & Walkthrough Update
+- **Action Taken**: Refined the `Sanctuary` section in `Sanctuary.tsx` with exact location coordinates and updated operating hours to 4 PM - 4 AM. Updated the project walkthrough to reflect these changes and the interactive map features.
+- **Result/Lesson**: Ensured accurate and up-to-date location and hours information for users. The walkthrough now provides a comprehensive guide to the enhanced `Sanctuary` section.
+
+### [2026-02-13] Overhauled Philosophy to Sanctuary section
+- **Action Taken**: Replaced the text-heavy `Philosophy` section with a high-impact `Sanctuary` section. Integrated interactive Google Maps, detailed address, contact info, and operating hours. Maintained the philosophy quote in a luxury framed sidebar.
+- **Result/Lesson**: Provided visitors with immediate utility (location and contact) without losing the brand's core message. Enhanced mobile UX with easy "Get Directions" links and responsive map framing.

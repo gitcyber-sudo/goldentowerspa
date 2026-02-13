@@ -27,3 +27,6 @@
 - [x] Task 2: Fix Therapist Role Assignment & Global Trigger Logic.
 - [x] Task 3: Implement Therapist Activity Status Filtering for Homepage.
 - [x] Task 4: Harden Governance Compliance & Rule Persistence.
+- [x] Task 5: Overhaul Philosophy section to functional Sanctuary Location section.
+- [x] Task 6: Refine Sanctuary Map location and Display Hours (4 PM - 4 AM).
+- [x] Task 7: Refine Sanctuary text labels and add mobile/social icons.

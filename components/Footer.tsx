@@ -29,7 +29,7 @@ const Footer: React.FC = () => {
           <div className="md:col-span-2 md:col-start-6">
             <h3 className="text-gold text-sm uppercase tracking-widest font-bold mb-6">Explore</h3>
             <ul className="space-y-4 font-light text-white/80">
-              <li><a href="#philosophy" className="hover:text-gold transition-colors">Philosophy</a></li>
+              <li><a href="#sanctuary" className="hover:text-gold transition-colors">Sanctuary</a></li>
               <li><a href="#services" className="hover:text-gold transition-colors">Treatments</a></li>
               <li><a href="#" className="hover:text-gold transition-colors">Gift Cards</a></li>
               <li><a href="#" className="hover:text-gold transition-colors">Membership</a></li>

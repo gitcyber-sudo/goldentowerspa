@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
-import Philosophy from './components/Philosophy';
+import Sanctuary from './components/Sanctuary';
 import VisualJourney from './components/VisualJourney';
 import Services from './components/Services';
 import Therapists from './components/Therapists';
@@ -52,7 +52,7 @@ const MainLayout: React.FC<{
       <main>
         <Hero onBookClick={() => handleBookingAttempt()} />
         <div className="section-reveal will-change-transform">
-          <Philosophy />
+          <Sanctuary />
         </div>
 
         <VisualJourney />
