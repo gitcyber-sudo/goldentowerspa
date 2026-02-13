@@ -138,7 +138,11 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
           <div ref={titleLine1Ref} className="text-white hero-text-shadow">
             Golden Tower
           </div>
-          <div ref={titleLine2Ref} className="text-gradient-gold font-bold italic tracking-[0.1em] mt-2 relative drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
+          <div ref={titleLine2Ref} className="font-bold tracking-[0.2em] mt-2 relative" style={{
+            color: '#FFFFFF',
+            textShadow: '0 0 40px rgba(197,160,89,0.6), 0 0 80px rgba(197,160,89,0.3), 0 4px 20px rgba(0,0,0,0.8)',
+            WebkitTextStroke: '1px rgba(197,160,89,0.3)',
+          }}>
             Spa
             {/* Decorative line */}
             <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gold rounded-full opacity-60 shadow-[0_0_10px_rgba(197,160,89,0.5)]"></div>
