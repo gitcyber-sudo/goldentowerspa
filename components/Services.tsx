@@ -3,6 +3,10 @@ import { ArrowRight, Loader2, Crown, Sparkles, MoveRight } from 'lucide-react';
 import Logo from './Logo';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface ServiceItem {
   id: string;
@@ -22,6 +26,8 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { loading: authLoading, user } = useAuth();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const cardsRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -70,6 +76,47 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
     fetchServices();
     return () => { mounted = false; };
   }, []);
+
+  useEffect(() => {
+    if (loading || !services.length) return;
+
+    const ctx = gsap.context(() => {
+      // Mobile Only Animation (check if width < 768px)
+      if (window.innerWidth < 768 && cardsRef.current && containerRef.current) {
+
+        const cards = gsap.utils.toArray('.express-card');
+        const totalCards = cards.length;
+
+        // Pin the container
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top top",
+            end: `+=${totalCards * 100}%`,
+            pin: true,
+            scrub: 1,
+            anticipatePin: 1
+          }
+        });
+
+        cards.forEach((card: any, i) => {
+          if (i === totalCards - 1) return; // Last card doesn't need to animate out
+
+          tl.to(card, {
+            yPercent: -120,
+            opacity: 0,
+            scale: 0.9,
+            rotation: -5,
+            duration: 1,
+            ease: "power2.inOut"
+          });
+        });
+      }
+
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [loading, services]);
 
   useEffect(() => {
     if (loading) return;
