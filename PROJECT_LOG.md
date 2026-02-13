@@ -30,3 +30,7 @@
 ### [2026-02-13] Fixed Therapist Role Assignment & Trigger
 - **Action Taken**: Identified role mismatch in `profiles` table caused by hardcoded `handle_new_user()` trigger. Updated trigger to respect `user_metadata` role and manually updated Owen's account.
 - **Result/Lesson**: Resolved login failure for Owen and future-proofed specialist account creation. Learned to verify database triggers earlier in authentication debugging.
+
+### [2026-02-13] Implemented Therapist Activity Filtering
+- **Action Taken**: Added `.eq('active', true)` filter to the therapist fetch query in `Therapists.tsx`. Verified filtering logic with a custom script.
+- **Result/Lesson**: Inactive therapists are now correctly hidden from the public homepage, while the admin dashboard and booking preference continue to handle active status correctly.

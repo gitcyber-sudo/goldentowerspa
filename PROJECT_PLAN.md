@@ -25,4 +25,5 @@
 ## Phase 6: Maintenance & UI Refinement
 - [x] Task 1: Reorganize Revenue Dashboard layout for specialist alignment.
 - [x] Task 2: Fix Therapist Role Assignment & Global Trigger Logic.
-- [x] Task 3: Harden Governance Compliance & Rule Persistence.
+- [x] Task 3: Implement Therapist Activity Status Filtering for Homepage.
+- [x] Task 4: Harden Governance Compliance & Rule Persistence.

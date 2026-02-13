@@ -41,6 +41,7 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
         const { data, error } = await supabase
           .from('therapists')
           .select('*')
+          .eq('active', true)
           .order('name', { ascending: true });
 
         if (error) throw error;
