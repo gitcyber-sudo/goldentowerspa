@@ -535,20 +535,33 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
 
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                {/* Weekly Revenue Chart */}
+                {/* Therapist Performance */}
                 <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
                     <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
-                            <h3 className="font-semibold text-charcoal">Revenue Trend</h3>
-                            <p className="text-[10px] md:text-xs text-charcoal/50">Weekly earnings overview</p>
+                            <h3 className="font-semibold text-charcoal">Therapist Performance</h3>
+                            <p className="text-[10px] md:text-xs text-charcoal/50">Revenue by specialist</p>
                         </div>
-                        <Activity className="w-5 h-5 text-gold" />
+                        <Users className="w-5 h-5 text-gold" />
                     </div>
-                    {stats.weeklyRevenue.length > 0 ? (
-                        <LineChart data={stats.weeklyRevenue} />
+                    {stats.topTherapists.length > 0 ? (
+                        <div className="space-y-3">
+                            {stats.topTherapists.map(([id, data], index) => (
+                                <div key={id} className="flex items-center gap-3 p-2 md:p-3 bg-charcoal/5 rounded-xl">
+                                    <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-serif text-sm ${index === 0 ? 'bg-gold text-white' : 'bg-gold/10 text-gold'}`}>
+                                        {data.name.charAt(0)}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-charcoal truncate">{data.name}</p>
+                                        <p className="text-[10px] md:text-xs text-charcoal/50">{data.count} sessions</p>
+                                    </div>
+                                    <span className="text-sm font-semibold text-gold">₱{data.revenue.toLocaleString()}</span>
+                                </div>
+                            ))}
+                        </div>
                     ) : (
                         <div className="h-40 flex items-center justify-center text-charcoal/40 text-sm">
-                            No data available
+                            No therapist data
                         </div>
                     )}
                 </div>
@@ -585,33 +598,20 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
 
             {/* Secondary Analytics */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                {/* Therapist Performance */}
+                {/* Weekly Revenue Chart */}
                 <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
                     <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
-                            <h3 className="font-semibold text-charcoal">Therapist Performance</h3>
-                            <p className="text-[10px] md:text-xs text-charcoal/50">Revenue by specialist</p>
+                            <h3 className="font-semibold text-charcoal">Revenue Trend</h3>
+                            <p className="text-[10px] md:text-xs text-charcoal/50">Weekly earnings overview</p>
                         </div>
-                        <Users className="w-5 h-5 text-gold" />
+                        <Activity className="w-5 h-5 text-gold" />
                     </div>
-                    {stats.topTherapists.length > 0 ? (
-                        <div className="space-y-3">
-                            {stats.topTherapists.map(([id, data], index) => (
-                                <div key={id} className="flex items-center gap-3 p-2 md:p-3 bg-charcoal/5 rounded-xl">
-                                    <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-serif text-sm ${index === 0 ? 'bg-gold text-white' : 'bg-gold/10 text-gold'}`}>
-                                        {data.name.charAt(0)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-charcoal truncate">{data.name}</p>
-                                        <p className="text-[10px] md:text-xs text-charcoal/50">{data.count} sessions</p>
-                                    </div>
-                                    <span className="text-sm font-semibold text-gold">₱{data.revenue.toLocaleString()}</span>
-                                </div>
-                            ))}
-                        </div>
+                    {stats.weeklyRevenue.length > 0 ? (
+                        <LineChart data={stats.weeklyRevenue} />
                     ) : (
                         <div className="h-40 flex items-center justify-center text-charcoal/40 text-sm">
-                            No therapist data
+                            No data available
                         </div>
                     )}
                 </div>

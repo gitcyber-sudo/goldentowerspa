@@ -21,3 +21,6 @@
 - [x] Task 1: Harden PROJECT_PROTOCOLS with mandatory documentation rules.
 - [x] Task 2: Implement MISSION_LOG.md (Flight Recorder) for agent persistence.
 - [x] Task 3: Synchronize all project artifacts for Phase 4 & 5 completion.
+
+## Phase 6: Maintenance & UI Refinement
+- [x] Task 1: Reorganize Revenue Dashboard layout for specialist alignment.

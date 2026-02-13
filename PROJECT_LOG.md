@@ -19,6 +19,14 @@
 - **Action Taken**: Performed a full security and connectivity audit. Updated `update-therapist-password` and `create-therapist` edge functions to include explicit CORS handling and enhanced logging. Verified RLS policies for guest bookings.
 - **Result/Lesson**: Resolved "Error updating therapist password" caused by browser CORS blocks. Confirmed PWA assets (`manifest.json`, `sw.js`) are correctly registered for mobile installability.
 
+### [2026-02-13] Hardened Governance Protocols
+- **Action Taken**: Updated `PROJECT_PROTOCOLS.md` to mandate `MISSION_LOG.md` updates for every individual task. Enhanced `AGENTS.md` to define documentation laps as "Aviation Safety Violations."
+- **Result/Lesson**: Reinforced the aviation-inspired governance model. Every operation now requires a pre-flight initiation and a post-flight finalization in the Flight Recorder to ensure 100% state persistence across agent handovers.
+
+### [2026-02-13] Revenue Dashboard Layout Optimization
+- **Action Taken**: Swapped the positions of the `Revenue Trend` and `Therapist Performance` components in `RevenueDashboard.tsx`. Therapist performance is now aligned horizontally with top services.
+- **Result/Lesson**: Improved visual hierarchy by grouping specialist performance data with service metrics, providing a more cohesive overview of key business drivers.
+
 ### [2026-02-13] Protocol Rename
 - **Action Taken**: Renamed `.agent/rules/flight_protocols.md` to `.agent/rules/PROJECT_PROTOCOLS.md`.
 - **Result/Lesson**: Aligned file naming convention with `PROJECT_PLAN` and `PROJECT_LOG`.
