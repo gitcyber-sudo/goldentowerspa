@@ -87,33 +87,41 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
         const cards = gsap.utils.toArray('.express-card');
         const totalCards = cards.length;
 
-        // Pin the container
+        // Pin the container - trigger earlier for better engagement
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: containerRef.current,
-            start: "top top",
-            end: `+=${totalCards * 100}%`,
+            start: "top 5%", // Almost top
+            end: () => `+=${totalCards * 150}%`,
             pin: true,
-            scrub: 1,
-            anticipatePin: 1
+            scrub: 1, // Smooth scrub
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            // markers: true // Debug markers can be helpful during dev but omit for production
           }
         });
 
         cards.forEach((card: any, i) => {
-          if (i === totalCards - 1) return; // Last card doesn't need to animate out
+          // Cards already start visible due to z-index stack
+          if (i === totalCards - 1) return; // Last card stays
 
           tl.to(card, {
-            yPercent: -120,
+            yPercent: -150,
             opacity: 0,
-            scale: 0.9,
-            rotation: -5,
+            scale: 0.8,
+            rotation: i % 2 === 0 ? -10 : 10,
             duration: 1,
-            ease: "power2.inOut"
-          });
+            ease: "power1.inOut"
+          }, i * 0.8); // Slight overlap for smooth flow
         });
       }
 
     }, containerRef);
+
+    // Force a refresh after a small delay to ensure layout shifts are accounted for
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 500);
 
     return () => ctx.revert();
   }, [loading, services]);
@@ -130,7 +138,8 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-    const elements = document.querySelectorAll('.reveal, .reveal-express');
+    // ONLY observe regular .reveal elements, NOT .reveal-express (which is GSAP handled now)
+    const elements = document.querySelectorAll('.reveal');
     elements.forEach(el => observer.observe(el));
 
     return () => observer.disconnect();
@@ -212,6 +221,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
         {/* --- EXPRESS MASSAGE SECTION --- */}
         <div
           id="express"
+          ref={containerRef}
           className="relative mt-24 mb-24 py-24 bg-charcoal -mx-6 md:-mx-12 px-6 md:px-12 overflow-hidden"
         >
           {/* Subtle Shimmer Background Layer */}
@@ -233,22 +243,17 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
           {loading ? (
             <div className="flex justify-center py-20"><Loader2 className="animate-spin text-gold" size={32} /></div>
           ) : (
-            <div className="relative group/carousel">
-              {/* Desktop Grid / Mobile Horizontal Carousel */}
-              <div
-                className="flex overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 pb-12 snap-x snap-mandatory hide-scrollbar group transition-all duration-500 scroll-smooth"
-                style={{ WebkitOverflowScrolling: 'touch' }}
-              >
+            <div className="relative">
+              {/* Desktop Grid Layout (Visible on MD+) */}
+              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {expressMassages.map((service, index) => (
                   <div
                     key={service.id}
-                    className="flex-shrink-0 w-[85vw] md:w-full snap-center reveal-express group/card"
+                    className="group/card"
                     style={{ transitionDelay: `${index * 150}ms` }}
                   >
                     <div className="h-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 transition-all duration-700 hover:bg-white/10 hover:border-gold/30 hover:shadow-2xl hover:shadow-gold/5 flex flex-col relative overflow-hidden">
-                      {/* Hover Shimmer */}
                       <div className="absolute inset-0 -translate-x-full group-hover/card:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none"></div>
-
                       <div className="relative h-[280px] w-full overflow-hidden mb-8 rounded-2xl ring-1 ring-white/10 group-hover/card:ring-gold/20">
                         <img
                           src={service.image_url}
@@ -263,18 +268,14 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                           30 Mins Ritual
                         </div>
                       </div>
-
                       <div className="space-y-4 mb-8">
                         <div className="flex items-center justify-between">
-                          <h3 className="font-serif text-3xl text-white group-hover/card:text-gold transition-colors leading-tight">
-                            {service.title}
-                          </h3>
+                          <h3 className="font-serif text-3xl text-white group-hover/card:text-gold transition-colors leading-tight">{service.title}</h3>
                         </div>
                         <p className="text-cream/60 text-sm font-light leading-relaxed italic line-clamp-3 pl-4 border-l border-gold/20">
                           {service.description.toLowerCase().charAt(0).toUpperCase() + service.description.toLowerCase().slice(1)}
                         </p>
                       </div>
-
                       <button
                         onClick={() => onBookClick(service.id)}
                         className="mt-auto w-full py-4 bg-transparent border border-gold/40 text-gold text-xs font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-gold hover:text-white transition-all duration-500 btn-tactile group/btn rounded-xl"
@@ -286,11 +287,62 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                 ))}
               </div>
 
-              {/* Swipe Indicator (Mobile Only) */}
-              <div className="flex md:hidden items-center justify-center gap-3 text-gold/40 animate-pulse mt-4">
-                <div className="w-8 h-[1px] bg-gold/20"></div>
-                <span className="text-[10px] uppercase tracking-widest font-black text-center">Swipe Left for more massage</span>
-                <div className="w-8 h-[1px] bg-gold/20"></div>
+              {/* Mobile Scroll-Locked Stack (Visible on < MD) */}
+              <div
+                ref={cardsRef}
+                className="md:hidden relative h-[70vh] w-full flex items-center justify-center"
+              >
+                {expressMassages.map((service, index) => (
+                  <div
+                    key={service.id}
+                    className="express-card absolute w-full max-w-[90vw] transition-shadow duration-500"
+                    style={{
+                      zIndex: expressMassages.length - index,
+                      transform: `translate(0, 0)`
+                    }}
+                  >
+                    <div className="bg-[#111111] border border-gold/30 rounded-[2.5rem] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden h-[55vh] flex flex-col ring-1 ring-white/5">
+                      <div className="relative h-[50%] w-full overflow-hidden mb-6 rounded-2xl shadow-2xl ring-1 ring-white/10 flex-shrink-0">
+                        <img
+                          src={service.image_url}
+                          alt={`Express therapy: ${service.title}`}
+                          loading="lazy"
+                          className="w-full h-full object-cover grayscale-[20%]"
+                        />
+                        <div className="absolute top-4 left-4 bg-gold text-white px-3 py-1 text-[10px] uppercase font-black tracking-widest rounded-full shadow-lg">
+                          0{index + 1} / 0{expressMassages.length}
+                        </div>
+                      </div>
+
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 text-gold mb-1">
+                            <Sparkles size={12} />
+                            <span className="text-[10px] uppercase tracking-[0.2em] font-black">Express Mastery</span>
+                          </div>
+                          <h3 className="font-serif text-3xl text-white mb-2 leading-tight">{service.title}</h3>
+                          <p className="text-cream/50 text-xs font-light leading-relaxed line-clamp-2 italic">
+                            {service.description}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-4 mt-6">
+                          <div className="text-white font-serif text-2xl">P {service.price}</div>
+                          <button
+                            onClick={() => onBookClick(service.id)}
+                            className="flex-1 py-4 bg-gold text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 rounded-2xl active:scale-95 transition-transform shadow-xl shadow-gold/10"
+                          >
+                            Reserve <ArrowRight size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="absolute -bottom-12 left-0 w-full text-center z-50 pointer-events-none">
+                  <p className="text-[10px] text-gold/40 uppercase tracking-[0.4em] font-black animate-bounce">Scroll Down to Reveal</p>
+                </div>
               </div>
             </div>
           )}
