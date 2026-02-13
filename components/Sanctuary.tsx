@@ -90,14 +90,26 @@ const Sanctuary: React.FC = () => {
                                 #1 C2 Road 9, Project 6,<br />
                                 Quezon City, 1100 Philippines
                             </p>
-                            <a
-                                href="https://www.google.com/maps/dir/?api=1&destination=Project+6+Quezon+City"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 text-gold font-bold uppercase tracking-widest text-sm hover:text-gold-dark transition-colors pl-10 group"
-                            >
-                                Get Directions <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                            </a>
+                            <div className="pt-4 pl-0 md:pl-10 w-full">
+                                <a
+                                    href="https://maps.app.goo.gl/RFCcVV3BNYQpedC17"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full md:w-auto flex items-center gap-4 bg-gradient-to-r from-charcoal to-charcoal/90 text-white py-4 px-6 rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-gold/20 transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden border border-gold/10"
+                                >
+                                    {/* Shimmer effect on hover */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gold/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%]" style={{ transition: 'transform 0.8s ease, opacity 0.3s ease' }} />
+
+                                    <div className="bg-gold/20 p-3 rounded-xl group-hover:bg-gold/30 transition-colors">
+                                        <MapPin size={22} className="text-gold" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <span className="font-bold text-sm tracking-wide block">Navigate to Your Sanctuary</span>
+                                        <span className="text-[11px] text-white/50 font-light">Opens in Google Maps · Just minutes away</span>
+                                    </div>
+                                    <ArrowUpRight size={20} className="text-gold group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform flex-shrink-0" />
+                                </a>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-8 md:gap-12 lg:gap-10">
