@@ -30,3 +30,5 @@
 - [x] Task 5: Overhaul Philosophy section to functional Sanctuary Location section.
 - [x] Task 6: Refine Sanctuary Map location and Display Hours (4 PM - 4 AM).
 - [x] Task 7: Refine Sanctuary text labels and add mobile/social icons.
+- [x] Task 8: Overhaul Visual Journey to Cinematic Horizontal Suite.
+- [x] Task 9: Overhaul Express Massages to high-end "Prestige Rituals" experience.

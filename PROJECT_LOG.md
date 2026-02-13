@@ -42,3 +42,8 @@
 ### [2026-02-13] Overhauled Philosophy to Sanctuary section
 - **Action Taken**: Replaced the text-heavy `Philosophy` section with a high-impact `Sanctuary` section. Integrated interactive Google Maps, detailed address, contact info, and operating hours. Maintained the philosophy quote in a luxury framed sidebar.
 - **Result/Lesson**: Provided visitors with immediate utility (location and contact) without losing the brand's core message. Enhanced mobile UX with easy "Get Directions" links and responsive map framing.
+
+### [2026-02-13] Overhauled Visual Journey to Cinematic Horizontal Suite
+- **Action Taken**: Implemented Concept 1 for the `VisualJourney` section. Created a pinned, horizontal scrolling track with four distinct spa sections ("The Entrance", "Modern Rituals", "Pure Alchemy", "Parisian Grace"). Added a gold shimmer overlay and deep parallax effects on imagery and typography.
+- **Result/Lesson**: Transformed the section into a cinematic storytelling experience that emphasizes the "Parisian Elegance meets Filipino Healing" brand identity. Used `containerAnimation` in GSAP to create smooth parallax within the horizontal track.
+
