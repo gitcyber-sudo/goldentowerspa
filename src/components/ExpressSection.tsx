@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { Sparkles, MoveRight, ArrowRight, ChevronRight } from 'lucide-react';
+import { MoveRight, ArrowRight, ChevronRight } from 'lucide-react';
+import Logo from './Logo';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -109,7 +110,7 @@ const ExpressSection: React.FC<ExpressSectionProps> = ({ expressMassages, onBook
             <div className="container mx-auto relative z-10 px-6 md:px-0">
                 <div className="flex flex-col mb-8 md:mb-16 lg:text-center">
                     <span className="text-gold text-[10px] md:text-xs uppercase tracking-[0.4em] font-black mb-3 block flex lg:justify-center items-center gap-2">
-                        <Sparkles size={14} className="animate-spin-slow" /> Timeless Efficiency
+                        <Logo className="w-4 h-4 animate-spin-slow" color="#C5A059" /> Timeless Efficiency
                     </span>
                     <h2 className="font-serif text-4xl md:text-7xl text-white leading-tight">
                         Express <span className="italic text-gold">Massage</span>
@@ -197,7 +198,7 @@ const ExpressSection: React.FC<ExpressSectionProps> = ({ expressMassages, onBook
                                         <div className="flex-1 flex flex-col justify-between relative z-10">
                                             <div>
                                                 <div className="flex items-center gap-2 text-gold mb-1.5">
-                                                    <Sparkles size={12} />
+                                                    <Logo className="w-3 h-3" color="#C5A059" />
                                                     <span className="text-[9px] uppercase tracking-[0.2em] font-black">Express Mastery</span>
                                                 </div>
                                                 <h3 className="font-serif text-2xl text-white mb-2 leading-tight">{service.title}</h3>

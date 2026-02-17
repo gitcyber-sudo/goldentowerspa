@@ -36,11 +36,13 @@ import {
     PlayCircle,
     MoreVertical,
     Trash2,
-    Star
+    Star,
+    UserSearch
 } from 'lucide-react';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import RevenueDashboard from './RevenueDashboard';
 import TherapistManagement from './TherapistManagement';
+import ClientIntelligence from './ClientIntelligence';
 import ManualBookingModal from './modals/ManualBookingModal';
 import EditBookingModal from './modals/EditBookingModal';
 
@@ -758,6 +760,7 @@ const AdminDashboard: React.FC = () => {
             case 'therapists': return 'Specialists';
             case 'website-analytics': return 'Website Analytics';
             case 'revenue': return 'Revenue Analytics';
+            case 'clients': return 'Client Intelligence';
             default: return 'Admin Panel';
         }
     };
@@ -781,6 +784,7 @@ const AdminDashboard: React.FC = () => {
                     {renderSidebarItem('dashboard', <LayoutDashboard size={20} />, 'Dashboard')}
                     {renderSidebarItem('bookings', <ClipboardList size={20} />, 'Bookings')}
                     {renderSidebarItem('therapists', <Users size={20} />, 'Specialists')}
+                    {renderSidebarItem('clients', <UserSearch size={20} />, 'Client Intelligence')}
                     <div className="pt-4 pb-2">
                         <p className="text-xs uppercase text-white/30 font-bold tracking-widest px-4">Analytics</p>
                     </div>
@@ -847,6 +851,7 @@ const AdminDashboard: React.FC = () => {
                 {activeTab === 'website-analytics' && <AnalyticsDashboard />}
                 {activeTab === 'revenue' && <RevenueDashboard bookings={bookings} />}
                 {activeTab === 'therapists' && <TherapistManagement />}
+                {activeTab === 'clients' && <ClientIntelligence />}
 
                 {/* Modals */}
                 <ManualBookingModal

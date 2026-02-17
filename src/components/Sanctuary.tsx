@@ -62,12 +62,13 @@ const Sanctuary: React.FC = () => {
         <section
             ref={sectionRef}
             id="sanctuary"
-            className="py-24 md:py-32 bg-gradient-to-b from-cream via-[#f4efe6] to-white relative overflow-hidden"
+            aria-label="Visit our sanctuary — location and contact"
+            className="py-16 md:py-32 bg-gradient-to-b from-cream via-[#f4efe6] to-white relative overflow-hidden"
         >
             {/* Decorative background elements */}
-            <div className="absolute top-0 left-0 w-full h-full opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent pointer-events-none"></div>
-            <div className="absolute top-0 left-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+            <div className="absolute top-0 left-0 w-full h-full opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent pointer-events-none" aria-hidden="true"></div>
+            <div className="absolute top-0 left-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" aria-hidden="true"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-3xl translate-x-1/3 translate-y-1/3" aria-hidden="true"></div>
 
             <div className="container mx-auto px-6 md:px-12 relative z-10">
                 <div className="sanctuary-header mb-16 md:mb-24">
@@ -82,8 +83,8 @@ const Sanctuary: React.FC = () => {
                     {/* Info Column */}
                     <div ref={infoRef} className="lg:col-span-5 sanctuary-info space-y-10">
                         <div className="space-y-4">
-                            <h3 className="font-serif text-3xl text-charcoal flex items-center gap-3">
-                                <MapPin className="text-gold" size={28} />
+                            <h3 className="font-serif text-2xl md:text-3xl text-charcoal flex items-center gap-3">
+                                <MapPin className="text-gold" size={28} aria-hidden="true" />
                                 Our Location
                             </h3>
                             <p className="text-xl text-charcoal-light leading-relaxed font-light pl-10">
@@ -115,7 +116,7 @@ const Sanctuary: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-8 md:gap-12 lg:gap-10">
                             <div className="space-y-4">
                                 <h3 className="font-serif text-2xl text-charcoal flex items-center gap-3">
-                                    <Clock className="text-gold" size={24} />
+                                    <Clock className="text-gold" size={24} aria-hidden="true" />
                                     Business Hours
                                 </h3>
                                 <div className="pl-9 space-y-2 text-charcoal-light font-light">
@@ -129,7 +130,7 @@ const Sanctuary: React.FC = () => {
 
                             <div className="space-y-4">
                                 <h3 className="font-serif text-2xl text-charcoal flex items-center gap-3">
-                                    <Phone className="text-gold" size={24} />
+                                    <Phone className="text-gold" size={24} aria-hidden="true" />
                                     Connect
                                 </h3>
                                 <div className="pl-9 space-y-3">

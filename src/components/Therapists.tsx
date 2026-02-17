@@ -131,11 +131,12 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
     <section
       ref={sectionRef}
       id="specialists"
-      className="bg-gradient-to-b from-cream/50 to-white py-24 md:py-32 overflow-hidden relative"
+      aria-label="Meet our wellness specialists"
+      className="bg-gradient-to-b from-cream/50 to-white py-16 md:py-32 overflow-hidden relative"
     >
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dust.png')] opacity-20 pointer-events-none"></div>
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gold/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 mix-blend-multiply"></div>
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2 mix-blend-multiply"></div>
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dust.png')] opacity-20 pointer-events-none" aria-hidden="true"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gold/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 mix-blend-multiply" aria-hidden="true"></div>
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2 mix-blend-multiply" aria-hidden="true"></div>
 
       <div className="container mx-auto px-6 md:px-12 relative z-10">
 
@@ -144,12 +145,17 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
           <h2 className="font-serif text-5xl md:text-7xl text-charcoal leading-tight">
             Meet the <span className="italic text-gold-dark">Therapists</span>
           </h2>
-          <div className="w-24 h-1 bg-gold mx-auto mt-8 opacity-50"></div>
+          <div className="w-24 h-1 bg-gold mx-auto mt-6 md:mt-8 opacity-50" aria-hidden="true"></div>
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="animate-spin text-gold" size={48} />
+          <div className="flex justify-center items-center py-20" role="status" aria-label="Loading therapists">
+            <Loader2 className="animate-spin text-gold" size={48} aria-hidden="true" />
+            <span className="sr-only">Loading our wellness specialists...</span>
+          </div>
+        ) : team.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-charcoal/50 text-lg font-light">Our team page is being updated. Check back soon to meet our specialists.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-x-20 md:gap-y-32">

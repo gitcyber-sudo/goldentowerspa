@@ -12,6 +12,8 @@ import AdminDashboard from './components/AdminDashboard';
 import UserDashboard from './components/UserDashboard';
 import TherapistDashboard from './components/TherapistDashboard';
 import TherapistLogin from './components/TherapistLogin';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
 
 const App: React.FC = () => {
   const { loading: authLoading } = useAuth();
@@ -75,6 +77,8 @@ const App: React.FC = () => {
           }
         />
         <Route path="/therapist-login" element={<TherapistLogin />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
       </Routes>
     </AnalyticsProvider>
   );

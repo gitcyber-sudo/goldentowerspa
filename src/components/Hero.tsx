@@ -104,7 +104,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
   }, []);
 
   return (
-    <section ref={containerRef} className="relative h-screen w-full overflow-hidden flex items-center justify-center hero-section perspective-1000">
+    <section ref={containerRef} aria-label="Welcome to Golden Tower Spa" className="relative h-screen w-full overflow-hidden flex items-center justify-center hero-section perspective-1000">
       {/* Background Image with Parallax & Zoom */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div ref={bgWrapperRef} className="absolute inset-0 w-full h-[120%] -top-[10%]">
@@ -116,12 +116,12 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
           />
         </div>
         {/* Cinematic Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-cream/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-transparent via-black/10 to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-cream/90" aria-hidden="true" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-transparent via-black/10 to-black/40" aria-hidden="true" />
       </div>
 
       {/* Particles/Sparkles (Static CSS animation) */}
-      <div className="absolute inset-0 z-[1] opacity-30 pointer-events-none">
+      <div className="absolute inset-0 z-[1] opacity-30 pointer-events-none" aria-hidden="true">
         <div className="absolute top-1/4 left-1/4 animate-pulse"><Logo className="h-4 w-4" color="#DFBD69" /></div>
         <div className="absolute top-1/3 right-1/3 animate-pulse delay-700"><Logo className="h-6 w-6" color="#DFBD69" /></div>
         <div className="absolute bottom-1/3 left-1/3 animate-pulse delay-1000"><Logo className="h-3 w-3" color="#DFBD69" /></div>
@@ -162,8 +162,8 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
             <span className="relative z-10 flex items-center gap-3">
               Book Your Relaxation <ChevronDown className="animate-bounce" size={20} />
             </span>
-            <div className="absolute inset-0 bg-white/20 transform -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-            <div className="absolute inset-0 bg-gradient-to-r from-gold via-gold-light to-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-white/20 transform -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-in-out" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-r from-gold via-gold-light to-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true" />
           </button>
         </div>
 

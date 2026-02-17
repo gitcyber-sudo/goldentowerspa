@@ -119,7 +119,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
   ).sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 
   return (
-    <section id="services" className="py-24 bg-gradient-to-b from-white via-[#faf9f5] to-cream/50 relative overflow-hidden">
+    <section id="services" aria-label="Spa treatments and services" className="py-16 md:py-24 bg-gradient-to-b from-white via-[#faf9f5] to-cream/50 relative overflow-hidden">
       <div className="container mx-auto px-6 md:px-12">
         {/* --- SIGNATURE SECTION --- */}
         <div className="mb-24">
@@ -129,7 +129,14 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-10"><Loader2 className="animate-spin text-gold" size={32} /></div>
+            <div className="flex justify-center py-10" role="status" aria-label="Loading treatments">
+              <Loader2 className="animate-spin text-gold" size={32} aria-hidden="true" />
+              <span className="sr-only">Loading treatments...</span>
+            </div>
+          ) : signatureTreatments.length === 0 && regularServices.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-charcoal/50 text-lg font-light">Our treatment menu is being updated. Please check back soon.</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...signatureTreatments, ...regularServices].map((service, index) => (
@@ -158,8 +165,9 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                   <button
                     onClick={() => onBookClick(service.id)}
                     className="text-gold text-xs font-bold uppercase tracking-widest flex items-center hover:text-gold-dark transition-colors btn-tactile"
+                    aria-label={`Book ${service.title}`}
                   >
-                    Book Massage <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                    Book Massage <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                   </button>
                 </div>
               ))}
@@ -184,7 +192,10 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-20"><Loader2 className="animate-spin text-gold" size={32} /></div>
+            <div className="flex justify-center py-20" role="status" aria-label="Loading packages">
+              <Loader2 className="animate-spin text-gold" size={32} aria-hidden="true" />
+              <span className="sr-only">Loading packages...</span>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
               {luxuryPackages.map((pkg, index) => (
@@ -212,8 +223,9 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
                     <button
                       onClick={() => onBookClick(pkg.id)}
                       className="text-gold text-xs font-bold uppercase tracking-widest flex items-center group-hover:translate-x-1 transition-transform cursor-pointer btn-tactile"
+                      aria-label={`Select ${pkg.title}`}
                     >
-                      Select Package <ArrowRight size={14} className="ml-2" />
+                      Select Package <ArrowRight size={14} className="ml-2" aria-hidden="true" />
                     </button>
                   </div>
                 </div>

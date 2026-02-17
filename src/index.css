@@ -5,6 +5,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -22,10 +23,52 @@
     --duration-medium: 500ms;
     --duration-entrance: 800ms;
     --cta-gold: #C5A059;
+
+    /* Design Tokens — Radius */
+    --radius-sm: 0.5rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.5rem;
+    --radius-xl: 2rem;
+    --radius-full: 9999px;
+
+    /* Design Tokens — Shadows */
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+    --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.1);
+    --shadow-gold: 0 4px 30px rgba(197, 160, 89, 0.15);
+    --shadow-gold-hover: 0 10px 40px rgba(197, 160, 89, 0.25);
+    --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+    /* Design Tokens — Transitions */
+    --transition-fast: 150ms ease-out;
+    --transition-base: 300ms ease-out;
+    --transition-slow: 500ms ease-out;
+    --transition-entrance: 800ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* Text selection styling */
+  ::selection {
+    background-color: rgba(197, 160, 89, 0.25);
+    color: #1A1A1A;
+  }
+
+  ::-moz-selection {
+    background-color: rgba(197, 160, 89, 0.25);
+    color: #1A1A1A;
+  }
+
+  /* Accessible focus styles — gold ring on focus-visible */
+  *:focus-visible {
+    outline: 2px solid #C5A059;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Remove focus outline for mouse users */
+  *:focus:not(:focus-visible) {
+    outline: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
-
     *,
     ::before,
     ::after {
@@ -33,6 +76,17 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+  }
+
+  /* Better touch targets on mobile */
+  @media (pointer: coarse) {
+    button,
+    a,
+    input,
+    select,
+    textarea {
+      min-height: 44px;
     }
   }
 }
@@ -55,7 +109,6 @@
   from {
     opacity: 0;
   }
-
   to {
     opacity: 1;
   }
@@ -65,7 +118,7 @@
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Custom Animations from index.html (if any were left over) or specific component styles */
+/* Custom Animations */
 .hero-text-shadow {
   text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
@@ -75,6 +128,43 @@
 }
 
 @layer utilities {
+  /* Screen reader only — hidden visually, accessible to AT */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Skip to content — shown on focus */
+  .sr-only-focusable:focus,
+  .sr-only-focusable:active {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    width: auto;
+    height: auto;
+    padding: 0.75rem 1.5rem;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    z-index: 9999;
+    background: #C5A059;
+    color: white;
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+
   .text-gradient-gold {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-[#C5A059] via-[#E5C585] to-[#C5A059];
   }
@@ -193,13 +283,21 @@
     filter: blur(0);
     opacity: 1;
   }
+
+  /* No scrollbar utility */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @keyframes border-rotate {
   from {
     transform: rotate(0deg);
   }
-
   to {
     transform: rotate(360deg);
   }
@@ -210,12 +308,10 @@
     left: -100%;
     top: -100%;
   }
-
   20% {
     left: 100%;
     top: 100%;
   }
-
   100% {
     left: 100%;
     top: 100%;
@@ -231,4 +327,29 @@
   transform: rotate(45deg);
   animation: shine 6s ease-in-out infinite;
   pointer-events: none;
+}
+
+/* Legal pages typography */
+.legal-content h2 {
+  @apply font-serif text-2xl md:text-3xl text-charcoal mt-10 mb-4;
+}
+
+.legal-content h3 {
+  @apply font-serif text-xl md:text-2xl text-charcoal-light mt-8 mb-3;
+}
+
+.legal-content p {
+  @apply text-charcoal-light font-light leading-relaxed mb-4 text-sm md:text-base;
+}
+
+.legal-content ul {
+  @apply list-disc pl-6 mb-4 space-y-2;
+}
+
+.legal-content li {
+  @apply text-charcoal-light font-light text-sm md:text-base;
+}
+
+.legal-content a {
+  @apply text-gold hover:text-gold-dark underline transition-colors;
 }
