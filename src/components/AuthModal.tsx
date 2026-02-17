@@ -81,12 +81,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     window.location.href = dashboardPath;
                 }
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             // Improved error message for specific Supabase error "Invalid login credentials"
-            if (err.message === "Invalid login credentials") {
+            const message = err instanceof Error ? err.message : 'Authentication failed';
+            if (message === "Invalid login credentials") {
                 setError("Incorrect email or password. Please try again.");
             } else {
-                setError(err.message || 'Authentication failed');
+                setError(message);
             }
         } finally {
             setLoading(false);
@@ -103,9 +104,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 }
             });
             if (error) throw error;
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Google Sign In Error:", err);
-            setError(err.message || 'Google sign-in failed');
+            setError(err instanceof Error ? err.message : 'Google sign-in failed');
         }
     };
 
@@ -181,7 +182,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gold" size={18} />
                             <input
                                 type="text"
-                                placeholder="Email or 'admin'"
+                                placeholder="Email address"
                                 required
                                 className="w-full bg-white border border-gold/20 pl-12 pr-4 py-3 rounded-xl focus:outline-none focus:border-gold transition-colors"
                                 value={formData.email}

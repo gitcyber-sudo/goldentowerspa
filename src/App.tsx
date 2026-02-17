@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, useCallback } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { AnalyticsProvider } from './context/AnalyticsContext';
@@ -6,14 +6,16 @@ import { useScrollAnimation } from './hooks/useScrollAnimation';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
 import MainLayout from './layouts/MainLayout';
+import ErrorBoundary from './components/ErrorBoundary';
 
-// Dashboard Components
-import AdminDashboard from './components/AdminDashboard';
-import UserDashboard from './components/UserDashboard';
-import TherapistDashboard from './components/TherapistDashboard';
-import TherapistLogin from './components/TherapistLogin';
-import PrivacyPolicy from './components/PrivacyPolicy';
-import TermsOfService from './components/TermsOfService';
+// Lazy-loaded routes — each becomes a separate chunk
+const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
+const UserDashboard = React.lazy(() => import('./components/UserDashboard'));
+const TherapistDashboard = React.lazy(() => import('./components/TherapistDashboard'));
+const TherapistLogin = React.lazy(() => import('./components/TherapistLogin'));
+const AdminLogin = React.lazy(() => import('./components/AdminLogin'));
+const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy'));
+const TermsOfService = React.lazy(() => import('./components/TermsOfService'));
 
 const App: React.FC = () => {
   const { loading: authLoading } = useAuth();
@@ -21,10 +23,10 @@ const App: React.FC = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string | undefined>(undefined);
 
-  const openBooking = (serviceId?: string) => {
+  const openBooking = useCallback((serviceId?: string) => {
     setSelectedServiceId(serviceId);
     setIsBookingOpen(true);
-  };
+  }, []);
 
   const containerRef = useScrollAnimation() as React.RefObject<HTMLDivElement>;
 
@@ -39,47 +41,52 @@ const App: React.FC = () => {
 
   return (
     <AnalyticsProvider>
-      <Routes>
-        <Route path="/" element={
-          <MainLayout
-            openBooking={openBooking}
-            isBookingOpen={isBookingOpen}
-            setIsBookingOpen={setIsBookingOpen}
-            isAuthOpen={isAuthOpen}
-            setIsAuthOpen={setIsAuthOpen}
-            onLoginClick={() => setIsAuthOpen(true)}
-            selectedServiceId={selectedServiceId}
-            containerRef={containerRef}
-          />
-        } />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['user']} allowGuests={true}>
-              <UserDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/therapist"
-          element={
-            <ProtectedRoute allowedRoles={['therapist']}>
-              <TherapistDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/therapist-login" element={<TherapistLogin />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms-of-service" element={<TermsOfService />} />
-      </Routes>
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingScreen message="Loading" />}>
+          <Routes>
+            <Route path="/" element={
+              <MainLayout
+                openBooking={openBooking}
+                isBookingOpen={isBookingOpen}
+                setIsBookingOpen={setIsBookingOpen}
+                isAuthOpen={isAuthOpen}
+                setIsAuthOpen={setIsAuthOpen}
+                onLoginClick={() => setIsAuthOpen(true)}
+                selectedServiceId={selectedServiceId}
+                containerRef={containerRef}
+              />
+            } />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['user']} allowGuests={true}>
+                  <UserDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/therapist"
+              element={
+                <ProtectedRoute allowedRoles={['therapist']}>
+                  <TherapistDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/therapist-login" element={<TherapistLogin />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
     </AnalyticsProvider>
   );
 };

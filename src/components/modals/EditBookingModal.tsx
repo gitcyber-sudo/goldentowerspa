@@ -1,18 +1,29 @@
-
 import React from 'react';
 import { X, Edit3, Save } from 'lucide-react';
+import type { Service, Therapist, BookingStatus } from '../../types';
+
+interface EditBookingFormData {
+    guest_name: string;
+    guest_email: string;
+    guest_phone: string;
+    service_id: string;
+    therapist_id: string;
+    booking_date: string;
+    booking_time: string;
+    status: BookingStatus;
+}
 
 interface EditBookingModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (e: React.FormEvent) => void;
-    data: any;
-    setData: (data: any) => void;
-    services: any[];
-    therapists: any[];
+    data: EditBookingFormData;
+    setData: (data: EditBookingFormData) => void;
+    services: Service[];
+    therapists: Therapist[];
 }
 
-const EditBookingModal: React.FC<EditBookingModalProps> = ({
+const EditBookingModal: React.FC<EditBookingModalProps> = React.memo(({
     isOpen,
     onClose,
     onSubmit,
@@ -99,6 +110,6 @@ const EditBookingModal: React.FC<EditBookingModalProps> = ({
             </div>
         </div>
     );
-};
+});
 
 export default EditBookingModal;

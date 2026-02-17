@@ -15,7 +15,6 @@ export const formatTimeTo12h = (time24: string): string => {
         h = h ? h : 12; // the hour '0' should be '12'
         return `${h}:${m} ${ampm}`;
     } catch (e) {
-        console.error('Error formatting time:', e);
         return time24;
     }
 };

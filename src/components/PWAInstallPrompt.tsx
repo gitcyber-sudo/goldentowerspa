@@ -15,7 +15,7 @@ export const PWAInstallPrompt: React.FC = () => {
 
         setIsIOS(isIphone);
 
-        const handler = (e: any) => {
+        const handler = (e: Event) => {
             e.preventDefault();
             setDeferredPrompt(e);
             if (!isStandalone) {
@@ -50,7 +50,6 @@ export const PWAInstallPrompt: React.FC = () => {
         if (!deferredPrompt) return;
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response to the install prompt: ${outcome}`);
         setDeferredPrompt(null);
         setShowPrompt(false);
     };

@@ -40,7 +40,7 @@ interface AnalyticsEvent {
     id: string;
     event_name: string;
     event_category: string;
-    event_data: any;
+    event_data: Record<string, unknown>;
     created_at: string;
 }
 

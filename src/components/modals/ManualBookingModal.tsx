@@ -1,27 +1,29 @@
-
-import React from 'react';
+import React, { useMemo } from 'react';
 import { XCircle } from 'lucide-react';
 import SelectionGrid from '../SelectionGrid';
+import type { Service, Therapist } from '../../types';
+
+interface ManualBookingFormData {
+    guest_name: string;
+    guest_email: string;
+    guest_phone: string;
+    service_id: string;
+    therapist_id: string;
+    date: string;
+    time: string;
+}
 
 interface ManualBookingModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (e: React.FormEvent) => void;
-    data: {
-        guest_name: string;
-        guest_email: string;
-        guest_phone: string;
-        service_id: string;
-        therapist_id: string;
-        date: string;
-        time: string;
-    };
-    setData: (data: any) => void;
-    services: any[];
-    therapists: any[];
+    data: ManualBookingFormData;
+    setData: (data: ManualBookingFormData) => void;
+    services: Service[];
+    therapists: Therapist[];
 }
 
-const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
+const ManualBookingModal: React.FC<ManualBookingModalProps> = React.memo(({
     isOpen,
     onClose,
     onSubmit,
@@ -31,6 +33,17 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
     therapists
 }) => {
     if (!isOpen) return null;
+
+    const serviceOptions = useMemo(() => services.map(s => ({
+        id: s.id,
+        title: s.title,
+        subtitle: s.category,
+        imageUrl: s.image_url,
+        price: s.price,
+        duration: s.duration
+    })), [services]);
+
+    const activeTherapists = useMemo(() => therapists.filter(t => t.active !== false), [therapists]);
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto flex justify-center items-start md:items-center p-4 md:p-6 bg-charcoal/80 backdrop-blur-sm">
@@ -63,14 +76,7 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
                     </div>
                     <SelectionGrid
                         label="Select Ritual"
-                        options={services.map(s => ({
-                            id: s.id,
-                            title: s.title,
-                            subtitle: s.category,
-                            imageUrl: s.image_url,
-                            price: s.price,
-                            duration: s.duration
-                        }))}
+                        options={serviceOptions}
                         selectedId={data.service_id}
                         onSelect={(id) => setData({ ...data, service_id: id })}
                     />
@@ -84,7 +90,7 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
                                 onChange={e => setData({ ...data, therapist_id: e.target.value })}
                             >
                                 <option value="">-- Choose Specialist --</option>
-                                {therapists.filter(t => t.active !== false).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                {activeTherapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                             </select>
                         </div>
                         <div>
@@ -113,6 +119,6 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = ({
             </div>
         </div>
     );
-};
+});
 
 export default ManualBookingModal;

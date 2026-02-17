@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import Sanctuary from '../components/Sanctuary';
@@ -27,7 +27,7 @@ interface MainLayoutProps {
   containerRef: React.RefObject<HTMLDivElement>;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({
+const MainLayout: React.FC<MainLayoutProps> = React.memo(({
   openBooking,
   isBookingOpen,
   setIsBookingOpen,
@@ -47,9 +47,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   // The original had `const { user } = useAuth();`
   const { user } = useAuth();
 
-  const handleBookingAttempt = (serviceId?: string) => {
+  const handleBookingAttempt = useCallback((serviceId?: string) => {
     openBooking(serviceId);
-  };
+  }, [openBooking]);
 
   return (
     <div ref={containerRef} className="bg-cream min-h-screen w-full overflow-x-hidden selection:bg-gold selection:text-white">
@@ -112,6 +112,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       <PWAInstallPrompt />
     </div>
   );
-};
+});
 
 export default MainLayout;

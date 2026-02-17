@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, X, Upload, RefreshCw, Plus, User } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import type { Therapist } from '../../types';
 
 interface EditTherapistModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
-    therapist: any;
+    therapist: Therapist;
 }
 
 const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose, onSuccess, therapist }) => {
@@ -59,7 +60,7 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                 // Use timestamp and random string to ensure uniqueness and avoid browser caching of distinct files
                 const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-                console.log('Uploading new image:', fileName);
+
 
                 const { error: uploadError } = await supabase.storage
                     .from('therapist-photos')
@@ -77,7 +78,7 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                     .from('therapist-photos')
                     .getPublicUrl(fileName);
 
-                console.log('New image URL generated:', publicUrl);
+
                 imageUrl = publicUrl;
             }
 
@@ -94,7 +95,7 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                 .eq('id', therapist.id)
                 .select();
 
-            console.log('Update operation result:', { data: updatedData, error: updateError });
+
 
             if (updateError) throw updateError;
 
@@ -153,9 +154,9 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
 
             onSuccess();
             onClose();
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Full Error Object:", err);
-            alert('Error updating therapist: ' + err.message);
+            alert('Error updating therapist: ' + (err instanceof Error ? err.message : 'Unknown error'));
         } finally {
             setLoading(false);
         }
@@ -242,7 +243,7 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                                     </h4>
                                     <p className="text-xs text-charcoal/60 leading-relaxed">
                                         This specialist doesn't have a login account yet. You can create one now.
-                                        They will sign in using their <strong>Full Name</strong> and a <strong>6-Digit PIN</strong>.
+                                        They will sign in using their <strong>Full Name</strong> and a <strong>4-Digit PIN</strong>.
                                     </p>
                                 </div>
 
@@ -252,7 +253,7 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                                         onClick={() => {
                                             setShowPasswordReset(true);
                                             // Pre-generate a PIN
-                                            setNewPassword(Math.floor(100000 + Math.random() * 900000).toString());
+                                            setNewPassword(Math.floor(1000 + Math.random() * 9000).toString());
                                         }}
                                         className="text-sm bg-gold text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gold-dark transition-colors shadow-sm"
                                     >
@@ -261,12 +262,12 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                                 ) : (
                                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                                         <div className="flex justify-between items-center">
-                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Generated 6-Digit PIN</label>
+                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Generated 4-Digit PIN</label>
                                         </div>
                                         <div className="flex gap-2">
                                             <input
                                                 type="text"
-                                                maxLength={6}
+                                                maxLength={4}
                                                 className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold font-mono font-bold tracking-widest text-center text-lg"
                                                 value={newPassword}
                                                 onChange={e => setNewPassword(e.target.value.replace(/[^0-9]/g, ''))}
@@ -296,13 +297,13 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                                 ) : (
                                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                                         <div className="flex justify-between items-center">
-                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">New 6-Digit PIN</label>
+                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">New 4-Digit PIN</label>
                                         </div>
                                         <div className="flex gap-2">
                                             <input
                                                 type="text"
-                                                maxLength={6}
-                                                placeholder="Enter new 6-digit PIN"
+                                                maxLength={4}
+                                                placeholder="Enter new 4-digit PIN"
                                                 className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold font-mono font-bold tracking-widest text-center text-lg"
                                                 value={newPassword}
                                                 onChange={e => setNewPassword(e.target.value.replace(/[^0-9]/g, ''))}

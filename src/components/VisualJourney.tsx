@@ -61,7 +61,7 @@ const VisualJourney: React.FC = () => {
       });
 
       // Individual parallax effects for elements within sections
-      sections.forEach((section: any) => {
+      sections.forEach((section: Element) => {
         const title = section.querySelector('.section-title');
         const concept = section.querySelector('.section-concept');
         const img = section.querySelector('.section-img');

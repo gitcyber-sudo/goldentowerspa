@@ -36,7 +36,7 @@ const TherapistLogin: React.FC = () => {
             if (profileError) throw profileError;
 
             if (!profile) {
-                throw new Error('Specialist account not found. Please verify the name or contact admin.');
+                throw new Error('Invalid credentials. Please try again.');
             }
 
             // 2. Sign in with the fetched email
@@ -51,7 +51,7 @@ const TherapistLogin: React.FC = () => {
             navigate('/therapist');
         } catch (err: any) {
             console.error('Therapist Login Error:', err);
-            setError(err.message || 'Login failed. Please verify your credentials.');
+            setError('Invalid credentials. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -90,7 +90,7 @@ const TherapistLogin: React.FC = () => {
                                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gold/40 group-focus-within:text-gold transition-colors" size={18} />
                                     <input
                                         type="text"
-                                        placeholder="e.g. Test Therapist"
+                                        placeholder="Name"
                                         required
                                         className="w-full bg-cream/30 border border-gold/10 pl-12 pr-4 py-4 rounded-xl focus:outline-none focus:border-gold focus:bg-white transition-all text-charcoal placeholder:text-charcoal/20"
                                         value={formData.name}
@@ -107,7 +107,7 @@ const TherapistLogin: React.FC = () => {
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gold/40 group-focus-within:text-gold transition-colors" size={18} />
                                     <input
                                         type="password"
-                                        placeholder="6-Digit Access PIN"
+                                        placeholder="4-Digit Access PIN"
                                         required
                                         className="w-full bg-cream/30 border border-gold/10 pl-12 pr-4 py-4 rounded-xl focus:outline-none focus:border-gold focus:bg-white transition-all text-charcoal placeholder:text-charcoal/20"
                                         value={formData.password}

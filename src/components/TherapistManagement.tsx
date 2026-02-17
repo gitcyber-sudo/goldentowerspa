@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { Plus, Search, Edit3, User, RefreshCw } from 'lucide-react';
 import AddTherapistModal from './modals/AddTherapistModal';
@@ -11,11 +11,7 @@ const TherapistManagement: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingTherapist, setEditingTherapist] = useState<any>(null);
 
-    useEffect(() => {
-        fetchTherapists();
-    }, []);
-
-    const fetchTherapists = async () => {
+    const fetchTherapists = useCallback(async () => {
         setLoading(true);
         const { data, error } = await supabase
             .from('therapists')
@@ -25,12 +21,16 @@ const TherapistManagement: React.FC = () => {
         if (error) console.error('Error fetching therapists:', error);
         if (data) setTherapists(data);
         setLoading(false);
-    };
+    }, []);
 
-    const filteredTherapists = therapists.filter(t =>
+    useEffect(() => {
+        fetchTherapists();
+    }, [fetchTherapists]);
+
+    const filteredTherapists = useMemo(() => therapists.filter(t =>
         t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (t.specialty && t.specialty.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    ), [therapists, searchTerm]);
 
     return (
         <div className="p-4 md:p-6 lg:p-8">

@@ -1,4 +1,3 @@
-
 import React, { useRef, useLayoutEffect, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -21,7 +20,7 @@ interface TherapistsProps {
   onBookClick: () => void;
 }
 
-const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
+const Therapists: React.FC<TherapistsProps> = React.memo(({ onBookClick }) => {
   const { loading: authLoading, user } = useAuth();
   const [team, setTeam] = useState<TherapistItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +36,7 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
       setLoading(true);
 
       try {
-        console.log(`Therapists: Fetch attempt ${retryCount + 1}...`);
+
         const { data, error } = await supabase
           .from('therapists')
           .select('*')
@@ -47,19 +46,19 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
         if (error) throw error;
 
         if ((!data || data.length === 0) && retryCount < 3) {
-          console.log(`Therapists: No data yet, retrying (${retryCount + 1}/3) in 2s...`);
+
           setTimeout(() => fetchTherapists(retryCount + 1), 2000);
           return;
         }
 
         if (data && mounted) {
-          console.log(`Therapists: Loaded ${data.length} specialists`);
+
           setTeam(data);
         }
       } catch (error) {
         console.error('Therapists fetch error:', error);
         if (retryCount < 3) {
-          console.log(`Therapists: Error encountered, retrying (${retryCount + 1}/3) in 2s...`);
+
           setTimeout(() => fetchTherapists(retryCount + 1), 2000);
           return;
         }
@@ -201,7 +200,6 @@ const Therapists: React.FC<TherapistsProps> = ({ onBookClick }) => {
       </div>
     </section>
   );
-};
+});
 
 export default Therapists;
-

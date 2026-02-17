@@ -63,7 +63,7 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
 
             // Auto-generate credentials
             const generatedEmail = `${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@goldentower.internal`;
-            const generatedPassword = Math.floor(100000 + Math.random() * 900000).toString();
+            const generatedPassword = Math.floor(1000 + Math.random() * 9000).toString();
 
             // 2. Call Edge Function to create user and therapist record
             const { data, error } = await supabase.functions.invoke('create-therapist', {
@@ -77,7 +77,7 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
 
             if (error) throw error;
 
-            console.log('Therapist created successfully:', data);
+
 
             // Show Success State with Credentials
             setGeneratedCredentials({
@@ -90,9 +90,9 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
             setImageFile(null);
             setImagePreview(null);
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error adding therapist:', err);
-            alert('Error adding therapist: ' + err.message);
+            alert('Error adding therapist: ' + (err instanceof Error ? err.message : 'Unknown error'));
         } finally {
             setLoading(false);
         }
@@ -139,7 +139,7 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
                                 <p className="text-lg font-medium text-charcoal font-serif">{generatedCredentials.name}</p>
                             </div>
                             <div>
-                                <label className="text-xs font-bold uppercase tracking-wider text-charcoal/40">6-Digit Access PIN</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-charcoal/40">4-Digit Access PIN</label>
                                 <div className="flex items-center gap-3">
                                     <p className="text-3xl font-bold text-gold tracking-widest font-mono">
                                         {generatedCredentials.password}
@@ -151,8 +151,8 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
                         <button
                             onClick={copyToClipboard}
                             className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${copied
-                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-                                    : 'bg-gold text-white hover:bg-gold-dark shadow-lg shadow-gold/20'
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                                : 'bg-gold text-white hover:bg-gold-dark shadow-lg shadow-gold/20'
                                 }`}
                         >
                             {copied ? (

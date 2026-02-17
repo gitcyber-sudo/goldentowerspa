@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { ArrowRight, Loader2, Crown, Sparkles, MoveRight } from 'lucide-react';
 import Logo from './Logo';
 import { supabase } from '../lib/supabase';
@@ -23,7 +23,7 @@ interface ServicesProps {
   onBookClick: (id: string) => void;
 }
 
-const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
+const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { loading: authLoading, user } = useAuth();
@@ -38,7 +38,7 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
       setLoading(true);
 
       try {
-        console.log(`Services: Fetch attempt ${retryCount + 1}...`);
+
         const { data, error } = await supabase
           .from('services')
           .select('*')
@@ -48,20 +48,20 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
 
         // If no data returned, it might be a Supabase sync delay
         if ((!data || data.length === 0) && retryCount < 3) {
-          console.log(`Services: No data yet, retrying (${retryCount + 1}/3) in 2s...`);
+
           setTimeout(() => fetchServices(retryCount + 1), 2000);
           return;
         }
 
         if (data && mounted) {
-          console.log(`Services: Loaded ${data.length} items`);
+
           setServices(data);
         }
       } catch (error) {
         console.error('Services fetch error:', error);
         // Try a retry even on error (e.g. network blip during sync)
         if (retryCount < 3) {
-          console.log(`Services: Error encountered, retrying (${retryCount + 1}/3) in 2s...`);
+
           setTimeout(() => fetchServices(retryCount + 1), 2000);
           return;
         }
@@ -94,29 +94,29 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
     return () => observer.disconnect();
   }, [loading, services]);
 
-  const processedServices = (services || []).map(s => ({
+  const processedServices = useMemo(() => (services || []).map(s => ({
     ...s
-  }));
+  })), [services]);
 
-  const signatureTreatments = processedServices
+  const signatureTreatments = useMemo(() => processedServices
     .filter(s => s && (s.category === 'signature' || (s.title && s.title.toLowerCase().includes('signature'))))
-    .sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+    .sort((a, b) => (a.title || "").localeCompare(b.title || "")), [processedServices]);
 
-  const luxuryPackages = processedServices
+  const luxuryPackages = useMemo(() => processedServices
     .filter(s => s && s.title && s.title.toUpperCase().includes('PACKAGE'))
-    .sort((a, b) => (a.title || "").localeCompare(b.title || "", undefined, { numeric: true }));
+    .sort((a, b) => (a.title || "").localeCompare(b.title || "", undefined, { numeric: true })), [processedServices]);
 
-  const expressMassages = processedServices
+  const expressMassages = useMemo(() => processedServices
     .filter(s => s && s.category === 'express')
-    .sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+    .sort((a, b) => (a.title || "").localeCompare(b.title || "")), [processedServices]);
 
-  const regularServices = processedServices.filter(s =>
+  const regularServices = useMemo(() => processedServices.filter(s =>
     s &&
     s.title !== 'Home Service Massage' &&
     !signatureTreatments.some(st => st.id === s.id) &&
     !luxuryPackages.some(lp => lp.id === s.id) &&
     !expressMassages.some(em => em.id === s.id)
-  ).sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+  ).sort((a, b) => (a.title || "").localeCompare(b.title || "")), [processedServices, signatureTreatments, luxuryPackages, expressMassages]);
 
   return (
     <section id="services" aria-label="Spa treatments and services" className="py-16 md:py-24 bg-gradient-to-b from-white via-[#faf9f5] to-cream/50 relative overflow-hidden">
@@ -236,6 +236,6 @@ const Services: React.FC<ServicesProps> = ({ onBookClick }) => {
       </div>
     </section>
   );
-};
+});
 
 export default Services;

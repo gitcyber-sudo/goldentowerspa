@@ -2,11 +2,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import type { Profile } from '../types';
 
 interface AuthContextType {
     user: User | null;
     session: Session | null;
-    profile: any | null;
+    profile: Profile | null;
     role: 'user' | 'therapist' | 'admin' | null;
     loading: boolean;
     signIn: (email: string) => Promise<void>;
@@ -60,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // 2. Listen for all auth events
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log("Auth event triggered:", event);
+
 
             if (!mounted) return;
 
@@ -92,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         (window.location.pathname === '/' || window.location.pathname === '/index.html')) {
                         const r = profileData?.role || 'user';
                         const path = r === 'admin' ? '/admin' : (r === 'therapist' ? '/therapist' : '/dashboard');
-                        console.log(`Auto-redirecting to ${path}...`);
+                        // Auto-redirect based on role
                         window.location.replace(path);
                     }
                 }
@@ -123,7 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!user) return;
 
         const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 Minutes
-        let timeoutId: any;
+        let timeoutId: ReturnType<typeof setTimeout>;
 
         const resetTimer = () => {
             if (timeoutId) clearTimeout(timeoutId);
@@ -147,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const claimGuestBookings = async (userId: string, email: string, visitorId: string) => {
         try {
-            console.log("Claiming guest bookings for:", userId, "on visitor:", visitorId);
+
             const { error } = await supabase
                 .from('bookings')
                 .update({
@@ -158,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 .is('user_id', null);
 
             if (error) throw error;
-            console.log("Guest bookings successfully claimed");
+
         } catch (err) {
             console.warn("Failed to claim guest bookings:", err);
         }
@@ -166,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const fetchProfile = async (userId: string) => {
         try {
-            console.log("Fetching profile for:", userId);
+
 
             // Add a sub-timeout specifically for the database query
             const profilePromise = supabase
@@ -180,14 +181,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setTimeout(() => reject(new Error("Profile fetch timeout")), 5000)
             );
 
-            const result: any = await Promise.race([profilePromise, timeoutPromise]);
+            const result = await Promise.race([profilePromise, timeoutPromise]) as { data: Profile | null; error: { message: string; code?: string } | null };
             const { data, error } = result;
 
             if (error) {
                 console.warn('Profile fetch error:', error.message);
                 // IF it's a "Not Found" error, we assume it's a new user and create a basic profile or default
                 if (error.code === 'PGRST116') {
-                    const fallback = { id: userId, role: 'user' };
+                    const fallback: Profile = { id: userId, role: 'user' };
                     setProfile(fallback);
                     return fallback;
                 }
@@ -195,7 +196,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             if (data) {
-                console.log("Profile loaded successfully:", data.role);
+
                 setProfile(data);
                 return data;
             }
@@ -215,7 +216,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const signOut = async () => {
         setLoading(true);
         try {
-            console.log("Initiating targeted sign out...");
+
 
             // 1. Clear profile state immediately
             setUser(null);
@@ -223,7 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setProfile(null);
 
             // 2. Clear Auth tokens AND the Guest Identity (to prevent cross-account pollution)
-            const storageKey = `sb-${new URL((supabase as any).supabaseUrl).hostname.split('.')[0]}-auth-token`;
+            const storageKey = `sb-${new URL((supabase as unknown as { supabaseUrl: string }).supabaseUrl).hostname.split('.')[0]}-auth-token`;
             localStorage.removeItem(storageKey);
             localStorage.removeItem('gt_visitor_id'); // RESET guest identity on logout
 
@@ -242,7 +243,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 window.location.href = window.location.origin;
             }
 
-            console.log("Sign out successful");
+
         } catch (error) {
             console.error('Error during sign out:', error);
         } finally {
