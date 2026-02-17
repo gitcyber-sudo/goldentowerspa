@@ -99,7 +99,9 @@
       "@context": "https://schema.org",
       "@type": "DaySpa",
       "name": "Golden Tower Spa",
+      "description": "Experience luxury and traditional healing at Golden Tower Spa, Quezon City's premier sanctuary for hilot massage and wellness treatments.",
       "image": "https://goldentowerspa.com/og-image.jpg",
+      "logo": "https://goldentowerspa.com/logo.png",
       "@id": "https://goldentowerspa.com",
       "url": "https://goldentowerspa.com",
       "telephone": "+639171234567",
@@ -130,12 +132,48 @@
         "opens": "10:00",
         "closes": "22:00"
       },
-      "priceRange": "$$"
+      "priceRange": "$$",
+      "sameAs": [
+        "https://www.facebook.com/goldentowerspa",
+        "https://www.instagram.com/goldentowerspa"
+      ],
+      "potentialAction": {
+        "@type": "ReserveAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://goldentowerspa.com/#book",
+          "inLanguage": "en-US",
+          "actionPlatform": [
+            "http://schema.org/DesktopWebPlatform",
+            "http://schema.org/IOSPlatform",
+            "http://schema.org/AndroidPlatform"
+          ]
+        },
+        "result": {
+          "@type": "Reservation",
+          "name": "Massage Booking"
+        }
+      }
     }
   </script>
 </head>
 
 <body class="bg-cream text-charcoal font-sans antialiased">
+  <noscript>
+    <h1>Golden Tower Spa - Luxury Massage in Quezon City</h1>
+    <p>Experience the ultimate relaxation at Golden Tower Spa. We offer premium Hilot, Swedish, and Shiatsu massages.
+    </p>
+    <h2>Our Services</h2>
+    <ul>
+      <li>Signature Golden Massage</li>
+      <li>Traditional Hilot</li>
+      <li>Ventosa Cupping Therapy</li>
+      <li>Deep Tissue Massage</li>
+    </ul>
+    <h2>Contact Us</h2>
+    <p>Located at Golden Tower, Quezon City. Call us at +63 917 123 4567.</p>
+    <p>Open Daily: 10:00 AM - 10:00 PM</p>
+  </noscript>
   <div id="root"></div>
   <!-- Vite Entry Point -->
   <script type="module" src="/src/index.tsx"></script>

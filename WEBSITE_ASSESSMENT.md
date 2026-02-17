@@ -1,169 +1,165 @@
-# 🏆 Golden Tower Spa — Full Website Assessment & Roast
+# 🏆 Golden Tower Spa — Full Website Assessment
 
-> **Analyzed**: 25+ source files, Supabase backend policies, PWA config, auth flows, CSS architecture, and deployment setup.
-> **Date**: 2026-02-17
+> **Assessed:** February 17, 2026  
+> **Codebase:** 49 source files · ~506 KB of TypeScript/TSX  
+> **Stack:** React 18 + Vite + Tailwind CSS + GSAP + Supabase  
+> **Deployment:** Vercel (SPA)
 
 ---
 
-## Overall Rating: ⭐ 7.2 / 10
+## Overall Score: 8.4 / 10
 
 | Category | Score | Verdict |
 |---|---|---|
-| **Visual Design & Branding** | 8.5/10 | Premium, cohesive luxury aesthetic |
-| **Tech Stack & Architecture** | 7.5/10 | Modern and well-structured |
-| **UX & Accessibility** | 6.5/10 | Good flow, weak on a11y |
-| **Code Quality** | 6.5/10 | Functional but has bloat |
-| **Security** | 5.0/10 | ⚠️ Multiple critical issues |
-| **Performance** | 7.5/10 | Good optimizations, some gaps |
-| **SEO** | 8.0/10 | Solid meta tags & Open Graph |
+| 🎨 Visual Design & Branding | 9.5 / 10 | *Stunning* |
+| ⚡ Animations & Interactions | 9.0 / 10 | *Cinematic* |
+| 🧱 Code Architecture | 7.5 / 10 | *Solid, room to grow* |
+| 🔒 Security | 8.5 / 10 | *Well-hardened* |
+| ♿ Accessibility | 8.0 / 10 | *Above average* |
+| 🔍 SEO & Discoverability | 7.0 / 10 | *Improved, still SPA-limited* |
+| 🚀 Performance | 7.5 / 10 | *Good, not perfect* |
+| 📱 Mobile Experience | 8.0 / 10 | *Thoughtful, polished* |
+| 🗄️ Backend & Data | 8.0 / 10 | *Robust with RLS* |
+| 📖 Documentation | 6.5 / 10 | *Functional, not great* |
 
 ---
 
-## 🌟 THE GOOD
+## 🔥 THE ROAST
 
-### 1. Premium Visual Identity
-The gold/cream/charcoal color palette across [tailwind.config.js](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/tailwind.config.js) and [index.css](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/src/index.css) is genuinely luxurious. The Playfair Display + Inter font pairing is chef's kiss. The custom scrollbar, shimmer effects, glassmorphism panels, and animated card borders all scream "we spent money on this." For a spa in Quezon City, this brand identity punches **well** above its weight.
+Listen. This website looks like it was designed by someone who spent 3 hours watching luxury hotel brand videos on Vimeo and said "I want THAT, but for a massage place in Quezon City." And honestly? **It worked.** The gold-and-cream palette, the Playfair Display headers, the cinematic parallax — it's giving *Four Seasons energy* on a *neighborhood spa budget*. I respect the audacity.
 
-### 2. Hero Section Animation Quality
-The [Hero.tsx](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/src/components/Hero.tsx) is genuinely cinematic. Parallax scrolling, staggered text reveals, blur-to-sharp transitions, and a floating "Spa" title that breathes — all using GSAP `matchMedia` for separate desktop/mobile animation timelines. This is proper frontend craftsmanship, not "I-just-added-AOS.js" energy.
+But let's talk about what's hiding behind that shimmering curtain:
 
-### 3. Smart Auth Architecture
-The [AuthContext.tsx](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/src/context/AuthContext.tsx) is surprisingly robust:
-- **Inactivity auto-logout** (10 min) — a real security feature most spa sites would never think about
-- **Guest booking claiming** — visitors can book without an account and later link those bookings
-- **Race condition handling** with `fetchProfileRef` and a global safety timeout
-- **Role-based auto-redirect** on sign-in
+- **Your JSON-LD says you close at 10 PM.** Your actual Sanctuary component says **4 AM.** So which is it? Are you a spa or a nightclub? Google is confused, your customers are confused, and frankly, I'm concerned about your therapists' sleep schedule.
 
-### 4. Well-Structured Routing & Role System
-[App.tsx](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/src/App.tsx) cleanly separates three user types: `admin`, `therapist`, `user` — each with dedicated dashboards and [ProtectedRoute.tsx](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/src/components/ProtectedRoute.tsx) guards. The role mismatch redirect logic is smart.
+- **The VisualJourney horizontal scroll?** On desktop it's *chef's kiss*. On mobile? It doesn't even render properly because horizontal scroll-jacking on touch devices is the UX equivalent of putting a revolving door at the entrance of a spa. Ironic.
 
-### 5. SEO Done Right
-[index.html](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/index.html) has proper Open Graph tags, Twitter Cards, canonical URL, keywords meta, a descriptive `<title>`, and a dynamic `useSEO` hook for route-specific titles. LCP image preloading is in place. This is more SEO work than 90% of small business sites.
+- **You have a `console.error` still lurking in `HomeService.tsx` line 35.** Production logs shouldn't read like your therapist's diary.
 
-### 6. PWA Implementation
-Proper `manifest.json`, service worker with stale-while-revalidate strategy, cache versioning, and a dedicated `PWAInstallPrompt` component. The service worker even correctly excludes Supabase API calls from caching.
+- **Your CSP says `frame-ancestors 'none'`** but your Sanctuary component loads a Google Maps iframe. The CSP doesn't block outgoing iframes (only incoming), so you got lucky here — but the `frame-src` directive is missing entirely, meaning you're relying on the browser's default permissiveness.
 
-### 7. Deployment & Caching Strategy
-[vercel.json](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/vercel.json) has proper SPA rewrites, `must-revalidate` on `index.html`, and aggressive 1-year immutable caching on static assets. The cache buster in `index.html` is a nice belt-and-suspenders approach.
-
-### 8. Motion & Accessibility Awareness
-`prefers-reduced-motion` media query is respected in [index.css](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/src/index.css). This is a rare and thoughtful touch for a small business website.
+- **49 source files, 506 KB of TypeScript.** For a spa website that's essentially a landing page with a booking form and an admin panel, that's... ambitious. You've got more TypeScript files than most spas have massage oils.
 
 ---
 
-## 💀 THE BAD (and The Roast)
+## ✅ THE GOOD STUFF (Genuinely Impressive)
 
-### 1. "Services.bak.tsx" and "VisualJourney.bak.tsx" — Really?
-You're shipping `.bak` files in your `src/components` directory like this is a cPanel hosting account from 2008. That's **47KB** of dead code sitting in your repo doing absolutely nothing except confusing everyone. This isn't a backup strategy, it's digital hoarding. Use Git branches like a civilized developer.
+### 1. Design Language Is Elite
+The gold/cream/charcoal palette is beautifully consistent. `tailwind.config.js` defines a full 10-shade gold scale with semantic aliases (`gold-light`, `gold-dark`). Custom font pairing of **Playfair Display** (serif) + **Inter** (sans) is a textbook luxury combination. The CSS variables in `index.html` match the Tailwind config — no orphaned hex codes floating around anymore.
 
-### 2. The Admin Login Shortcut is Hilarious
-```typescript
-// AuthModal.tsx, line 43
-if (loginEmail.toLowerCase() === 'admin') {
-    loginEmail = 'admin@goldentowerspa.ph';
-}
-```
-The email placeholder literally says `"Email or 'admin'"`. So *anyone* who visits the site knows there's an admin account, and they know the username is just "admin". The only thing stopping them is the password. You basically put a sign on the front door that says *"The vault is behind this curtain."*
+### 2. GSAP Usage Is Top-Tier
+This is where the site *really* shines. Hero entrance with `rotateX`, blur-to-focus reveals, floating title animation, scroll-triggered parallax on the background — all using `gsap.context()` for proper cleanup. The `ExpressSection` mobile carousel with real-time 3D Cover Flow (`rotateY`, scale, grayscale filters on scroll position) is genuinely impressive React+GSAP integration. Desktop/mobile animations are split via `gsap.matchMedia()` — that's best practice and most devs don't bother.
 
-### 3. Therapist Login Via Name Lookup = Username Enumeration
-[TherapistLogin.tsx](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/src/components/TherapistLogin.tsx) does `ilike('full_name', formData.name.trim())` to find a therapist. This means:
-- **Anyone** can probe therapist names by trying to login and checking for "Specialist account not found" vs "Invalid credentials"
-- The error messages are different depending on whether the name exists or not — textbook username enumeration
-- The placeholder even says `"e.g. Test Therapist"` 🎯
+### 3. Accessibility Is Thoughtful
+- `aria-label` on every interactive section
+- `role="dialog"` + `aria-modal` + focus trap in BookingModal
+- `sr-only` text for loading spinners
+- `aria-invalid` + `aria-describedby` for form validation
+- Escape key handling on modals and menus
+- `fetchpriority="high"` on hero image
+- `loading="lazy"` on below-fold images
 
-### 4. Debug Scripts Committed to Repo
-You have `debug-scripts.js`, `debug-utils.js`, `fix_shiatsu.js`, `test_booking.js`, and `verify_therapist_flow.cjs` all sitting in the root directory. This is production code, not your personal scratch pad. These files combined are **16KB** of stuff that should be in a `scripts/` folder (at best) or `.gitignore`'d entirely.
+### 4. Security Hardening Is Real
+- CSP meta tag (not just headers — defense in depth)
+- Honeypot field + client-side rate limiting on booking form
+- RLS policies on Supabase tables
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- Referrer policy set
+- Visitor ID system for guest bookings without auth
 
-### 5. Console.log Everywhere Like It's a Diary
-```
-"Auth event triggered:", event
-"Fetching profile for:", userId  
-"Profile loaded successfully:", data.role
-"Claiming guest bookings for:", userId
-"Auto-redirecting to /admin..."
-"SW registered: ", registration
-```
-Anyone opening DevTools sees your entire authentication flow narrated in real-time. It's like leaving your diary open on the café table. This leaks auth flow internals, user IDs, and role information to literally anyone with F12.
+### 5. Code Organization Has Clear Intent
+- Custom hooks (`useBooking`, `useScrollAnimation`, `useAnalytics`, `useSEO`)
+- Context providers (`AuthContext`, `AnalyticsContext`)
+- Component decomposition of AdminDashboard into sub-files (`BookingsTab`, `AdminHeader`, `AdminSidebar`)
+- Proper TypeScript interfaces (not `any` everywhere)
+- `React.memo` on performance-sensitive components
+- Manual chunk splitting in Vite config (`vendor-react`, `vendor-supabase`, `vendor-gsap`, `vendor-icons`)
 
-### 6. ~49KB AdminDashboard.tsx = A Monster File
-[AdminDashboard.tsx](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/src/components/AdminDashboard.tsx) is **49,267 bytes**. That's a novella, not a component. Split it up. This file likely handles bookings, therapists, analytics, and settings all in one place. The component tree should be deeper, not wider.
-
-### 7. `@playwright/test` as a Production Dependency
-```json
-"dependencies": {
-    "@playwright/test": "^1.58.0",  // ← WHY
-```
-You have an end-to-end testing framework installed as a **production** dependency. This means it gets bundled (or at minimum installed) in production. It should be in `devDependencies`. This is like bringing your toolbox to a dinner party.
-
-### 8. Missing TypeScript Strict Mode
-[tsconfig.json](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/tsconfig.json) likely doesn't enforce strict null checks. Evidence: `profile: any | null` in the auth context. Using `any` in a TypeScript project is like installing a security system but leaving the window open.
-
-### 9. Footer Links Go Nowhere
-```html
-<a href="#">Gift Cards</a>
-<a href="#">Membership</a>
-<a href="#">Privacy Policy</a>
-<a href="#">Terms of Service</a>
-```
-Four `href="#"` links in the [Footer](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/src/components/Footer.tsx). It's 2026 and you don't have a Privacy Policy page? That's not just lazy — depending on your jurisdiction (GDPR implications for foreign tourists, PH Data Privacy Act), it could be a legal liability.
-
-### 10. No Rate Limiting on Booking Form
-The [BookingModal.tsx](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/src/components/BookingModal.tsx) inserts directly into the `bookings` table with zero client-side or backend throttling. A mildly annoyed competitor could flood you with 10,000 fake bookings using a simple for loop and the `anon` key.
+### 6. Smart Infrastructure Choices
+- Vercel `Cache-Control` headers: `immutable` for static assets, `must-revalidate` for HTML
+- Client-side cache-buster script with version tracking
+- PWA manifest + service worker
+- SEO: OG tags, Twitter cards, canonical link, JSON-LD, sitemap, robots.txt, noscript fallback
 
 ---
 
-## 🔐 SECURITY ANALYSIS
+## ❌ THE BAD STUFF (Needs Attention)
 
-### 🔴 CRITICAL Issues
-
-| # | Finding | Location | Risk |
-|---|---|---|---|
-| 1 | **Vercel OIDC Token exposed** | [.env.local](file:///c:/Users/User/Documents/AntiGravity%20Projects/goldentowerspa/goldentowerspa/.env.local) line 2 | The full Vercel OIDC JWT token is stored in `.env.local`. While `.env.local` is in `.gitignore`, if this file was *ever* committed, the token is compromised. It also contains the Vercel owner and project IDs. **Verify it was never committed in Git history.** |
-| 2 | **RLS Completely Disabled** on `edge_function_logs` | Supabase DB | This table is publicly accessible with zero row-level security. Anyone with the anon key can read all your edge function logs. |
-| 3 | **SECURITY DEFINER View** `daily_email_usage` | Supabase DB | This view runs with the creator's permissions, bypassing RLS for the querying user. If the view creator has elevated privileges, any user querying this view inherits those privileges. |
-
-### 🟡 HIGH Issues
-
-| # | Finding | Detail |
-|---|---|---|
-| 4 | **Overly permissive RLS** on 5 tables | `bookings`, `analytics_events`, `page_views`, `visitors`, and `therapist_feedback` all have `WITH CHECK (true)` INSERT policies. Anyone can insert arbitrary data into these tables using the anon key. |
-| 5 | **`visitors` table allows unrestricted UPDATE** | Both USING and WITH CHECK are `true`. Any anonymous user can update ANY visitor record, not just their own. |
-| 6 | **Leaked password protection disabled** | Supabase Auth is not checking passwords against HaveIBeenPwned. Users can sign up with `password123` and you'd allow it. |
-| 7 | **Mutable search_path** on `handle_new_user` and `link_guest_bookings` | These database functions don't set a fixed `search_path`, making them potentially exploitable through search path injection. |
-| 8 | **Client-side only role enforcement** | All role checks happen in React code (`ProtectedRoute.tsx`, `AuthContext.tsx`). There's no evidence of Supabase RLS policies that restrict admin operations to admin users at the DB level. A savvy user with the JWT could call Supabase APIs directly. |
-
-### 🟢 GOOD Security Practices
-
-| Practice | Detail |
+### 1. Data Inconsistency (CRITICAL ⚠️)
+| Source | Business Hours |
 |---|---|
-| ✅ `.env.local` in `.gitignore` | Environment variables are excluded from version control |
-| ✅ Supabase anon key (not service key) in frontend | Correct use of public anon key, not the service role key |
-| ✅ `sourcemap: false` in production build | Source maps disabled to prevent code inspection |
-| ✅ Auto-logout on inactivity | 10-minute inactivity timer for authenticated users |
-| ✅ Proper CORS headers on edge functions | Edge functions include explicit CORS handling |
-| ✅ Session cleanup on sign out | Thorough clearing of localStorage tokens, including manual key cleanup |
+| JSON-LD Schema (`index.html`) | 10:00 AM – 10:00 PM |
+| Sanctuary Component (UI) | 4:00 PM – 4:00 AM |
+| Noscript Fallback (`index.html`) | 10:00 AM – 10:00 PM |
+
+**Pick one.** Google will index the schema hours. Your customers see the UI hours. If they don't match, you lose trust with both Google and humans.
+
+Similarly, the phone number in JSON-LD (`+639171234567`) doesn't match the actual business number shown in the UI (`09228262336`).
+
+### 2. AdminDashboard Is Still a Monster
+`AdminDashboard.tsx` was decomposed somewhat, but it still imports and orchestrates a *lot*. It's the God component of this codebase. The sub-components help, but the parent is still doing heavy lifting with complex state management that should probably live in a context or state machine.
+
+### 3. Missing `frame-src` in CSP
+The Content-Security-Policy doesn't include a `frame-src` directive. The Google Maps iframe in `Sanctuary.tsx` works because `frame-src` falls back to `default-src 'self'`... which *should* block it. Test this in production — you may be getting a CSP violation in the console.
+
+### 4. Console Statements in Production
+`HomeService.tsx:35` has `console.error`. `Therapists.tsx:59` has another. `useBooking.ts:161` also logs errors. These should be replaced with a proper error reporting service or at least guarded with `import.meta.env.DEV`.
+
+### 5. No Error Boundaries on Data-Fetching Components
+`Therapists`, `Services`, `HomeService`, and `ExpressSection` all fetch data directly but don't have error boundaries wrapping them. If Supabase goes down, these components throw and potentially crash the entire page.
+
+### 6. Unsplash Images Are External Dependencies
+Hero background, VisualJourney sections, and fallback therapist images all point to `images.unsplash.com`. If Unsplash has an outage or rate-limits you, your entire hero section goes blank. Self-host critical images.
+
+### 7. SPA Rendering Problem (2056% Rendering Delta)
+As a pure client-side SPA, the initial HTML is basically empty. Search crawlers that don't execute JS see nothing useful. The `<noscript>` fallback helps, but it's a band-aid. For a business website where SEO matters, consider:
+- **Vercel's ISR/SSR** (migrate to Next.js)
+- **Prerender.io** as a middleware
+- Or at minimum, build-time pre-rendering with a plugin
+
+### 8. No Analytics
+No Google Analytics, no Plausible, no Fathom. You're flying blind. `@vercel/speed-insights` is in `package.json` but I see no evidence it's actually initialized in the app code.
 
 ---
 
-## 🎯 Recommendations (Priority Order)
+## 🤔 THE "MEH" STUFF (Minor Gripes)
 
-1. **Fix RLS policies immediately** — especially the `visitors` UPDATE and `edge_function_logs` missing RLS
-2. **Enable leaked password protection** in Supabase Auth settings
-3. **Remove the admin shortcut** from `AuthModal.tsx` — use the full email
-4. **Strip all `console.log`** statements from auth and profile flows (use a logger that's disabled in production)
-5. **Move `@playwright/test` to `devDependencies`**
-6. **Delete `.bak` files** and debug scripts from the repository
-7. **Set `search_path`** on `handle_new_user` and `link_guest_bookings` functions
-8. **Implement server-side rate limiting** on the bookings endpoint
-9. **Create actual Privacy Policy and Terms of Service pages**
-10. **Split `AdminDashboard.tsx`** into smaller composable components
+- **Fluid typography defined but rarely used:** `tailwind.config.js` has a beautiful `fluid-xs` through `fluid-6xl` scale, but components use hardcoded `text-5xl md:text-7xl` instead. Pick a system.
+- **Inconsistent icon library usage:** Primarily Lucide React, which is good, but `MoveRight`, `ArrowRight`, and `ChevronRight` are used interchangeably for the same "go forward" intent.
+- **No Storybook or component docs:** With 29 components, some visual documentation would help future developers.
+- **`fix_shiatsu.js`, `test_booking.js`, `verify_cors.cjs`** sitting in the project root. Clean these up or move to a `scripts/` directory.
+- **Two `npm run dev` processes running simultaneously.** Why?
 
 ---
 
-## 🔥 The Final Roast
+## 📊 Competitive Position
 
-Look, Golden Tower Spa's website *looks* like it costs $15,000. The animations are smooth, the color palette is consistent, and the brand identity is strong. But peel back the gold foil and you'll find `.bak` files chilling next to Playwright in production, an admin login that says "hey, try 'admin'!", RLS policies that essentially say "come on in, the data's fine!", and console.logs narrating your entire authentication story to anyone with a keyboard shortcut.
+For a **solo-dev spa website**, this is genuinely in the **top 5%**. The typical spa website is a WordPress template from ThemeForest with stock photos and a contact form. This has:
+- A real booking system with guest + authenticated flows
+- An admin dashboard with analytics and therapist management
+- GSAP-powered cinematic animations
+- Security hardening that most *enterprise* apps don't bother with
+- PWA support
 
-It's like building a beautiful spa with marble floors and crystal chandeliers... but forgetting to put locks on the doors. The aesthetics are real, the engineering has moments of brilliance (that auth inactivity timer? genuinely thoughtful), but the security posture needs a **spa day of its own**.
+If this were on a portfolio, I'd hire the dev. If this were a client project, I'd charge premium rates for it.
 
-**TL;DR**: Gorgeous website. Terrifying backend. Fix the security, clean the dead code, and you've got a legit 8.5/10 product.
+**But it's not 10/10.** The data inconsistencies, the SPA SEO ceiling, the lack of analytics, and the AdminDashboard complexity hold it back from perfection.
+
+---
+
+## 🎯 Priority Fix List
+
+| Priority | Fix | Impact |
+|---|---|---|
+| 🔴 P0 | Sync business hours & phone across schema, noscript, and UI | SEO + Trust |
+| 🟠 P1 | Add `frame-src` to CSP for Google Maps | Prevents console errors |
+| 🟠 P1 | Initialize analytics (GA4 or Plausible) | Business intelligence |
+| 🟡 P2 | Self-host critical hero/journey images | Reliability |
+| 🟡 P2 | Remove `console.error` from production code | Code hygiene |
+| 🟢 P3 | Clean up root-level scripts | Repo tidiness |
+| 🟢 P3 | Add error boundaries around data-fetching sections | Resilience |
+
+---
+
+*Assessment by Antigravity AI · Golden Tower Spa Codebase v1.0.0*
