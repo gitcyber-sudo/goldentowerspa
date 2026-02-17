@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { X, Calendar, Clock, User, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
 import Logo from './Logo';
 import SelectionGrid from './SelectionGrid';
-import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import gsap from 'gsap';
+import { useBooking } from '../hooks/useBooking';
 
 interface BookingModalProps {
     isOpen: boolean;
@@ -13,62 +13,22 @@ interface BookingModalProps {
     onAuthRequired: () => void;
 }
 
-interface Service {
-    id: string;
-    title: string;
-    category: string;
-    description: string;
-    image_url: string;
-    price: number;
-    duration: number;
-}
-
-interface Therapist {
-    id: string;
-    name: string;
-    active: boolean;
-}
-
-interface BookingFormData {
-    service_id: string;
-    therapist_id: string;
-    date: string;
-    time: string;
-    guest_name: string;
-    guest_phone: string;
-}
-
 const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialServiceId, onAuthRequired }) => {
     const { user, profile } = useAuth();
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-    const [services, setServices] = useState<Service[]>([]);
-    const [therapists, setTherapists] = useState<Therapist[]>([]);
+    // Use the custom hook for logic
+    const {
+        formData, setFormData,
+        loading, success, errorMessage, validationErrors,
+        services, therapists,
+        hpField, setHpField,
+        submitBooking,
+        setValidationErrors
+    } = useBooking(initialServiceId, isOpen);
 
     const modalRef = useRef<HTMLDivElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const previousFocusRef = useRef<HTMLElement | null>(null);
-
-    const [formData, setFormData] = useState<BookingFormData>({
-        service_id: initialServiceId || '',
-        therapist_id: '',
-        date: '',
-        time: '',
-        guest_name: '',
-        guest_phone: ''
-    });
-
-    // Anti-bot state
-    const [hpField, setHpField] = useState('');
-
-    useEffect(() => {
-        if (isOpen && initialServiceId) {
-            setFormData(prev => ({ ...prev, service_id: initialServiceId }));
-        }
-    }, [isOpen, initialServiceId]);
 
     // Focus trap and Escape key
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -103,7 +63,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
             previousFocusRef.current = document.activeElement as HTMLElement;
             document.body.style.overflow = 'hidden';
             document.addEventListener('keydown', handleKeyDown);
-            fetchData();
 
             gsap.fromTo('.modal-content',
                 { opacity: 0, scale: 0.9, y: 20 },
@@ -122,132 +81,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, handleKeyDown]);
 
-    const fetchData = async () => {
-        const { data: s } = await supabase.from('services').select('*');
-        const { data: t } = await supabase.from('therapists').select('*').eq('active', true).order('name');
-
-        if (s) {
-            const sortedServices = [...s].sort((a, b) => {
-                const aTitle = a.title.toUpperCase();
-                const bTitle = b.title.toUpperCase();
-
-                const getPriority = (item: Service, title: string) => {
-                    if (item.category === 'signature' || title.includes('SIGNATURE')) return 1;
-                    if (title.includes('PACKAGE')) return 4;
-                    if (item.category === 'express' || title.includes('EXPRESS')) return 3;
-                    return 2;
-                };
-
-                const pA = getPriority(a, aTitle);
-                const pB = getPriority(b, bTitle);
-
-                if (pA !== pB) return pA - pB;
-                if (pA === 4) return aTitle.localeCompare(bTitle, undefined, { numeric: true });
-                return aTitle.localeCompare(bTitle);
-            });
-            setServices(sortedServices);
-        }
-        if (t) setTherapists(t);
-    };
-
-    const validateForm = (): boolean => {
-        const errors: Record<string, string> = {};
-
-        if (!formData.service_id) {
-            errors.service = 'Please choose a massage treatment.';
-        }
-        if (!user && !formData.guest_name.trim()) {
-            errors.guest_name = 'Please enter your name.';
-        }
-        if (!user && !formData.guest_phone.trim()) {
-            errors.guest_phone = 'Please enter your phone number.';
-        }
-        if (!formData.date) {
-            errors.date = 'Please select a date.';
-        }
-        if (!formData.time) {
-            errors.time = 'Please select a time.';
-        }
-
-        setValidationErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
-
-    const handleBooking = async (e: React.FormEvent) => {
+    const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setErrorMessage('');
-
-        if (!validateForm()) return;
-
-        // Anti-Bot: Honeypot check
-        if (hpField) {
-            // Silently fail for bots
-            setLoading(false);
-            return;
-        }
-
-        // Anti-Bot: Rate Limiting (Client-side)
-        const lastAttempt = localStorage.getItem('gt_last_booking_attempt');
-        const now = Date.now();
-        if (lastAttempt && (now - parseInt(lastAttempt) < 60000)) {
-            setErrorMessage('Please wait a moment before submitting another request.');
-            setLoading(false);
-            return;
-        }
-        localStorage.setItem('gt_last_booking_attempt', now.toString());
-
-        const visitorId = localStorage.getItem('gt_visitor_id');
-        setLoading(true);
-
-        try {
-            // — Booking limit check —
-            const maxPending = user ? 2 : 1;
-            const limitLabel = user ? 'registered users' : 'guests';
-
-            let pendingQuery = supabase
-                .from('bookings')
-                .select('id', { count: 'exact', head: true })
-                .eq('status', 'pending');
-
-            if (user) {
-                pendingQuery = pendingQuery.eq('user_id', user.id);
-            } else if (visitorId) {
-                pendingQuery = pendingQuery.eq('visitor_id', visitorId);
-            }
-
-            const { count: pendingCount } = await pendingQuery;
-
-            if ((pendingCount ?? 0) >= maxPending) {
-                setErrorMessage(
-                    `You already have ${pendingCount} pending booking${(pendingCount ?? 0) > 1 ? 's' : ''}. ` +
-                    `The maximum for ${limitLabel} is ${maxPending}. ` +
-                    `Please wait for your current booking to be confirmed or cancelled before booking again.`
-                );
-                setLoading(false);
-                return;
-            }
-
-            const { error } = await supabase.from('bookings').insert([{
-                user_id: user?.id || null,
-                user_email: user?.email || null,
-                guest_name: user ? profile?.full_name : formData.guest_name,
-                guest_phone: formData.guest_phone,
-                visitor_id: visitorId,
-                service_id: formData.service_id,
-                therapist_id: formData.therapist_id || null,
-                booking_date: formData.date,
-                booking_time: formData.time,
-                status: 'pending'
-            }]);
-
-            if (error) throw error;
-            setSuccess(true);
-        } catch (err) {
-            console.error('Booking failed:', err);
-            setErrorMessage('Something went wrong. Please try again or contact us directly.');
-        } finally {
-            setLoading(false);
-        }
+        await submitBooking();
     };
 
     if (!isOpen) return null;
@@ -323,7 +159,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                 </div>
                             )}
 
-                            <form onSubmit={handleBooking} className="space-y-5 md:space-y-6" noValidate>
+                            <form onSubmit={onSubmit} className="space-y-5 md:space-y-6" noValidate>
                                 {/* Honeypot Field (Hidden) */}
                                 <div style={{ opacity: 0, position: 'absolute', top: 0, left: 0, height: 0, width: 0, overflow: 'hidden', zIndex: -1 }}>
                                     <label htmlFor="hp-field">Website</label>
