@@ -61,6 +61,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
         guest_phone: ''
     });
 
+    // Anti-bot state
+    const [hpField, setHpField] = useState('');
+
     useEffect(() => {
         if (isOpen && initialServiceId) {
             setFormData(prev => ({ ...prev, service_id: initialServiceId }));
@@ -175,6 +178,23 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
         setErrorMessage('');
 
         if (!validateForm()) return;
+
+        // Anti-Bot: Honeypot check
+        if (hpField) {
+            // Silently fail for bots
+            setLoading(false);
+            return;
+        }
+
+        // Anti-Bot: Rate Limiting (Client-side)
+        const lastAttempt = localStorage.getItem('gt_last_booking_attempt');
+        const now = Date.now();
+        if (lastAttempt && (now - parseInt(lastAttempt) < 60000)) {
+            setErrorMessage('Please wait a moment before submitting another request.');
+            setLoading(false);
+            return;
+        }
+        localStorage.setItem('gt_last_booking_attempt', now.toString());
 
         const visitorId = localStorage.getItem('gt_visitor_id');
         setLoading(true);
@@ -304,6 +324,19 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                             )}
 
                             <form onSubmit={handleBooking} className="space-y-5 md:space-y-6" noValidate>
+                                {/* Honeypot Field (Hidden) */}
+                                <div style={{ opacity: 0, position: 'absolute', top: 0, left: 0, height: 0, width: 0, overflow: 'hidden', zIndex: -1 }}>
+                                    <label htmlFor="hp-field">Website</label>
+                                    <input
+                                        id="hp-field"
+                                        type="text"
+                                        name="website_url"
+                                        tabIndex={-1}
+                                        autoComplete="off"
+                                        value={hpField}
+                                        onChange={(e) => setHpField(e.target.value)}
+                                    />
+                                </div>
                                 {user ? (
                                     <div className="bg-gold/10 border border-gold/20 rounded-lg p-4 mb-4 md:mb-6">
                                         <div className="flex items-center gap-2 text-charcoal">
