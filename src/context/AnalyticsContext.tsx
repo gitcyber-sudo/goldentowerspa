@@ -157,8 +157,22 @@ const getAppContext = (): string => {
     return 'Direct Browser';
 };
 
+// Page title mapping
+const getPageTitle = (path: string): string => {
+    const titles: Record<string, string> = {
+        '/': 'Home',
+        '/admin': 'Admin Dashboard',
+        '/dashboard': 'User Dashboard',
+        '/therapist': 'Therapist Dashboard',
+        '/privacy-policy': 'Privacy Policy',
+        '/terms-of-service': 'Terms of Service',
+    };
+    return titles[path] || path;
+};
+
 // Track device fingerprint
 const trackDevice = async (userId: string | null) => {
+
     if (typeof window === 'undefined') return;
 
     // For debugging, we remove the session guard to ensure it fires
