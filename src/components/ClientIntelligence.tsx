@@ -80,7 +80,21 @@ const ClientIntelligence: React.FC = () => {
             (profiles || []).forEach(p => {
                 const userBookings = (bookings || []).filter(b => b.user_id === p.id);
                 const userDevices = (devices || []).filter(d => d.user_id === p.id);
-                const visitor = (visitors || []).find(v => v.user_id === p.id);
+                const userVisitors = (visitors || []).filter(v => v.user_id === p.id);
+
+                // Get most recent activity across all sources
+                const lastVisit = userVisitors.length > 0
+                    ? Math.max(...userVisitors.map(v => new Date(v.last_visit || 0).getTime()))
+                    : 0;
+                const lastDeviceSeen = userDevices.length > 0
+                    ? Math.max(...userDevices.map(d => new Date(d.last_seen || 0).getTime()))
+                    : 0;
+                const lastBooking = userBookings.length > 0
+                    ? Math.max(...userBookings.map(b => new Date(b.created_at || 0).getTime()))
+                    : 0;
+                const profileCreated = new Date(p.created_at).getTime();
+
+                const maxActive = Math.max(lastVisit, lastDeviceSeen, lastBooking, profileCreated);
 
                 registeredMap.set(p.id, {
                     type: 'registered',
@@ -92,7 +106,7 @@ const ClientIntelligence: React.FC = () => {
                     created_at: p.created_at,
                     bookingCount: userBookings.length,
                     lastBookingDate: userBookings[0]?.booking_date || null,
-                    lastActive: visitor?.last_visit || p.created_at,
+                    lastActive: new Date(maxActive).toISOString(),
                     devices: userDevices as ClientDevice[]
                 });
             });
@@ -109,9 +123,23 @@ const ClientIntelligence: React.FC = () => {
                     if (!existing.lastBookingDate || b.booking_date > existing.lastBookingDate) {
                         existing.lastBookingDate = b.booking_date;
                     }
+                    // Update lastActive for guest
+                    const lastActiveTime = Math.max(
+                        new Date(existing.lastActive || 0).getTime(),
+                        new Date(b.created_at).getTime()
+                    );
+                    existing.lastActive = new Date(lastActiveTime).toISOString();
                 } else {
                     const guestDevices = (devices || []).filter(d => d.visitor_id === b.visitor_id && !d.user_id);
                     const visitor = (visitors || []).find(v => v.visitor_id === b.visitor_id);
+
+                    const lastVisit = visitor ? new Date(visitor.last_visit || 0).getTime() : 0;
+                    const lastDeviceSeen = guestDevices.length > 0
+                        ? Math.max(...guestDevices.map(d => new Date(d.last_seen || 0).getTime()))
+                        : 0;
+                    const lastBooking = new Date(b.created_at).getTime();
+
+                    const maxActive = Math.max(lastVisit, lastDeviceSeen, lastBooking);
 
                     guestMap.set(b.visitor_id, {
                         type: 'unregistered',
@@ -122,7 +150,7 @@ const ClientIntelligence: React.FC = () => {
                         created_at: b.created_at,
                         bookingCount: 1,
                         lastBookingDate: b.booking_date,
-                        lastActive: visitor?.last_visit || b.created_at,
+                        lastActive: new Date(maxActive).toISOString(),
                         devices: guestDevices as ClientDevice[]
                     });
                 }
@@ -175,7 +203,8 @@ const ClientIntelligence: React.FC = () => {
             result = result.filter(c =>
                 (c.name || '').toLowerCase().includes(search) ||
                 (c.email || '').toLowerCase().includes(search) ||
-                (c.phone || '').includes(search)
+                (c.phone || '').includes(search) ||
+                (c.id || '').toLowerCase().includes(search)
             );
         }
 
@@ -207,7 +236,10 @@ const ClientIntelligence: React.FC = () => {
 
     const getRelativeTime = (dateStr: string | null) => {
         if (!dateStr) return 'Never';
-        const diff = Date.now() - new Date(dateStr).getTime();
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime()) || date.getTime() === 0) return 'Never';
+
+        const diff = Date.now() - date.getTime();
         const mins = Math.floor(diff / 60000);
         if (mins < 1) return 'Just now';
         if (mins < 60) return `${mins}m ago`;
@@ -215,7 +247,7 @@ const ClientIntelligence: React.FC = () => {
         if (hours < 24) return `${hours}h ago`;
         const days = Math.floor(hours / 24);
         if (days < 30) return `${days}d ago`;
-        return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     };
 
     const getDeviceIcon = (type: string) => {
@@ -332,7 +364,8 @@ const ClientIntelligence: React.FC = () => {
                                     <th className="px-5 py-3.5">Client</th>
                                     <th className="px-5 py-3.5">Status</th>
                                     <th className="px-5 py-3.5">Contact</th>
-                                    <th className="px-5 py-3.5">Bookings</th>
+                                    <th className="px-5 py-3.5 text-center">Bookings</th>
+                                    <th className="px-5 py-3.5">Last Booking</th>
                                     <th className="px-5 py-3.5">Devices</th>
                                     <th className="px-5 py-3.5">Last Active</th>
                                     <th className="px-5 py-3.5"></th>
@@ -376,15 +409,18 @@ const ClientIntelligence: React.FC = () => {
                                                 {!client.email && !client.phone && <p className="italic text-charcoal/30">No contact info</p>}
                                             </div>
                                         </td>
+                                        <td className="px-5 py-4 text-center">
+                                            <span className="text-lg font-serif text-charcoal">{client.bookingCount}</span>
+                                        </td>
                                         <td className="px-5 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-lg font-serif text-charcoal">{client.bookingCount}</span>
-                                                {client.lastBookingDate && (
-                                                    <span className="text-[10px] text-charcoal/40">
-                                                        Last: {new Date(client.lastBookingDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                                    </span>
-                                                )}
-                                            </div>
+                                            {client.lastBookingDate ? (
+                                                <div className="flex items-center gap-1.5 text-xs text-charcoal/70">
+                                                    <Calendar size={12} className="text-gold" />
+                                                    {new Date(client.lastBookingDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                </div>
+                                            ) : (
+                                                <span className="text-[10px] text-charcoal/30 italic">No bookings</span>
+                                            )}
                                         </td>
                                         <td className="px-5 py-4">
                                             <div className="flex items-center gap-1">
@@ -405,7 +441,10 @@ const ClientIntelligence: React.FC = () => {
                                             </div>
                                         </td>
                                         <td className="px-5 py-4">
-                                            <span className="text-xs text-charcoal/50">{getRelativeTime(client.lastActive)}</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-bold text-charcoal/70">{getRelativeTime(client.lastActive)}</span>
+                                                <span className="text-[9px] text-charcoal/30 uppercase tracking-tighter">Activity</span>
+                                            </div>
                                         </td>
                                         <td className="px-5 py-4 text-right">
                                             <ChevronRight size={16} className="text-charcoal/20 group-hover:text-gold transition-colors inline-block" />
@@ -416,50 +455,53 @@ const ClientIntelligence: React.FC = () => {
                         </table>
                     </div>
 
+
                     {/* Mobile Card View */}
-                    <div className="md:hidden space-y-3">
-                        {filteredClients.map(client => (
-                            <div
-                                key={client.id}
-                                className="bg-white p-4 rounded-xl border border-gold/10 shadow-sm active:bg-cream/30 transition-colors cursor-pointer"
-                                onClick={() => openClientDrawer(client)}
-                            >
-                                <div className="flex items-start justify-between mb-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-serif text-sm font-bold ring-2 ${client.type === 'registered'
-                                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                            : 'bg-amber-50 text-amber-700 ring-amber-200'
-                                            }`}>
-                                            {client.name.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-charcoal text-sm">{client.name}</p>
-                                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${client.type === 'registered'
-                                                ? 'bg-emerald-50 text-emerald-700'
-                                                : 'bg-amber-50 text-amber-700'
+                    < div className="md:hidden space-y-3" >
+                        {
+                            filteredClients.map(client => (
+                                <div
+                                    key={client.id}
+                                    className="bg-white p-4 rounded-xl border border-gold/10 shadow-sm active:bg-cream/30 transition-colors cursor-pointer"
+                                    onClick={() => openClientDrawer(client)}
+                                >
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-serif text-sm font-bold ring-2 ${client.type === 'registered'
+                                                ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                                : 'bg-amber-50 text-amber-700 ring-amber-200'
                                                 }`}>
-                                                {client.type === 'registered' ? 'Registered' : 'Unregistered'}
+                                                {client.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-charcoal text-sm">{client.name}</p>
+                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${client.type === 'registered'
+                                                    ? 'bg-emerald-50 text-emerald-700'
+                                                    : 'bg-amber-50 text-amber-700'
+                                                    }`}>
+                                                    {client.type === 'registered' ? 'Registered' : 'Unregistered'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <ChevronRight size={16} className="text-charcoal/20 mt-2" />
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs text-charcoal/50">
+                                        <div className="flex items-center gap-3">
+                                            <span className="flex items-center gap-1"><Calendar size={11} /> {client.bookingCount} bookings</span>
+                                            <span className="flex items-center gap-1">
+                                                {client.devices.slice(0, 2).map((d, i) => (
+                                                    <span key={i}>{getDeviceIcon(d.device_type)}</span>
+                                                ))}
+                                                {client.devices.length > 2 && <span className="font-bold">+{client.devices.length - 2}</span>}
+                                                {client.devices.length === 0 && <span className="italic">No devices</span>}
                                             </span>
                                         </div>
+                                        <span>{getRelativeTime(client.lastActive)}</span>
                                     </div>
-                                    <ChevronRight size={16} className="text-charcoal/20 mt-2" />
                                 </div>
-                                <div className="flex items-center justify-between text-xs text-charcoal/50">
-                                    <div className="flex items-center gap-3">
-                                        <span className="flex items-center gap-1"><Calendar size={11} /> {client.bookingCount} bookings</span>
-                                        <span className="flex items-center gap-1">
-                                            {client.devices.slice(0, 2).map((d, i) => (
-                                                <span key={i}>{getDeviceIcon(d.device_type)}</span>
-                                            ))}
-                                            {client.devices.length > 2 && <span className="font-bold">+{client.devices.length - 2}</span>}
-                                            {client.devices.length === 0 && <span className="italic">No devices</span>}
-                                        </span>
-                                    </div>
-                                    <span>{getRelativeTime(client.lastActive)}</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))
+                        }
+                    </div >
 
                     <p className="text-center text-xs text-charcoal/30 mt-4 font-bold uppercase tracking-widest">
                         {filteredClients.length} client{filteredClients.length !== 1 ? 's' : ''} shown
@@ -468,194 +510,196 @@ const ClientIntelligence: React.FC = () => {
             )}
 
             {/* ─── Detail Drawer ─── */}
-            {selectedClient && (
-                <>
-                    {/* Overlay */}
-                    <div
-                        className={`fixed inset-0 bg-charcoal/50 backdrop-blur-sm z-50 transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                        onClick={closeDrawer}
-                    />
-                    {/* Drawer */}
-                    <div className={`fixed top-0 right-0 h-full w-full sm:w-[480px] bg-[#F9F7F2] z-50 shadow-2xl transform transition-transform duration-300 overflow-y-auto ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                        {/* Drawer Header */}
-                        <div className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-gold/10 p-5 z-10">
-                            <div className="flex justify-between items-start">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-serif text-lg font-bold ring-2 ${selectedClient.type === 'registered'
-                                        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                        : 'bg-amber-50 text-amber-700 ring-amber-200'
-                                        }`}>
-                                        {selectedClient.name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div>
-                                        <h2 className="font-serif text-xl text-charcoal">{selectedClient.name}</h2>
-                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${selectedClient.type === 'registered'
-                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                            : 'bg-amber-50 text-amber-700 border border-amber-200'
+            {
+                selectedClient && (
+                    <>
+                        {/* Overlay */}
+                        <div
+                            className={`fixed inset-0 bg-charcoal/50 backdrop-blur-sm z-50 transition-opacity duration-300 ${drawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                            onClick={closeDrawer}
+                        />
+                        {/* Drawer */}
+                        <div className={`fixed top-0 right-0 h-full w-full sm:w-[480px] bg-[#F9F7F2] z-50 shadow-2xl transform transition-transform duration-300 overflow-y-auto ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                            {/* Drawer Header */}
+                            <div className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-gold/10 p-5 z-10">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-serif text-lg font-bold ring-2 ${selectedClient.type === 'registered'
+                                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                            : 'bg-amber-50 text-amber-700 ring-amber-200'
                                             }`}>
-                                            {selectedClient.type === 'registered' ? '✓ Registered' : '⊘ Unregistered'}
-                                        </span>
-                                    </div>
-                                </div>
-                                <button onClick={closeDrawer} className="p-2 text-charcoal/40 hover:text-charcoal hover:bg-charcoal/5 rounded-xl transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="p-5 space-y-6">
-                            {/* Contact Info */}
-                            <div className="bg-white p-4 rounded-xl border border-gold/10">
-                                <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 mb-3">Contact Information</h3>
-                                <div className="space-y-2">
-                                    {selectedClient.email && (
-                                        <div className="flex items-center gap-2 text-sm text-charcoal/70">
-                                            <Mail size={14} className="text-gold" /> {selectedClient.email}
+                                            {selectedClient.name.charAt(0).toUpperCase()}
                                         </div>
-                                    )}
-                                    {selectedClient.phone && (
-                                        <div className="flex items-center gap-2 text-sm text-charcoal/70">
-                                            <Phone size={14} className="text-gold" /> {selectedClient.phone}
+                                        <div>
+                                            <h2 className="font-serif text-xl text-charcoal">{selectedClient.name}</h2>
+                                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${selectedClient.type === 'registered'
+                                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                : 'bg-amber-50 text-amber-700 border border-amber-200'
+                                                }`}>
+                                                {selectedClient.type === 'registered' ? '✓ Registered' : '⊘ Unregistered'}
+                                            </span>
                                         </div>
-                                    )}
-                                    <div className="flex items-center gap-2 text-sm text-charcoal/70">
-                                        <Calendar size={14} className="text-gold" />
-                                        {selectedClient.type === 'registered'
-                                            ? `Member since ${new Date(selectedClient.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
-                                            : `First visit: ${new Date(selectedClient.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
-                                        }
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-charcoal/70">
-                                        <Clock size={14} className="text-gold" />
-                                        Last active: {getRelativeTime(selectedClient.lastActive)}
-                                    </div>
+                                    <button onClick={closeDrawer} className="p-2 text-charcoal/40 hover:text-charcoal hover:bg-charcoal/5 rounded-xl transition-colors">
+                                        <X size={20} />
+                                    </button>
                                 </div>
                             </div>
 
-                            {/* Quick Stats */}
-                            <div className="grid grid-cols-3 gap-3">
-                                <div className="bg-white p-3 rounded-xl border border-gold/10 text-center">
-                                    <p className="text-xl font-serif text-charcoal">{selectedClient.bookingCount}</p>
-                                    <p className="text-[9px] uppercase tracking-widest text-charcoal/40 font-bold">Bookings</p>
-                                </div>
-                                <div className="bg-white p-3 rounded-xl border border-gold/10 text-center">
-                                    <p className="text-xl font-serif text-charcoal">{selectedClient.devices.length}</p>
-                                    <p className="text-[9px] uppercase tracking-widest text-charcoal/40 font-bold">Devices</p>
-                                </div>
-                                <div className="bg-white p-3 rounded-xl border border-gold/10 text-center">
-                                    <p className="text-xl font-serif text-charcoal">
-                                        {selectedClient.devices.reduce((sum, d) => sum + d.session_count, 0)}
-                                    </p>
-                                    <p className="text-[9px] uppercase tracking-widest text-charcoal/40 font-bold">Sessions</p>
-                                </div>
-                            </div>
-
-                            {/* ─── Device Gallery ─── */}
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <Smartphone size={14} className="text-gold" />
-                                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40">Devices ({selectedClient.devices.length})</h3>
-                                </div>
-                                {selectedClient.devices.length === 0 ? (
-                                    <div className="bg-white p-6 rounded-xl border border-gold/10 text-center">
-                                        <Wifi className="text-charcoal/15 mx-auto mb-3" size={32} />
-                                        <p className="text-xs text-charcoal/40 italic">No device data recorded yet. Data will appear after the client's next visit.</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {selectedClient.devices.map((device, i) => (
-                                            <div key={device.id || i} className="bg-white p-4 rounded-xl border border-gold/10 hover:shadow-md transition-all group">
-                                                <div className="flex items-start justify-between mb-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-charcoal/5 flex items-center justify-center text-charcoal/60 group-hover:bg-gold/10 group-hover:text-gold transition-all">
-                                                            {getDeviceIcon(device.device_type)}
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-semibold text-charcoal text-sm">{device.device_model || 'Unknown Device'}</p>
-                                                            <p className="text-[10px] text-charcoal/40">{device.device_type.charAt(0).toUpperCase() + device.device_type.slice(1)}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="text-[10px] text-charcoal/40">{device.session_count} session{device.session_count !== 1 ? 's' : ''}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-2 text-xs">
-                                                    <div className="flex items-center gap-1.5 text-charcoal/60">
-                                                        <span>{getOSEmoji(device.os_name)}</span>
-                                                        <span>{device.os_name} {device.os_version}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 text-charcoal/60">
-                                                        <Globe size={11} className="text-gold" />
-                                                        <span>{device.browser} {device.browser_version ? device.browser_version.split('.')[0] : ''}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 text-charcoal/60">
-                                                        <Monitor size={11} className="text-gold" />
-                                                        <span>{device.screen_resolution}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 text-charcoal/60">
-                                                        <Globe size={11} className="text-gold" />
-                                                        <span>{device.app_context}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex justify-between items-center mt-3 pt-2 border-t border-gold/5 text-[10px] text-charcoal/35">
-                                                    <span>First seen: {new Date(device.first_seen).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                                    <span>Last seen: {getRelativeTime(device.last_seen)}</span>
-                                                </div>
+                            <div className="p-5 space-y-6">
+                                {/* Contact Info */}
+                                <div className="bg-white p-4 rounded-xl border border-gold/10">
+                                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 mb-3">Contact Information</h3>
+                                    <div className="space-y-2">
+                                        {selectedClient.email && (
+                                            <div className="flex items-center gap-2 text-sm text-charcoal/70">
+                                                <Mail size={14} className="text-gold" /> {selectedClient.email}
                                             </div>
-                                        ))}
+                                        )}
+                                        {selectedClient.phone && (
+                                            <div className="flex items-center gap-2 text-sm text-charcoal/70">
+                                                <Phone size={14} className="text-gold" /> {selectedClient.phone}
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-2 text-sm text-charcoal/70">
+                                            <Calendar size={14} className="text-gold" />
+                                            {selectedClient.type === 'registered'
+                                                ? `Member since ${new Date(selectedClient.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
+                                                : `First visit: ${new Date(selectedClient.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+                                            }
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm text-charcoal/70">
+                                            <Clock size={14} className="text-gold" />
+                                            Last active: {getRelativeTime(selectedClient.lastActive)}
+                                        </div>
                                     </div>
-                                )}
-                            </div>
-
-                            {/* ─── Booking History ─── */}
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <Calendar size={14} className="text-gold" />
-                                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40">Booking History ({clientBookings.length})</h3>
                                 </div>
-                                {clientBookings.length === 0 ? (
-                                    <div className="bg-white p-6 rounded-xl border border-gold/10 text-center">
-                                        <p className="text-xs text-charcoal/40 italic">Loading booking history...</p>
+
+                                {/* Quick Stats */}
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className="bg-white p-3 rounded-xl border border-gold/10 text-center">
+                                        <p className="text-xl font-serif text-charcoal">{selectedClient.bookingCount}</p>
+                                        <p className="text-[9px] uppercase tracking-widest text-charcoal/40 font-bold">Bookings</p>
                                     </div>
-                                ) : (
-                                    <div className="relative">
-                                        <div className="absolute left-4 top-0 bottom-0 w-px bg-gold/10" aria-hidden="true" />
+                                    <div className="bg-white p-3 rounded-xl border border-gold/10 text-center">
+                                        <p className="text-xl font-serif text-charcoal">{selectedClient.devices.length}</p>
+                                        <p className="text-[9px] uppercase tracking-widest text-charcoal/40 font-bold">Devices</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-xl border border-gold/10 text-center">
+                                        <p className="text-xl font-serif text-charcoal">
+                                            {selectedClient.devices.reduce((sum, d) => sum + d.session_count, 0)}
+                                        </p>
+                                        <p className="text-[9px] uppercase tracking-widest text-charcoal/40 font-bold">Sessions</p>
+                                    </div>
+                                </div>
+
+                                {/* ─── Device Gallery ─── */}
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Smartphone size={14} className="text-gold" />
+                                        <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40">Devices ({selectedClient.devices.length})</h3>
+                                    </div>
+                                    {selectedClient.devices.length === 0 ? (
+                                        <div className="bg-white p-6 rounded-xl border border-gold/10 text-center">
+                                            <Wifi className="text-charcoal/15 mx-auto mb-3" size={32} />
+                                            <p className="text-xs text-charcoal/40 italic">No device data recorded yet. Data will appear after the client's next visit.</p>
+                                        </div>
+                                    ) : (
                                         <div className="space-y-3">
-                                            {clientBookings.map((booking, i) => (
-                                                <div key={booking.id} className="relative pl-9">
-                                                    <div className={`absolute left-2.5 top-4 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10 ${booking.status === 'completed' ? 'bg-emerald-500'
-                                                        : booking.status === 'confirmed' ? 'bg-blue-500'
-                                                            : booking.status === 'pending' ? 'bg-amber-400'
-                                                                : 'bg-rose-400'
-                                                        }`} />
-                                                    <div className="bg-white p-4 rounded-xl border border-gold/10">
-                                                        <div className="flex justify-between items-start mb-2">
-                                                            <p className="font-semibold text-charcoal text-sm">{booking.services?.title || 'Service'}</p>
-                                                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusColor(booking.status)}`}>
-                                                                {booking.status}
-                                                            </span>
+                                            {selectedClient.devices.map((device, i) => (
+                                                <div key={device.id || i} className="bg-white p-4 rounded-xl border border-gold/10 hover:shadow-md transition-all group">
+                                                    <div className="flex items-start justify-between mb-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-xl bg-charcoal/5 flex items-center justify-center text-charcoal/60 group-hover:bg-gold/10 group-hover:text-gold transition-all">
+                                                                {getDeviceIcon(device.device_type)}
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-semibold text-charcoal text-sm">{device.device_model || 'Unknown Device'}</p>
+                                                                <p className="text-[10px] text-charcoal/40">{device.device_type.charAt(0).toUpperCase() + device.device_type.slice(1)}</p>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-3 text-xs text-charcoal/50">
-                                                            <span className="flex items-center gap-1"><Calendar size={10} /> {new Date(booking.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                                                            {booking.therapists?.name && (
-                                                                <span className="flex items-center gap-1 text-gold italic">{booking.therapists.name}</span>
-                                                            )}
-                                                            {booking.services?.price && (
-                                                                <span className="font-bold text-gold">₱{booking.services.price}</span>
-                                                            )}
+                                                        <div className="text-right">
+                                                            <p className="text-[10px] text-charcoal/40">{device.session_count} session{device.session_count !== 1 ? 's' : ''}</p>
                                                         </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                                        <div className="flex items-center gap-1.5 text-charcoal/60">
+                                                            <span>{getOSEmoji(device.os_name)}</span>
+                                                            <span>{device.os_name} {device.os_version}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 text-charcoal/60">
+                                                            <Globe size={11} className="text-gold" />
+                                                            <span>{device.browser} {device.browser_version ? device.browser_version.split('.')[0] : ''}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 text-charcoal/60">
+                                                            <Monitor size={11} className="text-gold" />
+                                                            <span>{device.screen_resolution}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 text-charcoal/60">
+                                                            <Globe size={11} className="text-gold" />
+                                                            <span>{device.app_context}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex justify-between items-center mt-3 pt-2 border-t border-gold/5 text-[10px] text-charcoal/35">
+                                                        <span>First seen: {new Date(device.first_seen).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                        <span>Last seen: {getRelativeTime(device.last_seen)}</span>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
+                                    )}
+                                </div>
+
+                                {/* ─── Booking History ─── */}
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Calendar size={14} className="text-gold" />
+                                        <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40">Booking History ({clientBookings.length})</h3>
                                     </div>
-                                )}
+                                    {clientBookings.length === 0 ? (
+                                        <div className="bg-white p-6 rounded-xl border border-gold/10 text-center">
+                                            <p className="text-xs text-charcoal/40 italic">Loading booking history...</p>
+                                        </div>
+                                    ) : (
+                                        <div className="relative">
+                                            <div className="absolute left-4 top-0 bottom-0 w-px bg-gold/10" aria-hidden="true" />
+                                            <div className="space-y-3">
+                                                {clientBookings.map((booking, i) => (
+                                                    <div key={booking.id} className="relative pl-9">
+                                                        <div className={`absolute left-2.5 top-4 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10 ${booking.status === 'completed' ? 'bg-emerald-500'
+                                                            : booking.status === 'confirmed' ? 'bg-blue-500'
+                                                                : booking.status === 'pending' ? 'bg-amber-400'
+                                                                    : 'bg-rose-400'
+                                                            }`} />
+                                                        <div className="bg-white p-4 rounded-xl border border-gold/10">
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <p className="font-semibold text-charcoal text-sm">{booking.services?.title || 'Service'}</p>
+                                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${getStatusColor(booking.status)}`}>
+                                                                    {booking.status}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-3 text-xs text-charcoal/50">
+                                                                <span className="flex items-center gap-1"><Calendar size={10} /> {new Date(booking.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                                                {booking.therapists?.name && (
+                                                                    <span className="flex items-center gap-1 text-gold italic">{booking.therapists.name}</span>
+                                                                )}
+                                                                {booking.services?.price && (
+                                                                    <span className="font-bold text-gold">₱{booking.services.price}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </>
-            )}
-        </div>
+                    </>
+                )
+            }
+        </div >
     );
 };
 
