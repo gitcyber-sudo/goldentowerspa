@@ -13,16 +13,40 @@ interface BookingModalProps {
     onAuthRequired: () => void;
 }
 
+interface Service {
+    id: string;
+    title: string;
+    category: string;
+    description: string;
+    image_url: string;
+    price: number;
+    duration: number;
+}
+
+interface Therapist {
+    id: string;
+    name: string;
+    active: boolean;
+}
+
+interface BookingFormData {
+    service_id: string;
+    therapist_id: string;
+    date: string;
+    time: string;
+    guest_name: string;
+    guest_phone: string;
+}
+
 const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialServiceId, onAuthRequired }) => {
     const { user, profile } = useAuth();
-    const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    const [services, setServices] = useState<any[]>([]);
-    const [therapists, setTherapists] = useState<any[]>([]);
+    const [services, setServices] = useState<Service[]>([]);
+    const [therapists, setTherapists] = useState<Therapist[]>([]);
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<BookingFormData>({
         service_id: initialServiceId || '',
         therapist_id: '',
         date: '',
@@ -39,19 +63,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
 
     useEffect(() => {
         if (isOpen) {
-            // Check if user is authenticated
-            /* 
-               REVISION: Relaxed auth requirement.
-               Even non-registered users can book.
-            */
-            /*
-            if (!user) {
-                onAuthRequired();
-                onClose();
-                return;
-            }
-            */
-
             document.body.style.overflow = 'hidden';
             fetchData();
             gsap.fromTo('.modal-content',
@@ -61,7 +72,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
         } else {
             document.body.style.overflow = 'unset';
         }
-    }, [isOpen, user]);
+    }, [isOpen]);
 
     const fetchData = async () => {
         const { data: s } = await supabase.from('services').select('*');
@@ -72,7 +83,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                 const aTitle = a.title.toUpperCase();
                 const bTitle = b.title.toUpperCase();
 
-                const getPriority = (item: any, title: string) => {
+                const getPriority = (item: Service, title: string) => {
                     if (item.category === 'signature' || title.includes('SIGNATURE')) return 1;
                     if (title.includes('PACKAGE')) return 4;
                     if (item.category === 'express' || title.includes('EXPRESS')) return 3;
@@ -93,14 +104,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
 
     const handleBooking = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        /* 
-        if (!user) {
-            alert('Please sign in to book');
-            onAuthRequired();
-            return;
-        }
-        */
 
         const visitorId = localStorage.getItem('gt_visitor_id');
 
