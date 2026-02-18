@@ -228,6 +228,50 @@
     transform: rotateX(0deg) translateY(0) scale(1);
   }
 
+  /* Glass Float & Alternating Text Entrance */
+  .reveal-glass-float {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: transform 1s var(--ease-entrance), opacity 1s var(--ease-entrance);
+  }
+
+  .reveal-glass-float.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Child elements within glass float */
+  .reveal-glass-float .glass-inner {
+    transform: scale(1.05);
+    transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .reveal-glass-float.is-visible .glass-inner {
+    transform: scale(1);
+  }
+
+  .slide-from-left {
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s, opacity 0.8s ease-out 0.2s;
+  }
+
+  .is-visible .slide-from-left {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .slide-from-right {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s, opacity 0.8s ease-out 0.2s;
+  }
+
+  .is-visible .slide-from-right {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
   .reveal-express {
     opacity: 0;
     transform: translateX(40px) scale(0.9) rotate(2deg);

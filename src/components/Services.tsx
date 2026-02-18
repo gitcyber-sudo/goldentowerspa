@@ -86,7 +86,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-    const elements = document.querySelectorAll('.reveal, .reveal-3d-deck');
+    const elements = document.querySelectorAll('.reveal, .reveal-3d-deck, .reveal-glass-float');
     elements.forEach(el => observer.observe(el));
 
     return () => observer.disconnect();
@@ -128,7 +128,17 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
   return (
     <section id="services" aria-label="Spa treatments and services" className="py-16 md:py-24 bg-gradient-to-b from-white via-[#faf9f5] to-cream/50 relative overflow-hidden">
       <div className="container mx-auto px-6 md:px-12">
-        {/* --- SIGNATURE SECTION --- */}
+        {/* Highlighted Golden Tower Signature Massage */}
+        {goldenTowerSignature && (
+          <div className="mb-24">
+            <SignatureMassage
+              service={goldenTowerSignature}
+              onBookClick={onBookClick}
+            />
+          </div>
+        )}
+
+        {/* --- REGULAR SECTION --- */}
         <div className="mb-24">
           <div className="flex flex-col mb-12">
             <span className="text-gold text-sm uppercase tracking-widest font-bold mb-2 block">The Art of Healing</span>
@@ -142,14 +152,6 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
             </div>
           ) : (
             <>
-              {/* Highlighted Golden Tower Signature Massage */}
-              {goldenTowerSignature && (
-                <SignatureMassage
-                  service={goldenTowerSignature}
-                  onBookClick={onBookClick}
-                />
-              )}
-
               {signatureTreatments.length === 0 && regularServices.length === 0 && !goldenTowerSignature ? (
                 <div className="text-center py-16">
                   <p className="text-charcoal/50 text-lg font-light">Our treatment menu is being updated. Please check back soon.</p>
@@ -160,7 +162,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
                     <div
                       key={service.id}
                       style={{ transitionDelay: `${index * 80}ms` }}
-                      className={`group transition-all duration-700 rounded-2xl p-4 reveal-3d-deck ${service.title.toLowerCase().includes('signature')
+                      className={`group transition-all duration-700 rounded-2xl p-4 reveal-glass-float ${service.title.toLowerCase().includes('signature')
                         ? 'card-signature'
                         : 'bg-cream/30 border border-gold/10 hover:-translate-y-2 hover:shadow-lg'
                         }`}
@@ -170,13 +172,15 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
                           src={service.image_url}
                           alt={`Luxury treatment: ${service.title}`}
                           loading="eager"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                          className="w-full h-full object-cover glass-inner group-hover:scale-110 transition-transform duration-1000"
                         />
                         <div className="absolute bottom-4 right-4 bg-gold text-white px-3 py-1 text-sm font-bold shadow-md">P {service.price}</div>
                         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] uppercase font-bold tracking-widest">{service.duration}</div>
                       </div>
-                      <h3 className="font-serif text-2xl text-charcoal mb-2 group-hover:text-gold transition-colors">{service.title}</h3>
-                      <p className="text-charcoal-light text-sm font-light mb-4 line-clamp-2 italic">
+                      <h3 className={`font-serif text-2xl text-charcoal mb-2 group-hover:text-gold transition-colors ${index % 2 === 0 ? 'slide-from-left' : 'slide-from-right'}`}>
+                        {service.title}
+                      </h3>
+                      <p className={`text-charcoal-light text-sm font-light mb-4 line-clamp-2 italic ${index % 2 === 0 ? 'slide-from-right' : 'slide-from-left'}`}>
                         {service.description.toLowerCase().charAt(0).toUpperCase() + service.description.toLowerCase().slice(1)}
                       </p>
                       <button
@@ -253,7 +257,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
           )}
         </div>
       </div>
-    </section>
+    </section >
   );
 });
 
