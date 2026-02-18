@@ -32,7 +32,7 @@ const HomeService: React.FC<HomeServiceProps> = ({ onBookClick }) => {
                 if (error) throw error;
                 setService(data);
             } catch (error) {
-                console.error('Error fetching Home Service:', error);
+                // Silently handle error or report to a service if necessary
             } finally {
                 setLoading(false);
             }

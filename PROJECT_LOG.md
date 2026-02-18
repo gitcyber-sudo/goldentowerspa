@@ -7,6 +7,10 @@
 
 ## Log Entries
 
+### [2026-02-18] Phase 6 Optimization & Documentation Sync
+- **Action Taken**: Implemented Hybrid Hero Layout (Mobile Portrait Video / Desktop Image Parallax). Refactored `Hero.tsx` with responsive rendering and GSAP `matchMedia`. Synced global business hours (4 PM - 4 AM) and international phone number format across JSON-LD, noscript, and UI. Hardened CSP with `frame-src`.
+- **Result/Lesson**: Enhanced mobile engagement with cinematic video while maintaining desktop performance and classic visual identity. Resolved critical data inconsistencies for SEO.
+
 ### [2026-02-13] Phase 4: Performance & SEO Optimization
 - **Action Taken**: Refactored Hero section to use high-priority `<img>` tag and preloading for LCP optimization. Overhauled `index.html` with full Open Graph and Twitter metadata. Implemented dynamic SEO using a custom `useSEO` hook across all major routes. Applied native lazy-loading and descriptive alt tags to all gallery and service images.
 - **Result/Lesson**: Significant improvement in Largest Contentful Paint (LCP) by prioritizing hero assets. Enabled rich social sharing previews and route-specific titles, enhancing both performance and search engine visibility. Native lazy-loading provides a more responsive initial experience on mobile.

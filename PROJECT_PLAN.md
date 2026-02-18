@@ -32,3 +32,6 @@
 - [x] Task 7: Refine Sanctuary text labels and add mobile/social icons.
 - [x] Task 8: Overhaul Visual Journey to Cinematic Horizontal Suite.
 - [x] Task 9: Overhaul Express Massages to high-end "Prestige Rituals" experience.
+- [x] Task 10: Implement Hybrid Hero Layout (Mobile Video / Desktop Image).
+- [x] Task 11: Sync Business Hours & Phone Number across all platforms.
+- [x] Task 12: Harden CSP for Google Maps and perform code hygiene.

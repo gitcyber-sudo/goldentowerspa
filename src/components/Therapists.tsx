@@ -56,7 +56,6 @@ const Therapists: React.FC<TherapistsProps> = React.memo(({ onBookClick }) => {
           setTeam(data);
         }
       } catch (error) {
-        console.error('Therapists fetch error:', error);
         if (retryCount < 3) {
 
           setTimeout(() => fetchTherapists(retryCount + 1), 2000);

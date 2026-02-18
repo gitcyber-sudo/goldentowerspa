@@ -158,7 +158,6 @@ export const useBooking = (initialServiceId?: string, isOpen?: boolean) => {
             if (error) throw error;
             setSuccess(true);
         } catch (err) {
-            console.error('Booking failed:', err);
             setErrorMessage('Something went wrong. Please try again or contact us directly.');
         } finally {
             setLoading(false);

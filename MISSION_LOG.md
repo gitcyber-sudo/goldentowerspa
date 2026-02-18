@@ -4,21 +4,20 @@
 **Last Sync**: 2026-02-13 16:05 (PST)
 
 ### 📍 Current Coordinates
-- **Primary Objective**: Governance Hardened & specialist login fixed.
+- **Primary Objective**: Hybrid Hero Layout Implementation (Mobile Video / Desktop Image).
 - **Active Workspace**: Full Project Grounding.
-- **Agent State**: All logs synchronized. Owen's login verified (database). `.cursorrules` reinforced.
+- **Agent State**: Hero component refactored with responsive video/image logic.
 
 ### ⛽ Current Fuel (Sub-task Progress)
-- [x] Identify root cause of Owen's login failure.
-- [x] Update database trigger `handle_new_user()`.
-- [x] Manually update Owen's profile role to `therapist`.
-- [x] Update `PROJECT_LOG.md`, `PROJECT_PLAN.md`, and `MISSION_LOG.md`.
-- [x] Reinforce governance rules in `.cursorrules`.
+- [x] Integrate `hero.mp4` for mobile background.
+- [x] Restore desktop image parallax fallback.
+- [x] Implement GSAP `matchMedia` for responsive animations.
+- [x] Sync business hours and phone number (In Progress).
 
 ### 🛰️ Next 3 Waypoints
-1. Await user feedback on specialist portal access.
-2. Monitor production logs for role assignment issues.
-3. Proceed with next business objective.
+1. Finalize SEO and CSP synchronization.
+2. Perform code hygiene cleanup (console logs).
+3. Await user manual verification.
 
 ---
 *Safe Landing achieved. Documentation is the source of truth.*
