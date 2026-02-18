@@ -17,7 +17,6 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const badgeRef = useRef<HTMLSpanElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const bgWrapperRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -27,7 +26,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Parallax on the wrapper (Desktop Only)
+      // Parallax on the wrapper
       gsap.to(bgWrapperRef.current, {
         yPercent: 30,
         ease: 'none',
@@ -41,7 +40,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
 
       const mm = gsap.matchMedia();
 
-      // Desktop Animations (Classic Centered Layout)
+      // Desktop Animations (Complex)
       mm.add("(min-width: 768px)", () => {
         const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
         tl.fromTo(badgeRef.current,
@@ -75,14 +74,12 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
         });
       });
 
-      // Mobile Animations (Centered Video Background)
+      // Mobile Animations (Simplified & High Performance)
       mm.add("(max-width: 767px)", () => {
         const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
-
-        // Video is background, just fade content in
         tl.fromTo(badgeRef.current,
           { y: -20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8, delay: 0.5 }
+          { y: 0, opacity: 1, duration: 0.8, delay: 0.1 }
         )
           .fromTo([titleLine1Ref.current, titleLine2Ref.current],
             { y: 40, opacity: 0, scale: 0.95 },
@@ -108,11 +105,8 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
 
   return (
     <section ref={containerRef} aria-label="Welcome to Golden Tower Spa" className="relative h-screen w-full overflow-hidden flex items-center justify-center hero-section perspective-1000">
-
-      {/* --- BACKGROUNDS --- */}
-
-      {/* Desktop Background: Image with Parallax */}
-      <div className="hidden md:block absolute inset-0 z-0 overflow-hidden">
+      {/* Background Image with Parallax & Zoom */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <div ref={bgWrapperRef} className="absolute inset-0 w-full h-[120%] -top-[10%]">
           <img
             src="/images/hero-bg.jpg"
@@ -121,40 +115,26 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
             className={`w-full h-full object-cover hero-bg ${isMounted ? 'zoomed' : ''}`}
           />
         </div>
+        {/* Cinematic Overlays */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-cream/90" aria-hidden="true" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-transparent via-black/10 to-black/40" aria-hidden="true" />
       </div>
 
-      {/* Mobile Background: Portrait Video */}
-      <div className="md:hidden absolute inset-0 z-0">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="/images/hero-bg.jpg"
-          className="w-full h-full object-cover"
-        >
-          <source src="/hero.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-      </div>
-
-      {/* --- DECORATIVE ELEMENTS --- */}
+      {/* Particles/Sparkles (Static CSS animation) */}
       <div className="absolute inset-0 z-[1] opacity-30 pointer-events-none" aria-hidden="true">
         <div className="absolute top-1/4 left-1/4 animate-pulse"><Logo className="h-4 w-4" color="#DFBD69" /></div>
         <div className="absolute top-1/3 right-1/3 animate-pulse delay-700"><Logo className="h-6 w-6" color="#DFBD69" /></div>
-        <div className="hidden md:block absolute bottom-1/3 left-1/3 animate-pulse delay-1000"><Logo className="h-3 w-3" color="#DFBD69" /></div>
+        <div className="absolute bottom-1/3 left-1/3 animate-pulse delay-1000"><Logo className="h-3 w-3" color="#DFBD69" /></div>
       </div>
 
-      {/* --- CONTENT (Centered for BOTH) --- */}
-      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto flex flex-col items-center">
+      {/* Content */}
+      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto mt-16 md:mt-0 flex flex-col items-center">
 
-        <span ref={badgeRef} className="glass-panel px-8 py-3 rounded-full text-white text-sm md:text-base font-bold uppercase tracking-[0.4em] mb-8 border border-white/30 hero-glow-gold reveal backdrop-blur-md">
+        <span ref={badgeRef} className="glass-panel px-8 py-3 rounded-full text-white text-sm md:text-base font-bold uppercase tracking-[0.4em] mb-8 border border-white/30 hero-glow-gold reveal">
           Luxury Wellness in Quezon City
         </span>
 
-        <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl mb-6 leading-[1] drop-shadow-2xl flex flex-col items-center">
+        <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl text-charcoal mb-6 leading-[1] drop-shadow-2xl flex flex-col items-center">
           <div ref={titleLine1Ref} className="text-white hero-text-shadow">
             Golden Tower
           </div>
@@ -164,6 +144,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
             WebkitTextStroke: '1px rgba(197,160,89,0.4)',
           }}>
             Spa
+            {/* Decorative line */}
             <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gold rounded-full opacity-60 shadow-[0_0_10px_rgba(197,160,89,0.5)]"></div>
           </div>
         </h1>
@@ -186,13 +167,6 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
           </button>
         </div>
 
-      </div>
-
-      {/* Particles/Sparkles (Static CSS animation) */}
-      <div className="absolute inset-0 z-[1] opacity-30 pointer-events-none" aria-hidden="true">
-        <div className="absolute top-1/4 left-1/4 animate-pulse"><Logo className="h-4 w-4" color="#DFBD69" /></div>
-        <div className="absolute top-1/3 right-1/3 animate-pulse delay-700"><Logo className="h-6 w-6" color="#DFBD69" /></div>
-        <div className="hidden md:block absolute bottom-1/3 left-1/3 animate-pulse delay-1000"><Logo className="h-3 w-3" color="#DFBD69" /></div>
       </div>
     </section>
   );
