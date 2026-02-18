@@ -4,6 +4,7 @@ import Logo from './Logo';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import ExpressSection from './ExpressSection';
+import SignatureMassage from './SignatureMassage';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -98,9 +99,17 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
     ...s
   })), [services]);
 
+  const goldenTowerSignature = useMemo(() => processedServices.find(s =>
+    s && s.title && s.title.toLowerCase().includes('golden tower signature')
+  ), [processedServices]);
+
   const signatureTreatments = useMemo(() => processedServices
-    .filter(s => s && (s.category === 'signature' || (s.title && s.title.toLowerCase().includes('signature'))))
-    .sort((a, b) => (a.title || "").localeCompare(b.title || "")), [processedServices]);
+    .filter(s =>
+      s &&
+      (s.category === 'signature' || (s.title && s.title.toLowerCase().includes('signature'))) &&
+      (!goldenTowerSignature || s.id !== goldenTowerSignature.id)
+    )
+    .sort((a, b) => (a.title || "").localeCompare(b.title || "")), [processedServices, goldenTowerSignature]);
 
   const luxuryPackages = useMemo(() => processedServices
     .filter(s => s && s.title && s.title.toUpperCase().includes('PACKAGE'))
@@ -115,8 +124,9 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
     s.title !== 'Home Service Massage' &&
     !signatureTreatments.some(st => st.id === s.id) &&
     !luxuryPackages.some(lp => lp.id === s.id) &&
-    !expressMassages.some(em => em.id === s.id)
-  ).sort((a, b) => (a.title || "").localeCompare(b.title || "")), [processedServices, signatureTreatments, luxuryPackages, expressMassages]);
+    !expressMassages.some(em => em.id === s.id) &&
+    (!goldenTowerSignature || s.id !== goldenTowerSignature.id)
+  ).sort((a, b) => (a.title || "").localeCompare(b.title || "")), [processedServices, signatureTreatments, luxuryPackages, expressMassages, goldenTowerSignature]);
 
   return (
     <section id="services" aria-label="Spa treatments and services" className="py-16 md:py-24 bg-gradient-to-b from-white via-[#faf9f5] to-cream/50 relative overflow-hidden">
@@ -133,45 +143,57 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
               <Loader2 className="animate-spin text-gold" size={32} aria-hidden="true" />
               <span className="sr-only">Loading treatments...</span>
             </div>
-          ) : signatureTreatments.length === 0 && regularServices.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-charcoal/50 text-lg font-light">Our treatment menu is being updated. Please check back soon.</p>
-            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[...signatureTreatments, ...regularServices].map((service, index) => (
-                <div
-                  key={service.id}
-                  style={{ transitionDelay: `${index * 100}ms` }}
-                  className={`group transition-all duration-700 rounded-2xl p-4 reveal ${service.title.toLowerCase().includes('signature')
-                    ? 'card-signature'
-                    : 'bg-cream/30 border border-gold/10 hover:-translate-y-2 hover:shadow-lg'
-                    }`}
-                >
-                  <div className={`relative h-[300px] w-full overflow-hidden mb-6 rounded-lg ${service.title.toLowerCase().includes('signature') ? 'shimmer-effect' : ''}`}>
-                    <img
-                      src={service.image_url}
-                      alt={`Luxury treatment: ${service.title}`}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
-                    />
-                    <div className="absolute bottom-4 right-4 bg-gold text-white px-3 py-1 text-sm font-bold shadow-md">P {service.price}</div>
-                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] uppercase font-bold tracking-widest">{service.duration}</div>
-                  </div>
-                  <h3 className="font-serif text-2xl text-charcoal mb-2 group-hover:text-gold transition-colors">{service.title}</h3>
-                  <p className="text-charcoal-light text-sm font-light mb-4 line-clamp-2 italic">
-                    {service.description.toLowerCase().charAt(0).toUpperCase() + service.description.toLowerCase().slice(1)}
-                  </p>
-                  <button
-                    onClick={() => onBookClick(service.id)}
-                    className="text-gold text-xs font-bold uppercase tracking-widest flex items-center hover:text-gold-dark transition-colors btn-tactile"
-                    aria-label={`Book ${service.title}`}
-                  >
-                    Book Massage <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
-                  </button>
+            <>
+              {/* Highlighted Golden Tower Signature Massage */}
+              {goldenTowerSignature && (
+                <SignatureMassage
+                  service={goldenTowerSignature}
+                  onBookClick={onBookClick}
+                />
+              )}
+
+              {signatureTreatments.length === 0 && regularServices.length === 0 && !goldenTowerSignature ? (
+                <div className="text-center py-16">
+                  <p className="text-charcoal/50 text-lg font-light">Our treatment menu is being updated. Please check back soon.</p>
                 </div>
-              ))}
-            </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {[...signatureTreatments, ...regularServices].map((service, index) => (
+                    <div
+                      key={service.id}
+                      style={{ transitionDelay: `${index * 100}ms` }}
+                      className={`group transition-all duration-700 rounded-2xl p-4 reveal ${service.title.toLowerCase().includes('signature')
+                        ? 'card-signature'
+                        : 'bg-cream/30 border border-gold/10 hover:-translate-y-2 hover:shadow-lg'
+                        }`}
+                    >
+                      <div className={`relative h-[300px] w-full overflow-hidden mb-6 rounded-lg ${service.title.toLowerCase().includes('signature') ? 'shimmer-effect' : ''}`}>
+                        <img
+                          src={service.image_url}
+                          alt={`Luxury treatment: ${service.title}`}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                        />
+                        <div className="absolute bottom-4 right-4 bg-gold text-white px-3 py-1 text-sm font-bold shadow-md">P {service.price}</div>
+                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] uppercase font-bold tracking-widest">{service.duration}</div>
+                      </div>
+                      <h3 className="font-serif text-2xl text-charcoal mb-2 group-hover:text-gold transition-colors">{service.title}</h3>
+                      <p className="text-charcoal-light text-sm font-light mb-4 line-clamp-2 italic">
+                        {service.description.toLowerCase().charAt(0).toUpperCase() + service.description.toLowerCase().slice(1)}
+                      </p>
+                      <button
+                        onClick={() => onBookClick(service.id)}
+                        className="text-gold text-xs font-bold uppercase tracking-widest flex items-center hover:text-gold-dark transition-colors btn-tactile"
+                        aria-label={`Book ${service.title}`}
+                      >
+                        Book Massage <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
 
