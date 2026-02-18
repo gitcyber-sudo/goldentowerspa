@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 
 import Logo from './Logo';
+import { getBusinessDate } from '../lib/utils';
 
 interface Booking {
     id: string;
@@ -53,27 +54,28 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
 
     const getTimeFilter = (): { start: Date | null; end: Date | null } => {
         const now = new Date();
-        // A "Business Day" starts at 6 AM (06:00).
-        // If it is currently before 6 AM, the current shift belongs to the previous calendar day.
-        const currentHour = now.getHours();
-        const businessTodayStart = new Date(now);
-        if (currentHour < 6) {
-            businessTodayStart.setDate(businessTodayStart.getDate() - 1);
-        }
-        businessTodayStart.setHours(6, 0, 0, 0);
+        const bizDateStr = getBusinessDate(now);
+        const bizDate = new Date(bizDateStr);
+
+        const businessTodayStart = new Date(bizDate);
+        businessTodayStart.setHours(16, 0, 0, 0);
+
+        const businessTodayEnd = new Date(businessTodayStart);
+        businessTodayEnd.setDate(businessTodayEnd.getDate() + 1);
+        businessTodayEnd.setHours(15, 59, 59, 999);
 
         switch (timeRange) {
             case 'today':
-                return { start: businessTodayStart, end: now };
+                return { start: businessTodayStart, end: businessTodayEnd };
             case '7d':
-                return { start: new Date(businessTodayStart.getTime() - 6 * 24 * 60 * 60 * 1000), end: now };
+                return { start: new Date(businessTodayStart.getTime() - 6 * 24 * 60 * 60 * 1000), end: businessTodayEnd };
             case '30d':
-                return { start: new Date(businessTodayStart.getTime() - 29 * 24 * 60 * 60 * 1000), end: now };
+                return { start: new Date(businessTodayStart.getTime() - 29 * 24 * 60 * 60 * 1000), end: businessTodayEnd };
             case '90d':
-                return { start: new Date(businessTodayStart.getTime() - 89 * 24 * 60 * 60 * 1000), end: now };
+                return { start: new Date(businessTodayStart.getTime() - 89 * 24 * 60 * 60 * 1000), end: businessTodayEnd };
             case 'custom':
-                const start = new Date(customYear, customMonth, 1, 6, 0, 0);
-                const end = new Date(customYear, customMonth + 1, 0, 5, 59, 59);
+                const start = new Date(customYear, customMonth, 1, 16, 0, 0);
+                const end = new Date(customYear, customMonth + 1, 0, 15, 59, 59);
                 return { start, end };
             default:
                 return { start: null, end: null };
@@ -91,12 +93,10 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
 
     const getShiftDateLabel = (dateStr: string) => {
         const date = new Date(dateStr);
-        const hour = date.getHours();
-        const displayDate = new Date(date);
-        if (hour < 6) {
-            displayDate.setDate(displayDate.getDate() - 1);
-        }
-        return displayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const bizDate = getBusinessDate(date);
+        const [year, month, day] = bizDate.split('-');
+        const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
 
     const filteredBookings = useMemo(() => {

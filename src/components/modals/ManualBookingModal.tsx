@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import { XCircle } from 'lucide-react';
 import SelectionGrid from '../SelectionGrid';
 import type { Service, Therapist } from '../../types';
+import CustomDatePicker from '../ui/CustomDatePicker';
+import CustomTimePicker from '../ui/CustomTimePicker';
 
 interface ManualBookingFormData {
     guest_name: string;
@@ -93,26 +95,16 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = React.memo(({
                                 {activeTherapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                             </select>
                         </div>
-                        <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Date *</label>
-                            <input
-                                required
-                                type="date"
-                                className="w-full border border-gold/20 rounded-lg p-3"
-                                value={data.date}
-                                onChange={e => setData({ ...data, date: e.target.value })}
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Time *</label>
-                            <input
-                                required
-                                type="time"
-                                className="w-full border border-gold/20 rounded-lg p-3"
-                                value={data.time}
-                                onChange={e => setData({ ...data, time: e.target.value })}
-                            />
-                        </div>
+                        <CustomDatePicker
+                            label="Date *"
+                            value={data.date}
+                            onChange={(date) => setData({ ...data, date })}
+                        />
+                        <CustomTimePicker
+                            label="Time *"
+                            value={data.time}
+                            onChange={(time) => setData({ ...data, time })}
+                        />
                     </div>
                     <button type="submit" className="w-full bg-gold text-white font-bold uppercase tracking-widest py-4 rounded-xl mt-4">Confirm Reservation</button>
                 </form>

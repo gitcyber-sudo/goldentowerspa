@@ -9,6 +9,8 @@ import TherapistManagement from './TherapistManagement';
 import ClientIntelligence from './ClientIntelligence';
 import ManualBookingModal from './modals/ManualBookingModal';
 import EditBookingModal from './modals/EditBookingModal';
+import CompleteBookingModal from './modals/CompleteBookingModal';
+import { getBusinessDate } from '../lib/utils';
 
 // Decomposed Components
 import AdminSidebar from './admin/AdminSidebar';
@@ -49,6 +51,7 @@ const AdminDashboard: React.FC = () => {
     const [editFormData, setEditFormData] = useState<any>({});
     const [viewingReview, setViewingReview] = useState<{ booking: Booking, feedback: any } | null>(null);
     const [feedbacks, setFeedbacks] = useState<Record<string, any>>({});
+    const [completingBooking, setCompletingBooking] = useState<Booking | null>(null);
 
     const fetchBookings = useCallback(async () => {
         setLoading(true);
@@ -129,20 +132,29 @@ const AdminDashboard: React.FC = () => {
         }
     }, [activeTab, fetchBookings, fetchTherapists]);
 
-    const updateStatus = useCallback(async (id: string, newStatus: string, therapistId?: string) => {
+    const updateStatus = useCallback(async (id: string, newStatus: string, therapistId?: string, completionTime?: string) => {
+        if (newStatus === 'completed' && !completionTime) {
+            const booking = bookings.find(b => b.id === id);
+            if (booking) {
+                setCompletingBooking(booking);
+                return;
+            }
+        }
+
         try {
-            const updateData: Record<string, string> = { status: newStatus };
+            const updateData: any = { status: newStatus };
             if (therapistId) updateData.therapist_id = therapistId;
             if (newStatus === 'completed') {
-                updateData.completed_at = new Date().toISOString();
+                updateData.completed_at = completionTime || new Date().toISOString();
             }
             const { error } = await supabase.from('bookings').update(updateData).eq('id', id);
             if (error) throw error;
+            setCompletingBooking(null);
             fetchBookings();
         } catch (err) {
             console.error('Error updating status:', err);
         }
-    }, [fetchBookings]);
+    }, [fetchBookings, bookings]);
 
     const handleManualBooking = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
@@ -272,25 +284,23 @@ const AdminDashboard: React.FC = () => {
         cancelled: bookings.filter(b => b.status === 'cancelled').length,
     }), [bookings]);
 
-    const revenueStats = useMemo(() => ({
-        totalRevenue: bookings
-            .filter(b => b.status === 'completed')
-            .reduce((sum, b) => sum + (b.services?.price || 0), 0),
-        pendingRevenue: bookings
-            .filter(b => b.status === 'confirmed' || b.status === 'pending')
-            .reduce((sum, b) => sum + (b.services?.price || 0), 0),
-        todayRevenue: bookings
-            .filter(b => {
-                const phtToday = new Intl.DateTimeFormat('en-CA', {
-                    timeZone: 'Asia/Manila',
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                }).format(new Date());
-                return b.status === 'completed' && b.booking_date === phtToday;
-            })
-            .reduce((sum, b) => sum + (b.services?.price || 0), 0),
-    }), [bookings]);
+    const revenueStats = useMemo(() => {
+        const businessToday = getBusinessDate(new Date());
+        return {
+            totalRevenue: bookings
+                .filter(b => b.status === 'completed')
+                .reduce((sum, b) => sum + (b.services?.price || 0), 0),
+            pendingRevenue: bookings
+                .filter(b => b.status === 'confirmed' || b.status === 'pending')
+                .reduce((sum, b) => sum + (b.services?.price || 0), 0),
+            todayRevenue: bookings
+                .filter(b => {
+                    if (b.status !== 'completed' || !b.completed_at) return false;
+                    return getBusinessDate(new Date(b.completed_at)) === businessToday;
+                })
+                .reduce((sum, b) => sum + (b.services?.price || 0), 0),
+        };
+    }, [bookings]);
 
     const getPageTitle = useCallback(() => {
         switch (activeTab) {
@@ -369,6 +379,12 @@ const AdminDashboard: React.FC = () => {
                     isOpen={!!viewingReview}
                     onClose={() => setViewingReview(null)}
                     review={viewingReview}
+                />
+                <CompleteBookingModal
+                    isOpen={!!completingBooking}
+                    onClose={() => setCompletingBooking(null)}
+                    onConfirm={(time) => updateStatus(completingBooking!.id, 'completed', undefined, time)}
+                    bookingDate={completingBooking?.booking_date || ''}
                 />
             </main>
         </div>

@@ -18,3 +18,22 @@ export const formatTimeTo12h = (time24: string): string => {
         return time24;
     }
 };
+/**
+ * Determines the "Business Day" for a given timestamp.
+ * A business day starts at 4:00 PM (16:00) and ends at 3:59 PM the next day.
+ * Revenue items between 4:00 PM Feb 18 and 3:59 PM Feb 19 are assigned to "Feb 18".
+ * @param date - The date to check
+ * @returns YYYY-MM-DD string representing the business day
+ */
+export const getBusinessDate = (date: Date): string => {
+    const d = new Date(date);
+    const hour = d.getHours();
+
+    // If it's before 4 PM, it belongs to the previous calendar day's business cycle
+    if (hour < 16) {
+        d.setDate(d.getDate() - 1);
+    }
+
+    // Return in YYYY-MM-DD format (can use en-CA for simple ISO date)
+    return d.toLocaleDateString('en-CA');
+};

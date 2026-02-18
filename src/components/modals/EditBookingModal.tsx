@@ -1,6 +1,8 @@
 import React from 'react';
 import { X, Edit3, Save } from 'lucide-react';
 import type { Service, Therapist, BookingStatus } from '../../types';
+import CustomDatePicker from '../ui/CustomDatePicker';
+import CustomTimePicker from '../ui/CustomTimePicker';
 
 interface EditBookingFormData {
     guest_name: string;
@@ -79,14 +81,16 @@ const EditBookingModal: React.FC<EditBookingModalProps> = React.memo(({
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Date</label>
-                            <input type="date" className="w-full border border-gold/20 rounded-lg p-3" value={data.booking_date} onChange={e => setData({ ...data, booking_date: e.target.value })} />
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Time</label>
-                            <input type="time" className="w-full border border-gold/20 rounded-lg p-3" value={data.booking_time} onChange={e => setData({ ...data, booking_time: e.target.value })} />
-                        </div>
+                        <CustomDatePicker
+                            label="Date"
+                            value={data.booking_date}
+                            onChange={(date) => setData({ ...data, booking_date: date })}
+                        />
+                        <CustomTimePicker
+                            label="Time"
+                            value={data.booking_time}
+                            onChange={(time) => setData({ ...data, booking_time: time })}
+                        />
                     </div>
 
                     <div>

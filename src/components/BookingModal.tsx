@@ -5,6 +5,8 @@ import SelectionGrid from './SelectionGrid';
 import { useAuth } from '../context/AuthContext';
 import gsap from 'gsap';
 import { useBooking } from '../hooks/useBooking';
+import CustomDatePicker from './ui/CustomDatePicker';
+import CustomTimePicker from './ui/CustomTimePicker';
 
 interface BookingModalProps {
     isOpen: boolean;
@@ -277,46 +279,23 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label htmlFor="booking-date" className="block text-xs uppercase tracking-widest font-bold text-gold mb-2 flex items-center">
-                                            <Calendar size={14} className="mr-2" aria-hidden="true" /> Date
-                                        </label>
-                                        <input
-                                            id="booking-date"
-                                            required
-                                            type="date"
-                                            className={`w-full bg-white border p-3.5 md:p-4 rounded-lg focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold/30 transition-colors ${validationErrors.date ? 'border-rose-400' : 'border-gold/20'}`}
-                                            value={formData.date}
-                                            onChange={(e) => {
-                                                setFormData({ ...formData, date: e.target.value });
-                                                if (validationErrors.date) setValidationErrors(prev => ({ ...prev, date: '' }));
-                                            }}
-                                            aria-invalid={!!validationErrors.date}
-                                        />
-                                        {validationErrors.date && (
-                                            <p className="text-rose-500 text-xs mt-1.5" role="alert">{validationErrors.date}</p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label htmlFor="booking-time" className="block text-xs uppercase tracking-widest font-bold text-gold mb-2 flex items-center">
-                                            <Clock size={14} className="mr-2" aria-hidden="true" /> Time
-                                        </label>
-                                        <input
-                                            id="booking-time"
-                                            required
-                                            type="time"
-                                            className={`w-full bg-white border p-3.5 md:p-4 rounded-lg focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold/30 transition-colors ${validationErrors.time ? 'border-rose-400' : 'border-gold/20'}`}
-                                            value={formData.time}
-                                            onChange={(e) => {
-                                                setFormData({ ...formData, time: e.target.value });
-                                                if (validationErrors.time) setValidationErrors(prev => ({ ...prev, time: '' }));
-                                            }}
-                                            aria-invalid={!!validationErrors.time}
-                                        />
-                                        {validationErrors.time && (
-                                            <p className="text-rose-500 text-xs mt-1.5" role="alert">{validationErrors.time}</p>
-                                        )}
-                                    </div>
+                                    <CustomDatePicker
+                                        label="Date"
+                                        value={formData.date}
+                                        minDate={new Date().toISOString().split('T')[0]}
+                                        onChange={(date) => {
+                                            setFormData({ ...formData, date });
+                                            if (validationErrors.date) setValidationErrors(prev => ({ ...prev, date: '' }));
+                                        }}
+                                    />
+                                    <CustomTimePicker
+                                        label="Time"
+                                        value={formData.time}
+                                        onChange={(time) => {
+                                            setFormData({ ...formData, time });
+                                            if (validationErrors.time) setValidationErrors(prev => ({ ...prev, time: '' }));
+                                        }}
+                                    />
                                 </div>
 
                                 <button
