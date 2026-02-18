@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { ArrowRight, Loader2, Crown, Sparkles, MoveRight } from 'lucide-react';
-import Logo from './Logo';
+import { ArrowRight, Loader2, Crown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
 import ExpressSection from './ExpressSection';
 import SignatureMassage from './SignatureMassage';
 import gsap from 'gsap';
@@ -27,7 +25,6 @@ interface ServicesProps {
 const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { loading: authLoading, user } = useAuth();
 
   useEffect(() => {
     let mounted = true;
@@ -50,7 +47,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
         // If no data returned, it might be a Supabase sync delay
         if ((!data || data.length === 0) && retryCount < 3) {
 
-          setTimeout(() => fetchServices(retryCount + 1), 2000);
+          setTimeout(() => fetchServices(retryCount + 1), 500);
           return;
         }
 
@@ -63,7 +60,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
         // Try a retry even on error (e.g. network blip during sync)
         if (retryCount < 3) {
 
-          setTimeout(() => fetchServices(retryCount + 1), 2000);
+          setTimeout(() => fetchServices(retryCount + 1), 500);
           return;
         }
       } finally {
@@ -89,7 +86,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-    const elements = document.querySelectorAll('.reveal');
+    const elements = document.querySelectorAll('.reveal, .reveal-3d-deck');
     elements.forEach(el => observer.observe(el));
 
     return () => observer.disconnect();
@@ -135,7 +132,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
         <div className="mb-24">
           <div className="flex flex-col mb-12">
             <span className="text-gold text-sm uppercase tracking-widest font-bold mb-2 block">The Art of Healing</span>
-            <h2 className="font-serif text-4xl md:text-5xl text-charcoal">Signature Massages</h2>
+            <h2 className="font-serif text-4xl md:text-5xl text-charcoal">Regular Massages</h2>
           </div>
 
           {loading ? (
@@ -162,8 +159,8 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
                   {[...signatureTreatments, ...regularServices].map((service, index) => (
                     <div
                       key={service.id}
-                      style={{ transitionDelay: `${index * 100}ms` }}
-                      className={`group transition-all duration-700 rounded-2xl p-4 reveal ${service.title.toLowerCase().includes('signature')
+                      style={{ transitionDelay: `${index * 80}ms` }}
+                      className={`group transition-all duration-700 rounded-2xl p-4 reveal-3d-deck ${service.title.toLowerCase().includes('signature')
                         ? 'card-signature'
                         : 'bg-cream/30 border border-gold/10 hover:-translate-y-2 hover:shadow-lg'
                         }`}
@@ -172,7 +169,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
                         <img
                           src={service.image_url}
                           alt={`Luxury treatment: ${service.title}`}
-                          loading="lazy"
+                          loading="eager"
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                         />
                         <div className="absolute bottom-4 right-4 bg-gold text-white px-3 py-1 text-sm font-bold shadow-md">P {service.price}</div>
