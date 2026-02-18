@@ -167,7 +167,7 @@ const Therapists: React.FC<TherapistsProps> = React.memo(({ onBookClick }) => {
                 <div className="relative aspect-[3/4] md:aspect-[4/5] overflow-hidden rounded-t-[120px] rounded-b-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] transition-shadow duration-500 group-hover:shadow-gold/20">
 
                   <img
-                    src={member.image_url || `https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=1000&auto=format&fit=crop`}
+                    src={member.image_url || "/images/therapist-default.jpg"}
                     alt={`Wellness Specialist: ${member.name}`}
                     loading="lazy"
                     className="w-full h-full object-cover grayscale-[15%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110"

@@ -9,25 +9,25 @@ const suiteSections = [
   {
     title: "The Entrance",
     concept: "Elegance",
-    image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop",
+    image: "/images/journey-1.jpg",
     quote: "A transition from the city's pulse to a sanctuary of silence."
   },
   {
     title: "Modern Rituals",
     concept: "Healing",
-    image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070&auto=format&fit=crop",
+    image: "/images/journey-2.jpg",
     quote: "Where time-honored Hilot meets contemporary luxury."
   },
   {
     title: "Pure Alchemy",
     concept: "Purity",
-    image: "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=600&auto=format&fit=crop",
+    image: "/images/journey-3.jpg",
     quote: "Organic oils and botanicals crafted for your rebirth."
   },
   {
     title: "Parisian Grace",
     concept: "Architectural",
-    image: "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?q=80&w=600&auto=format&fit=crop",
+    image: "/images/journey-4.jpg",
     quote: "Every corner designed to elevate the human spirit."
   }
 ];

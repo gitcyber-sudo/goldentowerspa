@@ -109,7 +109,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div ref={bgWrapperRef} className="absolute inset-0 w-full h-[120%] -top-[10%]">
           <img
-            src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070&auto=format&fit=crop"
+            src="/images/hero-bg.jpg"
             alt="Golden Tower Spa Hero Background"
             fetchpriority="high"
             className={`w-full h-full object-cover hero-bg ${isMounted ? 'zoomed' : ''}`}
