@@ -30,6 +30,24 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
     } = useBooking(initialServiceId, isOpen);
 
     // ... existing refs and hooks ...
+    const modalRef = useRef<HTMLDivElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+    // GSAP Animations
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const ctx = gsap.context(() => {
+            gsap.from(modalRef.current, {
+                y: 50,
+                opacity: 0,
+                duration: 0.5,
+                ease: 'power3.out'
+            });
+        });
+
+        return () => ctx.revert();
+    }, [isOpen]);
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
