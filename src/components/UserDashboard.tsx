@@ -315,7 +315,7 @@ const UserDashboard: React.FC = () => {
                     </div>
                     <h3 className="font-serif text-2xl md:text-3xl text-white mb-2 leading-tight">Elevate Your Experience</h3>
                     <p className="text-white/50 text-sm max-w-xl leading-relaxed">
-                        Create an account to preserve your booking history, earn exclusive rewards, and enjoy <strong className="text-white/70">2 simultaneous pending bookings</strong> instead of 1.
+                        Create an account to preserve your booking history, earn exclusive rewards, and <strong className="text-white/70">unlock the freedom to orchestrate your entire wellness calendar with multiple advance bookings</strong>.
                     </p>
                 </div>
                 <button
@@ -333,28 +333,51 @@ const UserDashboard: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#F9F7F2]">
-            {/* ─── Header ─── */}
-            <header className="bg-white/80 backdrop-blur-xl border-b border-gold/10 px-4 md:px-6 py-4 md:py-5 sticky top-0 z-40">
+            {/* ─── Premium Brand Header ─── */}
+            <header className="bg-white/90 backdrop-blur-xl border-b border-gold/10 px-4 md:px-8 py-4 md:py-6 sticky top-0 z-40 shadow-sm transition-all duration-300">
                 <div className="max-w-6xl mx-auto flex justify-between items-center">
-                    <button
-                        onClick={() => navigate('/')}
-                        className="flex items-center gap-2 text-gold hover:text-gold-dark transition-all font-bold uppercase tracking-widest text-[10px] md:text-[11px] group"
-                        aria-label="Return to homepage"
-                    >
-                        <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                        <span className="hidden md:inline">Return to Home</span>
-                        <span className="md:hidden">Home</span>
-                    </button>
+                    {/* Brand Link + Portal Identity */}
+                    <div className="flex items-center gap-4 md:gap-8">
+                        <button
+                            onClick={() => navigate('/')}
+                            className="group flex items-center gap-3 transition-transform hover:scale-[1.02]"
+                            aria-label="Golden Tower Spa - Return to Sanctuary Home"
+                        >
+                            <Logo className="h-10 md:h-12 w-auto" color="#997B3D" />
+                            <div className="flex flex-col text-left border-l border-gold/20 pl-4">
+                                <span className="font-serif font-bold text-lg md:text-2xl text-gold leading-tight">Golden Tower</span>
+                                <span className="text-[10px] md:text-xs text-charcoal/40 uppercase tracking-[0.3em] font-black">
+                                    {user ? 'Member Portal' : 'Guest Sanctuary'}
+                                </span>
+                            </div>
+                        </button>
+                    </div>
+
+                    {/* Actions & Profile */}
                     <div className="flex items-center gap-3 md:gap-6">
-                        <p className="text-base md:text-xl font-serif text-charcoal">
-                            Welcome, <span className="text-gold italic">{profile?.full_name || user?.email || 'Guest'}</span>
-                        </p>
+                        <div className="hidden md:flex flex-col items-end mr-2">
+                            <p className="text-xs uppercase tracking-widest text-gold font-black opacity-60">Verified Identity</p>
+                            <p className="text-sm font-serif text-charcoal">
+                                Welcome, <span className="italic">{profile?.full_name || user?.email || 'Guest'}</span>
+                            </p>
+                        </div>
+
+                        <div className="h-10 w-px bg-gold/10 hidden md:block" aria-hidden="true" />
+
                         {user ? (
-                            <button onClick={handleSignOut} className="flex items-center gap-1.5 text-rose-500 hover:text-rose-700 transition-colors font-bold uppercase tracking-widest text-[10px] md:border-l md:border-gold/20 md:pl-6" aria-label="Sign out">
+                            <button
+                                onClick={handleSignOut}
+                                className="flex items-center gap-2 text-rose-500 hover:text-rose-700 transition-all font-bold uppercase tracking-widest text-[10px] bg-rose-50/50 px-4 py-2.5 rounded-full border border-rose-100 hover:bg-rose-50"
+                                aria-label="Sign out of your sanctuary account"
+                            >
                                 <LogOut size={16} /> <span className="hidden md:inline">Sign Out</span>
                             </button>
                         ) : (
-                            <button onClick={() => { setAuthMode('login'); setIsAuthOpen(true); }} className="flex items-center gap-1.5 text-gold hover:text-gold-dark transition-colors font-bold uppercase tracking-widest text-[10px] md:border-l md:border-gold/20 md:pl-6" aria-label="Sign in">
+                            <button
+                                onClick={() => { setAuthMode('login'); setIsAuthOpen(true); }}
+                                className="flex items-center gap-2 text-gold hover:bg-gold/5 transition-all font-bold uppercase tracking-widest text-[10px] border border-gold/20 px-5 py-2.5 rounded-full"
+                                aria-label="Sign in to your member portal"
+                            >
                                 <User size={16} /> <span className="hidden md:inline">Sign In</span>
                             </button>
                         )}
@@ -437,7 +460,7 @@ const UserDashboard: React.FC = () => {
                         <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-all"><Phone className="text-emerald-600" size={20} /></div>
                         <div className="text-left"><p className="font-bold text-charcoal text-sm">Call Us</p><p className="text-xs text-charcoal/50">0922 826 2336</p></div>
                     </a>
-                    <a href="https://maps.app.goo.gl/goldentowerspa" target="_blank" rel="noopener noreferrer" className="bg-white p-4 rounded-xl border border-gold/10 hover:border-gold/30 hover:shadow-md transition-all flex items-center gap-4 group" aria-label="Get directions to Golden Tower Spa">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=Golden+Tower+Spa+Project+6+Quezon+City" target="_blank" rel="noopener noreferrer" className="bg-white p-4 rounded-xl border border-gold/10 hover:border-gold/30 hover:shadow-md transition-all flex items-center gap-4 group" aria-label="Get directions to Golden Tower Spa">
                         <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-all"><MapPin className="text-blue-600" size={20} /></div>
                         <div className="text-left"><p className="font-bold text-charcoal text-sm">Find Us</p><p className="text-xs text-charcoal/50">Get directions</p></div>
                     </a>
