@@ -366,7 +366,6 @@ const ClientIntelligence: React.FC = () => {
                                     <th className="px-5 py-3.5">Contact</th>
                                     <th className="px-5 py-3.5 text-center">Bookings</th>
                                     <th className="px-5 py-3.5">Last Booking</th>
-                                    <th className="px-5 py-3.5">Devices</th>
                                     <th className="px-5 py-3.5">Last Active</th>
                                     <th className="px-5 py-3.5"></th>
                                 </tr>
@@ -395,11 +394,12 @@ const ClientIntelligence: React.FC = () => {
                                             </div>
                                         </td>
                                         <td className="px-5 py-4">
-                                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest ${client.type === 'registered'
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest ${client.type === 'registered'
                                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                                 : 'bg-amber-50 text-amber-700 border border-amber-200'
                                                 }`}>
-                                                {client.type === 'registered' ? '✓ Registered' : '⊘ Unregistered'}
+                                                {client.type === 'registered' ? <UserCheck size={10} strokeWidth={2.5} /> : <UserX size={10} strokeWidth={2.5} />}
+                                                {client.type === 'registered' ? 'Registered' : 'Unregistered'}
                                             </span>
                                         </td>
                                         <td className="px-5 py-4">
@@ -421,24 +421,6 @@ const ClientIntelligence: React.FC = () => {
                                             ) : (
                                                 <span className="text-[10px] text-charcoal/30 italic">No bookings</span>
                                             )}
-                                        </td>
-                                        <td className="px-5 py-4">
-                                            <div className="flex items-center gap-1">
-                                                {client.devices.length > 0 ? (
-                                                    <>
-                                                        {client.devices.slice(0, 3).map((d, i) => (
-                                                            <div key={i} className="w-7 h-7 rounded-lg bg-charcoal/5 flex items-center justify-center text-charcoal/50" title={`${d.device_model} — ${d.os_name} ${d.os_version}`}>
-                                                                {getDeviceIcon(d.device_type)}
-                                                            </div>
-                                                        ))}
-                                                        {client.devices.length > 3 && (
-                                                            <span className="text-[10px] font-bold text-charcoal/40 ml-1">+{client.devices.length - 3}</span>
-                                                        )}
-                                                    </>
-                                                ) : (
-                                                    <span className="text-[10px] text-charcoal/30 italic">No data</span>
-                                                )}
-                                            </div>
                                         </td>
                                         <td className="px-5 py-4">
                                             <div className="flex flex-col">
@@ -475,10 +457,11 @@ const ClientIntelligence: React.FC = () => {
                                             </div>
                                             <div>
                                                 <p className="font-semibold text-charcoal text-sm">{client.name}</p>
-                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${client.type === 'registered'
+                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${client.type === 'registered'
                                                     ? 'bg-emerald-50 text-emerald-700'
                                                     : 'bg-amber-50 text-amber-700'
                                                     }`}>
+                                                    {client.type === 'registered' ? <UserCheck size={9} /> : <UserX size={9} />}
                                                     {client.type === 'registered' ? 'Registered' : 'Unregistered'}
                                                 </span>
                                             </div>
@@ -488,13 +471,6 @@ const ClientIntelligence: React.FC = () => {
                                     <div className="flex items-center justify-between text-xs text-charcoal/50">
                                         <div className="flex items-center gap-3">
                                             <span className="flex items-center gap-1"><Calendar size={11} /> {client.bookingCount} bookings</span>
-                                            <span className="flex items-center gap-1">
-                                                {client.devices.slice(0, 2).map((d, i) => (
-                                                    <span key={i}>{getDeviceIcon(d.device_type)}</span>
-                                                ))}
-                                                {client.devices.length > 2 && <span className="font-bold">+{client.devices.length - 2}</span>}
-                                                {client.devices.length === 0 && <span className="italic">No devices</span>}
-                                            </span>
                                         </div>
                                         <span>{getRelativeTime(client.lastActive)}</span>
                                     </div>

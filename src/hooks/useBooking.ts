@@ -50,6 +50,7 @@ export const useBooking = (initialServiceId?: string, isOpen?: boolean) => {
 
     // Anti-bot State
     const [hpField, setHpField] = useState('');
+    const [isReturningGuest, setIsReturningGuest] = useState(false);
 
     // Reset success/error on open
     useEffect(() => {
@@ -68,6 +69,27 @@ export const useBooking = (initialServiceId?: string, isOpen?: boolean) => {
     const fetchData = async () => {
         const { data: s } = await supabase.from('services').select('*');
         const { data: t } = await supabase.from('therapists').select('*').eq('active', true).order('name');
+
+        // Check for returning guest
+        const visitorId = localStorage.getItem('gt_visitor_id');
+        if (visitorId && !user) {
+            const { data: lastBooking } = await supabase
+                .from('bookings')
+                .select('guest_name, guest_phone')
+                .eq('visitor_id', visitorId)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (lastBooking) {
+                setFormData(prev => ({
+                    ...prev,
+                    guest_name: lastBooking.guest_name || '',
+                    guest_phone: lastBooking.guest_phone || ''
+                }));
+                setIsReturningGuest(true);
+            }
+        }
 
         if (s) {
             const sortedServices = [...s].sort((a, b) => {
@@ -172,6 +194,7 @@ export const useBooking = (initialServiceId?: string, isOpen?: boolean) => {
         hpField, setHpField,
         // Methods
         submitBooking,
-        setValidationErrors // exposed if needed for field clearing
+        setValidationErrors, // exposed if needed for field clearing
+        isReturningGuest
     };
 };

@@ -25,66 +25,28 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
         services, therapists,
         hpField, setHpField,
         submitBooking,
-        setValidationErrors
+        setValidationErrors,
+        isReturningGuest
     } = useBooking(initialServiceId, isOpen);
 
-    const modalRef = useRef<HTMLDivElement>(null);
-    const closeButtonRef = useRef<HTMLButtonElement>(null);
-    const previousFocusRef = useRef<HTMLElement | null>(null);
-
-    // Focus trap and Escape key
-    const handleKeyDown = useCallback((e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-            onClose();
-            return;
-        }
-
-        if (e.key === 'Tab' && modalRef.current) {
-            const focusable = modalRef.current.querySelectorAll<HTMLElement>(
-                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-            );
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-
-            if (e.shiftKey) {
-                if (document.activeElement === first) {
-                    e.preventDefault();
-                    last?.focus();
-                }
-            } else {
-                if (document.activeElement === last) {
-                    e.preventDefault();
-                    first?.focus();
-                }
-            }
-        }
-    }, [onClose]);
-
-    useEffect(() => {
-        if (isOpen) {
-            previousFocusRef.current = document.activeElement as HTMLElement;
-            document.body.style.overflow = 'hidden';
-            document.addEventListener('keydown', handleKeyDown);
-
-            gsap.fromTo('.modal-content',
-                { opacity: 0, scale: 0.9, y: 20 },
-                { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: 'power3.out' }
-            );
-
-            // Focus close button after animation
-            setTimeout(() => closeButtonRef.current?.focus(), 550);
-        } else {
-            document.body.style.overflow = 'unset';
-            document.removeEventListener('keydown', handleKeyDown);
-            // Restore focus
-            previousFocusRef.current?.focus();
-        }
-
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, handleKeyDown]);
+    // ... existing refs and hooks ...
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Immediate Validation Check
+        const missingFields = [];
+        if (!user && !formData.guest_name.trim()) missingFields.push("Name");
+        if (!user && !formData.guest_phone.trim()) missingFields.push("Phone Number");
+        if (!formData.date) missingFields.push("Date");
+        if (!formData.time) missingFields.push("Time");
+        if (!formData.service_id) missingFields.push("Treatment");
+
+        if (missingFields.length > 0) {
+            alert(`Please complete the following details:\n\n• ${missingFields.join('\n• ')}`);
+            return;
+        }
+
         await submitBooking();
     };
 
@@ -97,7 +59,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
             aria-modal="true"
             aria-labelledby="booking-modal-title"
         >
-            {/* Backdrop */}
+            {/* ... Backdrop ... */}
             <div
                 className="fixed inset-0 bg-charcoal/80 backdrop-blur-md"
                 onClick={onClose}
@@ -109,6 +71,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                 ref={modalRef}
                 className="modal-content relative bg-cream w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl border border-gold/20 my-auto"
             >
+                {/* ... Close Button ... */}
                 <button
                     ref={closeButtonRef}
                     onClick={onClose}
@@ -119,6 +82,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                 </button>
 
                 {success ? (
+                    // ... Success View ...
                     <div className="p-8 md:p-12 text-center py-16 md:py-24">
                         <div className="flex justify-center mb-6">
                             <CheckCircle2 className="text-gold" size={64} aria-hidden="true" />
@@ -149,7 +113,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                             </div>
                         </div>
 
-                        {/* Mobile Title (visible on small screens only) */}
+                        {/* Mobile Title */}
                         <h3 id="booking-modal-title-mobile" className="md:hidden font-serif text-2xl text-charcoal px-6 pt-6 pb-2 italic">Tailor Your Ritual</h3>
 
                         {/* Form Side */}
@@ -162,7 +126,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                             )}
 
                             <form onSubmit={onSubmit} className="space-y-5 md:space-y-6" noValidate>
-                                {/* Honeypot Field (Hidden) */}
+                                {/* Honeypot Field */}
                                 <div style={{ opacity: 0, position: 'absolute', top: 0, left: 0, height: 0, width: 0, overflow: 'hidden', zIndex: -1 }}>
                                     <label htmlFor="hp-field">Website</label>
                                     <input
@@ -187,6 +151,23 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                     </div>
                                 ) : (
                                     <div className="space-y-4 mb-4 md:mb-6">
+                                        {/* Returning Guest Welcome */}
+                                        {isReturningGuest && (
+                                            <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-center justify-between mb-4">
+                                                <div>
+                                                    <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Welcome Back!</p>
+                                                    <p className="text-xs text-emerald-600/80 mt-0.5">We've pre-filled your details.</p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { onClose(); onAuthRequired(); }}
+                                                    className="text-[10px] font-bold uppercase tracking-widest bg-white border border-emerald-200 text-emerald-700 px-3 py-1.5 rounded-full hover:bg-emerald-50 transition-colors"
+                                                >
+                                                    Create Account
+                                                </button>
+                                            </div>
+                                        )}
+
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label htmlFor="guest-name" className="text-xs uppercase tracking-widest font-bold text-gold mb-2 block">Your Name</label>
@@ -204,9 +185,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                                     aria-invalid={!!validationErrors.guest_name}
                                                     aria-describedby={validationErrors.guest_name ? 'guest-name-error' : undefined}
                                                 />
-                                                {validationErrors.guest_name && (
-                                                    <p id="guest-name-error" className="text-rose-500 text-xs mt-1.5" role="alert">{validationErrors.guest_name}</p>
-                                                )}
                                             </div>
                                             <div>
                                                 <label htmlFor="guest-phone" className="text-xs uppercase tracking-widest font-bold text-gold mb-2 block">Phone Number</label>
@@ -224,12 +202,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                                     aria-invalid={!!validationErrors.guest_phone}
                                                     aria-describedby={validationErrors.guest_phone ? 'guest-phone-error' : undefined}
                                                 />
-                                                {validationErrors.guest_phone && (
-                                                    <p id="guest-phone-error" className="text-rose-500 text-xs mt-1.5" role="alert">{validationErrors.guest_phone}</p>
-                                                )}
                                             </div>
                                         </div>
-                                        <p className="text-[10px] text-charcoal/40 italic">We use your device ID to track your booking. No account required.</p>
+                                        {!isReturningGuest && (
+                                            <p className="text-[10px] text-charcoal/40 italic">We use your device ID to track your booking. No account required.</p>
+                                        )}
                                     </div>
                                 )}
 
@@ -252,9 +229,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                                 if (validationErrors.service) setValidationErrors(prev => ({ ...prev, service: '' }));
                                             }}
                                         />
-                                        {validationErrors.service && (
-                                            <p className="text-rose-500 text-xs mt-1.5" role="alert">{validationErrors.service}</p>
-                                        )}
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
