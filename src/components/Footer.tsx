@@ -111,7 +111,7 @@ const Footer: React.FC = () => {
                   <span className="w-px h-3 bg-white/10" aria-hidden="true" />
 
                   <a
-                    href="mailto:valdezjohnpaul15.jv@gmail.com"
+                    href="mailto:valdezjohnpaul15.jv@gmail.com?subject=Project%20Inquiry%20-%20Golden%20Tower%20Spa%20Platform&body=Hello%20John%20Paul%2C%0A%0AI%20am%20interested%20in%20discussing%20a%20potential%20project%20related%20to%20the%20Golden%20Tower%20Spa%20digital%20platform.%0A%0AI%20specifically%20liked%20the%20website%20features%20mentioned%20in%20your%20highlights.%0A%0ALooking%20forward%20to%20hearing%20from%20you.%0A%0ABest%20regards%2C%0A%5BYour%20Name%5D"
                     className="text-[10px] uppercase tracking-widest font-bold text-white/40 hover:text-gold transition-colors flex items-center gap-1.5"
                   >
                     <Mail size={12} className="text-gold/40" />
