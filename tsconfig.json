@@ -32,7 +32,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInImports": true
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src",
