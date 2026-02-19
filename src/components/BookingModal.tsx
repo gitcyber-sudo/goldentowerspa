@@ -30,14 +30,16 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
     } = useBooking(initialServiceId, isOpen);
 
     // ... existing refs and hooks ...
-    const modalRef = useRef<HTMLDivElement>(null);
-    const closeButtonRef = useRef<HTMLButtonElement>(null);
+    // TEMPORARILY DISABLED FOR TESTING
+    // const modalRef = useRef<HTMLDivElement>(null);
+    // const closeButtonRef = useRef<HTMLButtonElement>(null);
 
     // GSAP Animations
     useEffect(() => {
         if (!isOpen) return;
 
         const ctx = gsap.context(() => {
+            // @ts-ignore - Intentional crash for testing
             gsap.from(modalRef.current, {
                 y: 50,
                 opacity: 0,
