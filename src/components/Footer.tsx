@@ -105,7 +105,7 @@ const Footer: React.FC = () => {
                     className="text-[10px] uppercase tracking-widest font-bold text-white/40 hover:text-gold transition-colors flex items-center gap-1.5 group/btn"
                   >
                     <Sparkles size={12} className="text-gold/40 group-hover/btn:text-gold transition-transform duration-500" />
-                    Technical Features
+                    Website Features
                   </button>
 
                   <span className="w-px h-3 bg-white/10" aria-hidden="true" />
@@ -115,7 +115,7 @@ const Footer: React.FC = () => {
                     className="text-[10px] uppercase tracking-widest font-bold text-white/40 hover:text-gold transition-colors flex items-center gap-1.5"
                   >
                     <Mail size={12} className="text-gold/40" />
-                    Work with Me
+                    Inquire
                   </a>
                 </div>
               </div>
