@@ -17,6 +17,7 @@ This document serves as the single source of truth for standardized error codes 
 | **GTS-201** | Services | `src/components/Services.tsx` | Failed to load the services menu from the database. | Medium |
 | **GTS-301** | Authentication | `src/components/AuthModal.tsx` | General failure during Sign In or Sign Up attempt. | Medium |
 | **GTS-401** | Booking | `src/hooks/useBooking.ts` | Failure during booking reservation submission to database. | High |
+| **GTS-402** | Booking | `src/components/UserDashboard.tsx` | Failure during booking cancellation attempt. | Medium |
 
 ## Guidelines for New Codes
 

@@ -62,6 +62,6 @@
 ### [2026-02-19] Error Logging & Email Alert Reliability Fix
 - **Action Taken**: Resolved critical CORS and race condition issues in the error logging system. Updated `log-error` Edge Function to handle `x-visitor-id` headers and implemented strictly-ordered deduplication logic. Refined the Content Security Policy to fix invalid icon sources and allow texture backgrounds.
 - **Result/Lesson**: Error reporting is now 100% reliable for both guest and authenticated users. Fixed a race condition where simultaneous reports canceled each other out. Automated email alerts via Resend are verified working.
-### [2026-02-19] Phase 10: Error Code Standardization
-- **Action Taken**: Implemented a unique error identification system using the `GTS-XXX` prefix. Every major failure point in the application's lifecycle now broadcasts a unique ID.
-- **Result/Lesson**: This eliminates the "blind search" during debugging. Telemetry reports are now 100% actionable with zero ambiguity about their origin.
+### [2026-02-19] Phase 12: Guest Cancellation RLS Fix
+- **Action Taken**: Fixed a security policy mismatch on the `bookings` table. Added guest support to the `WITH CHECK` clause of the update policy, allowing `status = 'cancelled'` updates via `visitor_id`. Verified with SQL session simulation.
+- **Result/Lesson**: Found that PostgREST updates require the `WITH CHECK` expression to evaluate to true for the final state of the row. Corrected the policy to be consistent for both guests and authenticated users.

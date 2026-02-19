@@ -113,7 +113,20 @@ const UserDashboard: React.FC = () => {
             const { error } = await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', id);
             if (error) throw error;
             fetchBookings();
-        } catch (err) { console.error('Error cancelling booking:', err); alert('Failed to cancel booking'); }
+        } catch (err: any) {
+            console.error('Error cancelling booking:', err);
+
+            // Standardized Telemetry
+            import('../lib/errorLogger').then(({ logError }) => {
+                logError({
+                    message: `[GTS-402]: Booking cancellation failed for ${id}. ${err.message || ''}`,
+                    severity: 'error',
+                    metadata: { bookingId: id, originalError: err }
+                });
+            });
+
+            alert('Failed to cancel booking. Our team has been notified.');
+        }
     };
 
     const handleSignOut = async () => { await signOut(); navigate('/'); };
