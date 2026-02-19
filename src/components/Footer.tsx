@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Facebook, MapPin, Mail, Smartphone, ArrowUpRight, Sparkles } from 'lucide-react';
+import { Facebook, MapPin, Mail, Smartphone, ArrowUpRight } from 'lucide-react';
+import Logo from './Logo';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import FeaturesModal from './modals/FeaturesModal';
 
@@ -66,7 +67,7 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="flex items-center gap-3">
                   <Mail size={16} className="text-gold" />
-                  <span>valdezjohnpaul15.jv@gmail.com</span>
+                  <span>gtowerspa@gmail.com</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <MapPin size={16} className="text-gold flex-shrink-0 mt-0.5" />
@@ -95,7 +96,7 @@ const Footer: React.FC = () => {
                     onClick={() => setIsFeaturesOpen(true)}
                     className="text-[10px] uppercase tracking-widest font-bold text-white/40 hover:text-gold transition-colors flex items-center gap-1.5 group/btn"
                   >
-                    <Sparkles size={12} className="text-gold/40 group-hover/btn:text-gold transition-transform duration-500" />
+                    <Logo className="h-3 w-3 text-gold/40 group-hover/btn:text-gold transition-transform duration-500" color="currentColor" />
                     Website Features
                   </button>
 

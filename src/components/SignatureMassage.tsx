@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { ArrowRight, Star, Sparkles } from 'lucide-react';
+import { ArrowRight, Star } from 'lucide-react';
+import Logo from './Logo';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -131,7 +132,7 @@ const SignatureMassage: React.FC<SignatureMassageProps> = ({ onBookClick, servic
           <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
             <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-2xl p-2 pr-6 border border-white/10 hover:bg-white/20 transition-colors cursor-default">
               <div className="bg-gold p-3 rounded-xl shadow-inner">
-                <Sparkles className="text-white w-6 h-6" />
+                <Logo className="text-white w-6 h-6" color="white" />
               </div>
               <div>
                 <p className="text-[10px] text-gold-light uppercase tracking-widest font-bold">Investment</p>
@@ -141,27 +142,27 @@ const SignatureMassage: React.FC<SignatureMassageProps> = ({ onBookClick, servic
 
             <div className="h-10 w-[1px] bg-white/20 hidden sm:block" />
 
-             <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Duration</p>
-                <p className="text-lg font-light flex items-center gap-2">
-                   {service.duration}
-                </p>
-              </div>
+            <div>
+              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Duration</p>
+              <p className="text-lg font-light flex items-center gap-2">
+                {service.duration}
+              </p>
+            </div>
           </div>
 
         </div>
 
         <div className="mt-8 md:mt-0">
-            <button
+          <button
             onClick={() => onBookClick(service.id)}
             className="group relative px-8 py-4 bg-gradient-to-r from-gold to-yellow-600 rounded-full overflow-hidden shadow-[0_0_40px_-10px_rgba(255,215,0,0.6)] hover:shadow-[0_0_60px_-5px_rgba(255,215,0,0.8)] transition-all duration-500 transform hover:scale-105"
-            >
+          >
             <div className="absolute inset-0 bg-white/20 group-hover:bg-white/0 transition-colors duration-500" />
             <div className="relative flex items-center gap-3 font-bold tracking-widest uppercase text-sm text-white">
-                Book Experience
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              Book Experience
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </div>
-            </button>
+          </button>
         </div>
       </div>
     </div>

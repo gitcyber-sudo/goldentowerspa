@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Logo from '../components/Logo';
-import { Crown, Heart, Shield, Sparkles } from 'lucide-react';
+import { Crown, Heart, Shield } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -125,7 +125,7 @@ const About: React.FC = () => {
                             { icon: Crown, title: "Excellence", desc: "We refuse to settle for anything less than perfection in every treatment." },
                             { icon: Heart, title: "Compassion", desc: "Every touch is guided by genuine care and a desire to heal." },
                             { icon: Shield, title: "Integrity", desc: "We use only premium, organic oils and maintain the highest hygiene standards." },
-                            { icon: Sparkles, title: "Serenity", desc: "Our space is acoustically tuned to silence the noise of the outside world." }
+                            { icon: () => <Logo color="#A6803E" className="w-7 h-7" />, title: "Serenity", desc: "Our space is acoustically tuned to silence the noise of the outside world." }
                         ].map((item, i) => (
                             <div key={i} className="value-card bg-cream/30 p-8 rounded-2xl border border-gold/10 hover:border-gold/40 hover:bg-cream/80 transition-all duration-300 group text-center">
                                 <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 transition-transform duration-300">
