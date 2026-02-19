@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
 import { Facebook, MapPin, Mail, Smartphone, ArrowUpRight, Sparkles } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import FeaturesModal from './modals/FeaturesModal';
 
 const Footer: React.FC = () => {
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleScroll = (id: string) => {
+    if (location.pathname === '/' || location.pathname === '/index.html') {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate('/', { state: { scrollTo: id } });
+    }
+  };
 
   return (
     <footer id="footer" role="contentinfo" className="bg-charcoal text-cream relative overflow-hidden">
@@ -23,10 +36,10 @@ const Footer: React.FC = () => {
                 Experience the pinnacle of relaxation and wellness. Your journey to tranquility starts here at our sanctuary of peace.
               </p>
               <div className="flex space-x-5">
-                <a href="#" className="p-2.5 rounded-full border border-white/10 text-white/40 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all duration-300" aria-label="Follow us on Facebook">
+                <a href="https://www.facebook.com/profile.php?id=100063262268519" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-white/10 text-white/40 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all duration-300" aria-label="Follow us on Facebook">
                   <Facebook size={20} />
                 </a>
-                <a href="#" className="p-2.5 rounded-full border border-white/10 text-white/40 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all duration-300" aria-label="Find us on Maps">
+                <a href="https://www.google.com/maps/dir/?api=1&destination=Golden+Tower+Spa+Project+6+Quezon+City" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-white/10 text-white/40 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all duration-300" aria-label="Find us on Maps">
                   <MapPin size={20} />
                 </a>
               </div>
@@ -36,9 +49,9 @@ const Footer: React.FC = () => {
             <div className="md:col-span-2 space-y-6">
               <h3 className="text-sm font-bold uppercase tracking-widest text-white">Quick Links</h3>
               <ul className="space-y-3 font-light text-white/60 text-sm">
-                <li><Link to="/services" className="hover:text-gold transition-colors">Services</Link></li>
-                <li><Link to="/therapists" className="hover:text-gold transition-colors">Our Team</Link></li>
-                <li><Link to="/locations" className="hover:text-gold transition-colors">Locations</Link></li>
+                <li><button onClick={() => handleScroll('services')} className="hover:text-gold transition-colors text-left w-full">Services</button></li>
+                <li><button onClick={() => handleScroll('specialists')} className="hover:text-gold transition-colors text-left w-full">Our Team</button></li>
+                <li><button onClick={() => handleScroll('sanctuary')} className="hover:text-gold transition-colors text-left w-full">Locations</button></li>
                 <li><Link to="/about" className="hover:text-gold transition-colors">About Us</Link></li>
               </ul>
             </div>

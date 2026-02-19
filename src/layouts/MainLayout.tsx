@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import Sanctuary from '../components/Sanctuary';
@@ -15,6 +15,7 @@ import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import Logo from '../components/Logo';
 import { useSEO } from '../hooks/useSEO';
 import { useAuth } from '../context/AuthContext';
+import { useLocation } from 'react-router-dom';
 
 interface MainLayoutProps {
   openBooking: (id?: string) => void;
@@ -42,10 +43,31 @@ const MainLayout: React.FC<MainLayoutProps> = React.memo(({
     description: 'The premier destination for traditional Hilot massage and luxury wellness treatments in Quezon City. Book your path to tranquility today.'
   });
 
-  // We can access user from useAuth if needed, but it wasn't strictly used in the rendered JSX in the original file
-  // keeping it to match original logic if it was doing something invisible, but it seems unused in the return.
-  // The original had `const { user } = useAuth();`
   const { user } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Handle scroll from navigation state (Footer links)
+    if (location.state && (location.state as any).scrollTo) {
+      const id = (location.state as any).scrollTo;
+      const element = document.getElementById(id);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100); // Small delay to ensure render
+      }
+    }
+    // Handle direct hash links
+    else if (location.hash) {
+      const id = location.hash.replace('#', '');
+      const element = document.getElementById(id);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, [location]);
 
   const handleBookingAttempt = useCallback((serviceId?: string) => {
     openBooking(serviceId);
