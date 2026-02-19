@@ -10,6 +10,12 @@ interface AnalyticsContextType {
     trackBookingCompleted: (bookingId: string, serviceId: string, serviceName: string) => void;
 }
 
+declare global {
+    interface Window {
+        gtag: (...args: any[]) => void;
+    }
+}
+
 const AnalyticsContext = createContext<AnalyticsContextType | undefined>(undefined);
 
 // Generate a unique visitor ID
@@ -263,6 +269,14 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 user_id: user?.id || null
             });
 
+            // Mirror to Google Analytics
+            if (typeof window.gtag === 'function') {
+                window.gtag('event', 'page_view', {
+                    page_path: location.pathname,
+                    page_title: getPageTitle(location.pathname)
+                });
+            }
+
             // Track device fingerprint
             await trackDevice(user?.id || null);
         } catch (error) {
@@ -287,6 +301,14 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 session_id: sessionId,
                 user_id: user?.id || null
             });
+
+            // Mirror to Google Analytics
+            if (typeof window.gtag === 'function') {
+                window.gtag('event', eventName, {
+                    event_category: eventCategory || 'general',
+                    ...eventData
+                });
+            }
         } catch (error) {
             console.debug('Event tracking error:', error);
         }
