@@ -7,6 +7,10 @@
 
 ## Log Entries
 
+### [2026-02-18] Phase 7: UI Component Modernization
+- **Action Taken**: Implemented custom `CustomDatePicker` and `CustomTimePicker` components. Integrated across all booking modals (`BookingModal`, `ManualBookingModal`, `CompleteBookingModal`, `EditBookingModal`).
+- **Result/Lesson**: Significantly improved the premium feel of the booking flow by replacing native OS pickers with themed components.
+
 ### [2026-02-18] Phase 6 Optimization & Documentation Sync
 - **Action Taken**: Implemented Hybrid Hero Layout (Mobile Portrait Video / Desktop Image Parallax). Refactored `Hero.tsx` with responsive rendering and GSAP `matchMedia`. Synced global business hours (4 PM - 4 AM) and international phone number format across JSON-LD, noscript, and UI. Hardened CSP with `frame-src`.
 - **Result/Lesson**: Enhanced mobile engagement with cinematic video while maintaining desktop performance and classic visual identity. Resolved critical data inconsistencies for SEO.
