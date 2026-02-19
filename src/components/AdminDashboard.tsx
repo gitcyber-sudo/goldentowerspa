@@ -17,6 +17,7 @@ import AdminSidebar from './admin/AdminSidebar';
 import AdminHeader from './admin/AdminHeader';
 import ReviewsPanel from './admin/ReviewsPanel';
 import BookingsTab from './admin/BookingsTab';
+import ErrorLogs from './admin/ErrorLogs';
 
 import type { Booking, Therapist, Service } from '../types';
 
@@ -310,6 +311,7 @@ const AdminDashboard: React.FC = () => {
             case 'website-analytics': return 'Website Analytics';
             case 'revenue': return 'Revenue Analytics';
             case 'clients': return 'Client Intelligence';
+            case 'errors': return 'System Error Logs';
             default: return 'Admin Panel';
         }
     }, [activeTab]);
@@ -355,6 +357,7 @@ const AdminDashboard: React.FC = () => {
                 {activeTab === 'revenue' && <RevenueDashboard bookings={bookings} />}
                 {activeTab === 'therapists' && <TherapistManagement />}
                 {activeTab === 'clients' && <ClientIntelligence />}
+                {activeTab === 'errors' && <ErrorLogs />}
 
                 {/* Modals */}
                 <ManualBookingModal

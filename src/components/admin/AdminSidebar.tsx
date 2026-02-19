@@ -44,6 +44,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab, is
                     </div>
                     {renderSidebarItem('website-analytics', <Eye size={20} />, 'Website Visits')}
                     {renderSidebarItem('revenue', <TrendingUp size={20} />, 'Revenue')}
+                    {renderSidebarItem('errors', <AlertTriangle size={20} />, 'Error Logs')}
                 </nav>
                 <div className="p-4 lg:p-6 border-t border-white/10">
                     <button onClick={onSignOut} className="w-full flex items-center gap-3 px-4 py-3 text-rose-400 hover:bg-white/5 rounded-xl transition-all">
