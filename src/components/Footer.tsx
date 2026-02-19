@@ -71,7 +71,7 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <MapPin size={16} className="text-gold flex-shrink-0 mt-0.5" />
-                  <span>Golden Tower, Quezon City, Philippines</span>
+                  <span>#1 C2 Road 9, Project 6, Quezon City, 1100 Philippines</span>
                 </li>
               </ul>
             </div>
