@@ -31,20 +31,31 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         fullName: ''
     });
 
+    const validateEmail = (email: string) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    };
+
     if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+
+        // Handle shorthand for admin login
+        let loginEmail = formData.email.trim();
+        if (loginEmail.toLowerCase() === 'admin') {
+            loginEmail = 'admin@goldentowerspa.ph';
+        }
+
+        // Client-side email validation
+        if (!validateEmail(loginEmail)) {
+            setError("Please enter a valid email address.");
+            return;
+        }
+
         setLoading(true);
 
         try {
-            // Handle shorthand for admin login
-            let loginEmail = formData.email.trim();
-            if (loginEmail.toLowerCase() === 'admin') {
-                loginEmail = 'admin@goldentowerspa.ph';
-            }
-
             if (isSignUp) {
                 const { error: signUpError } = await supabase.auth.signUp({
                     email: loginEmail,
@@ -94,8 +105,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 setError("Incorrect email or password. Please try again.");
             } else if (message.includes("User already registered")) {
                 setError("An account with this email already exists.");
-            } else if (message === "{}" || message === "{}") {
-                setError("A connection error occurred. Please check your internet and try again.");
+            } else if (message.toLowerCase().includes("email") && message.toLowerCase().includes("valid")) {
+                setError("Please enter a valid email address.");
+            } else if (message === "{}" || message === "undefined" || !message) {
+                // Supabase often returns {} for dummy domains or generic validation failures
+                setError("Please enter a valid, registered email address.");
             } else {
                 setError(message);
             }
