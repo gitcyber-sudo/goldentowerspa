@@ -6,11 +6,25 @@ If images are needed for the UI or content:
 2. REQUEST the user to provide the images manually.
 3. USE the provided images in the implementation.
 
-## AVIATION SAFETY PROTOCOL (GOVERNANCE)
-Every agent MUST follow these "Flight Rules" for project continuity:
-1. **Pre-flight Check**: Read `PROJECT_PLAN.md` and `AGENTS.md` before starting work.
-2. **Flight Recorder**: Initialize every task in `MISSION_LOG.md` and update it upon completion.
-3. **Plan Sync**: Update `PROJECT_PLAN.md` if any structural changes are made to the roadmap.
-4. **Log Maintenance**: Append every bug fix or milestone to `PROJECT_LOG.md` immediately upon completion.
+---
 
-Failure to maintain these logs is considered an "Aviation Safety Violation."
+## 🚀 OPERATIONAL INTELLIGENCE MODES
+The AI must adjust its reasoning depth based on the following triggers in the user's prompt:
+
+### 1. 🛳️ Cruise Mode (Default)
+**Trigger:** Standard requests (e.g., "Fix this typo," "Change this color," "Add a button").
+- **Goal:** Speed and direct action. 
+- **Action:** Make local edits immediately without extensive planning unless requested.
+- **Tone:** Direct, concise, and efficient.
+
+### 2. 🧠 Opus Mode (High Intelligence)
+**Trigger:** Keywords: `/opus`, `/deep`, `mastermind`, `architectural analysis`, or complex system requests.
+**Goal:** High-fidelity architectural reasoning (Equivalent to Claude 4.5 Opus).
+- **Mandatory Planning:** ALWAYS create or update an `implementation_plan.md` artifact BEFORE editing code.
+- **Architectural Critique:** Identify potential logic duplication across the 55+ source files and suggest hook/context extraction.
+- **Strict Typing:** ZERO usage of `any`. Every data structure must have explicitly defined TypeScript Interfaces/Types.
+- **Premium UI Standard:** Any UI change must be evaluated against the "Luxury Spa Architecture" (Gold/Cream palette, GSAP cleanups, responsive fidelity).
+- **Security Check:** If modifying data flows, verify Supabase RLS impact and Honeypot status.
+
+**System Response:** Start your first reply in this mode with "Opus Mode Activated 🧠" to signal the shift in intelligence level.
+

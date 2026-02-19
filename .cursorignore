@@ -1,0 +1,38 @@
+# Large Metadata
+package-lock.json
+
+# Build and Dependencies
+node_modules/
+dist/
+.vercel/
+
+# Media and Binaries (AI cannot read these effectively)
+**/*.mp4
+**/*.jpg
+**/*.png
+**/*.jpeg
+**/*.gif
+**/*.svg
+**/*.ico
+
+# Test Reports and Temporary Files
+playwright-report/
+test-results/
+npm_audit_report.txt
+verify_output.txt
+tsc_output.txt
+
+# Static Documentation (Large files that don't change often)
+WEBSITE_ASSESSMENT.md
+ROUTES.md
+SITE_MAP.md
+
+# Governance/Log Files (Removed per user request)
+MISSION_LOG.md
+PROJECT_LOG.md
+PROJECT_PLAN.md
+AGENTS.md
+
+# Supabase Local Config
+supabase/.temp/
+supabase/.branches/
