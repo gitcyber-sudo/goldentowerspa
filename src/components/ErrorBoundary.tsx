@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { logError } from '../lib/errorLogger';
 
 interface Props {
     children: ReactNode;
@@ -24,26 +24,13 @@ class ErrorBoundary extends Component<Props, State> {
     public async componentDidCatch(error: Error, errorInfo: ErrorInfo) {
         console.error("Uncaught error:", error, errorInfo);
 
-        // Send to Supabase Edge Function
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-
-            await supabase.functions.invoke('log-error', {
-                body: {
-                    message: error.message,
-                    stack: error.stack,
-                    component_stack: errorInfo.componentStack,
-                    url: window.location.href,
-                    user_agent: navigator.userAgent,
-                    user_id: user?.id,
-                    severity: 'error'
-                }
-            });
-        } catch (logError) {
-            console.error("Failed to log error:", logError);
-        }
+        // Send to Supabase Edge Function via centralized logger
+        await logError({
+            message: error.message,
+            stack: error.stack,
+            component_stack: errorInfo.componentStack,
+        });
     }
-
 
     public render() {
         if (this.state.hasError) {

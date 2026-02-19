@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, LayoutDashboard, ClipboardList, Users, UserSearch, Eye, TrendingUp, LogOut } from 'lucide-react';
+import { X, LayoutDashboard, ClipboardList, Users, UserSearch, Eye, TrendingUp, LogOut, AlertTriangle } from 'lucide-react';
 
 interface AdminSidebarProps {
     activeTab: string;

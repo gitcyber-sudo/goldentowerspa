@@ -18,6 +18,34 @@ if (container) {
     </React.StrictMode>
   );
 
+  // Global Error Handlers for Reliability
+  window.addEventListener('error', (event) => {
+    // Prevent infinite loops if logging itself fails
+    if (event.filename && event.filename.includes('errorLogger')) return;
+
+    import('./lib/errorLogger').then(({ logError }) => {
+      logError({
+        message: event.message,
+        stack: event.error?.stack,
+        url: window.location.href,
+        severity: 'error',
+        metadata: { source: 'window.onerror', filename: event.filename, lineno: event.lineno }
+      });
+    });
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    import('./lib/errorLogger').then(({ logError }) => {
+      logError({
+        message: `Unhandled Promise Rejection: ${event.reason}`,
+        stack: event.reason?.stack,
+        url: window.location.href,
+        severity: 'error',
+        metadata: { source: 'window.onunhandledrejection' }
+      });
+    });
+  });
+
   // Register Service Worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
