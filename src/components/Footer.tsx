@@ -49,39 +49,17 @@ const Footer: React.FC = () => {
               <ul className="space-y-4 font-light text-white/60 text-sm">
                 <li className="flex items-center gap-3">
                   <Smartphone size={16} className="text-gold" />
-                  <span>+63 945 123 4567</span>
+                  <span>+63 922 826 2336</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Mail size={16} className="text-gold" />
-                  <span>connect@goldentower.com</span>
+                  <span>valdezjohnpaul15.jv@gmail.com</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <MapPin size={16} className="text-gold flex-shrink-0 mt-0.5" />
-                  <span>Cebu Business Park, Cebu City, Philippines</span>
+                  <span>Golden Tower, Quezon City, Philippines</span>
                 </li>
               </ul>
-            </div>
-
-            {/* Newsletter Column */}
-            <div className="md:col-span-3 space-y-6">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-white">Newsletter</h3>
-              <p className="text-white/40 text-xs font-light leading-relaxed">
-                Subscribe to receive special offers and updates on new wellness programs.
-              </p>
-              <form className="relative group" onSubmit={(e) => e.preventDefault()}>
-                <input
-                  type="email"
-                  placeholder="Email Address"
-                  className="w-full bg-white/5 border border-white/10 rounded-full py-3.5 px-6 text-sm focus:outline-none focus:border-gold/50 transition-all duration-300 pr-12"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-gold hover:bg-gold-light text-black rounded-full transition-all duration-300 flex items-center justify-center p-2"
-                  aria-label="Subscribe"
-                >
-                  <ArrowUpRight size={18} />
-                </button>
-              </form>
             </div>
           </div>
 

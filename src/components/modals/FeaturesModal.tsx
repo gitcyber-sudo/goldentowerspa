@@ -44,15 +44,15 @@ const FeaturesModal: React.FC<FeaturesModalProps> = ({ isOpen, onClose }) => {
     ];
 
     return (
-        <div className="fixed inset-0 z-[1000] flex items-end justify-center p-4 pb-32 md:pb-48 overflow-y-auto custom-scrollbar">
+        <div className="fixed inset-0 z-[1000] flex items-end justify-center p-4 pb-32 md:items-center md:pb-0 md:p-6 overflow-y-auto custom-scrollbar">
             {/* Backdrop */}
             <div
                 className="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity duration-500"
                 onClick={onClose}
             />
 
-            {/* Modal Container - Bottom Anchored Sheet */}
-            <div className="relative w-full max-w-sm bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-full duration-500 flex flex-col">
+            {/* Modal Container - Bottom Anchor (Mobile) / Centered (Desktop) */}
+            <div className="relative w-full max-w-sm md:max-w-md bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-full duration-500 flex flex-col">
 
                 {/* Header Decor */}
                 <div className="absolute top-0 left-0 w-full h-1 flex shrink-0 z-20">

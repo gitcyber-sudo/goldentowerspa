@@ -16,6 +16,7 @@ const TherapistLogin = React.lazy(() => import('./components/TherapistLogin'));
 const AdminLogin = React.lazy(() => import('./components/AdminLogin'));
 const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = React.lazy(() => import('./components/TermsOfService'));
+const About = React.lazy(() => import('./pages/About'));
 
 const App: React.FC = () => {
   const { loading: authLoading } = useAuth();
@@ -82,6 +83,7 @@ const App: React.FC = () => {
             />
             <Route path="/therapist-login" element={<TherapistLogin />} />
             <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/about" element={<About />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
           </Routes>
