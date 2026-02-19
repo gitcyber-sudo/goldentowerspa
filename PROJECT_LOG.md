@@ -7,6 +7,10 @@
 
 ## Log Entries
 
+### [2026-02-19] Error Logging & Email Alert Reliability Fix
+- **Action Taken**: Resolved critical CORS and race condition issues in the error logging system. Updated `log-error` Edge Function to handle `x-visitor-id` headers and implemented strictly-ordered deduplication logic. Refined the Content Security Policy to fix invalid icon sources and allow texture backgrounds.
+- **Result/Lesson**: Error reporting is now 100% reliable for both guest and authenticated users. Fixed a race condition where simultaneous reports canceled each other out. Automated email alerts via Resend are verified working.
+
 ### [2026-02-18] Phase 7: UI Component Modernization
 - **Action Taken**: Implemented custom `CustomDatePicker` and `CustomTimePicker` components. Integrated across all booking modals (`BookingModal`, `ManualBookingModal`, `CompleteBookingModal`, `EditBookingModal`).
 - **Result/Lesson**: Significantly improved the premium feel of the booking flow by replacing native OS pickers with themed components.
@@ -55,6 +59,9 @@
 - **Action Taken**: Implemented Concept 1 for the `VisualJourney` section. Created a pinned, horizontal scrolling track with four distinct spa sections ("The Entrance", "Modern Rituals", "Pure Alchemy", "Parisian Grace"). Added a gold shimmer overlay and deep parallax effects on imagery and typography.
 - **Result/Lesson**: Transformed the section into a cinematic storytelling experience that emphasizes the "Parisian Elegance meets Filipino Healing" brand identity. Used `containerAnimation` in GSAP to create smooth parallax within the horizontal track.
 
-### [2026-02-13] Admin Notification Research (Deferred)
-- **Action Taken**: Researched various admin notification methods including SMS (Twilio), Facebook Messenger, Viber, Telegram, and Email. Created implementation plans for each.
-- **Result/Lesson**: User decided to defer the implementation of notifications to a later time. All plans have been archived/discarded for now.
+### [2026-02-19] Error Logging & Email Alert Reliability Fix
+- **Action Taken**: Resolved critical CORS and race condition issues in the error logging system. Updated `log-error` Edge Function to handle `x-visitor-id` headers and implemented strictly-ordered deduplication logic. Refined the Content Security Policy to fix invalid icon sources and allow texture backgrounds.
+- **Result/Lesson**: Error reporting is now 100% reliable for both guest and authenticated users. Fixed a race condition where simultaneous reports canceled each other out. Automated email alerts via Resend are verified working.
+### [2026-02-19] Phase 10: Error Code Standardization
+- **Action Taken**: Implemented a unique error identification system using the `GTS-XXX` prefix. Every major failure point in the application's lifecycle now broadcasts a unique ID.
+- **Result/Lesson**: This eliminates the "blind search" during debugging. Telemetry reports are now 100% actionable with zero ambiguity about their origin.

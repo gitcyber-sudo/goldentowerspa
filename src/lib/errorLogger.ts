@@ -9,7 +9,30 @@ interface LogErrorParams {
     metadata?: Record<string, any>;
 }
 
+const sentErrors = new Set<string>();
+
 export const logError = async ({ message, stack, component_stack, url, severity = 'error', metadata }: LogErrorParams) => {
+    // 1. Normalize and Capture Synthetic Stack if missing
+    // If we have no stack (common when strings are thrown), create a synthetic one 
+    // to at least point us to where the logger was triggered.
+    let finalStack = stack;
+    if (!finalStack) {
+        try {
+            throw new Error("Synthetic Stack Trace");
+        } catch (e: any) {
+            finalStack = e.stack;
+        }
+    }
+
+    // 2. Client-Side Deduplication (Debounce)
+    const errorKey = `${message}-${finalStack || ''}-${component_stack || ''}`;
+    if (sentErrors.has(errorKey)) {
+        console.warn("Duplicate error suppressed:", message);
+        return;
+    }
+    sentErrors.add(errorKey);
+    setTimeout(() => sentErrors.delete(errorKey), 10000);
+
     try {
         // Try to get user, but don't block logging if it fails
         let userId: string | undefined = undefined;
@@ -22,7 +45,7 @@ export const logError = async ({ message, stack, component_stack, url, severity 
 
         const payload = {
             message,
-            stack,
+            stack: finalStack,
             component_stack,
             url: url || window.location.href,
             user_agent: navigator.userAgent,

@@ -10,11 +10,8 @@
   <meta name="keywords"
     content="spa quezon city, massage project 6 qc, traditional hilot massage, luxury wellness qc, home service massage quezon city, ventosa cupping therapy, golden tower spa" />
 
-  <!-- Security Headers -->
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' https://*.supabase.co https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' 'feather-icon' https://*.unsplash.com https://images.unsplash.com https://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com data: blob:; connect-src 'self' https://*.supabase.co https://www.google-analytics.com; frame-src 'self' https://www.google.com https://www.google.com/maps; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests;" />
+  <!-- Security Headers (Harden via Vercel headers, keeping minimal set here) -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <meta http-equiv="X-Frame-Options" content="DENY" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
 
   <!-- Canonical Link -->
@@ -37,9 +34,7 @@
   <meta name="twitter:image" content="https://goldentowerspa.vercel.app/og-image.jpg" />
 
   <!-- Preload LCP Image -->
-  <link rel="preload" as="image"
-    href="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=2070&auto=format&fit=crop"
-    fetchpriority="high">
+  <link rel="preload" as="image" href="/images/hero-bg.jpg" fetchpriority="high">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

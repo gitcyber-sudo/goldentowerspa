@@ -179,8 +179,21 @@ export const useBooking = (initialServiceId?: string, isOpen?: boolean) => {
 
             if (error) throw error;
             setSuccess(true);
-        } catch (err) {
+        } catch (err: any) {
             setErrorMessage('Something went wrong. Please try again or contact us directly.');
+
+            // Standardized Telemetry
+            import('../lib/errorLogger').then(({ logError }) => {
+                logError({
+                    message: `[GTS-401]: Booking submission failed. ${err.message || ''}`,
+                    severity: 'error',
+                    metadata: {
+                        userId: user?.id,
+                        serviceId: formData.service_id,
+                        originalError: err
+                    }
+                });
+            });
         } finally {
             setLoading(false);
         }

@@ -113,6 +113,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
             } else {
                 setError(message);
             }
+
+            // Standardized Telemetry
+            import('../lib/errorLogger').then(({ logError }) => {
+                logError({
+                    message: `[GTS-301]: Authentication failed (${isSignUp ? 'signup' : 'login'}). ${message}`,
+                    severity: 'error',
+                    metadata: { email: loginEmail, isSignUp, originalError: err }
+                });
+            });
         } finally {
             setLoading(false);
         }

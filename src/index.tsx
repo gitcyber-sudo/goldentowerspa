@@ -23,6 +23,9 @@ if (container) {
     // Prevent infinite loops if logging itself fails
     if (event.filename && event.filename.includes('errorLogger')) return;
 
+    // Notify user visually
+    alert("An unexpected error occurred. Our team has been notified. Please refresh the page if the application becomes unresponsive.");
+
     import('./lib/errorLogger').then(({ logError }) => {
       logError({
         message: event.message,
@@ -35,6 +38,9 @@ if (container) {
   });
 
   window.addEventListener('unhandledrejection', (event) => {
+    // Notify user visually for promise rejections
+    alert("An unexpected background error occurred. Our team has been notified.");
+
     import('./lib/errorLogger').then(({ logError }) => {
       logError({
         message: `Unhandled Promise Rejection: ${event.reason}`,

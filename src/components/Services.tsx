@@ -55,8 +55,18 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
 
           setServices(data);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Services fetch error:', error);
+
+        // Standardized Telemetry
+        import('../lib/errorLogger').then(({ logError }) => {
+          logError({
+            message: `[GTS-201]: Failed to fetch services menu. ${error.message || ''}`,
+            severity: 'error',
+            metadata: { retryCount, originalError: error }
+          });
+        });
+
         // Try a retry even on error (e.g. network blip during sync)
         if (retryCount < 3) {
 

@@ -51,8 +51,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         setLoading(false);
                     }
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Manual session check error:", err);
+
+                import('../lib/errorLogger').then(({ logError }) => {
+                    logError({
+                        message: `[GTS-101]: Critical failure during auth initialization. ${err.message || ''}`,
+                        severity: 'error',
+                        metadata: { error: err }
+                    });
+                });
+
                 if (mounted) setLoading(false);
             }
         };
@@ -201,8 +210,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 return data;
             }
             return null;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Unexpected error during profile fetch:', error);
+
+            import('../lib/errorLogger').then(({ logError }) => {
+                logError({
+                    message: `[GTS-102]: Profile fetch unexpected failure for user ${userId}. ${error.message || ''}`,
+                    severity: 'error',
+                    metadata: { userId, error }
+                });
+            });
+
             return null;
         } finally {
             setLoading(false);
