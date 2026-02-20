@@ -65,3 +65,6 @@
 ### [2026-02-19] Phase 12: Guest Cancellation RLS Fix
 - **Action Taken**: Fixed a security policy mismatch on the `bookings` table. Added guest support to the `WITH CHECK` clause of the update policy, allowing `status = 'cancelled'` updates via `visitor_id`. Verified with SQL session simulation.
 - **Result/Lesson**: Found that PostgREST updates require the `WITH CHECK` expression to evaluate to true for the final state of the row. Corrected the policy to be consistent for both guests and authenticated users.
+### [2026-02-20] Project Governance: Stability Protocol Implementation
+- **Action Taken**: Created `STABILITY_CHECKLIST.md` to mandate continuous verification. Established the "Type Check Pulse" and "Production Dry-Run" standards. 
+- **Result/Lesson**: Formalized the build-ready philosophy to prevent technical debt. Future agents are now bound to verify compilation every 60 minutes.

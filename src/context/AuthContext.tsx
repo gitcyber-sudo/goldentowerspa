@@ -128,32 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     }, []);
 
-    // --- INACTIVITY TIMER ---
-    useEffect(() => {
-        if (!user) return;
 
-        const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 Minutes
-        let timeoutId: ReturnType<typeof setTimeout>;
-
-        const resetTimer = () => {
-            if (timeoutId) clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-                console.warn("Auto-logging out due to inactivity");
-                signOut();
-            }, INACTIVITY_LIMIT);
-        };
-
-        // Events to listen for activity
-        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
-        events.forEach(event => document.addEventListener(event, resetTimer));
-
-        resetTimer(); // Initialize timer
-
-        return () => {
-            if (timeoutId) clearTimeout(timeoutId);
-            events.forEach(event => document.removeEventListener(event, resetTimer));
-        };
-    }, [user]);
 
     const claimGuestBookings = async (userId: string, email: string, visitorId: string) => {
         try {
@@ -227,7 +202,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const signIn = async (email: string) => {
+    const signIn = async (_email: string) => {
         // Implementation for manual triggers if needed
     };
 

@@ -98,6 +98,11 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = React.memo(({
                         <CustomDatePicker
                             label="Date *"
                             value={data.date}
+                            disabledDates={
+                                data.therapist_id
+                                    ? activeTherapists.find(t => t.id === data.therapist_id)?.unavailable_blockouts as string[] | undefined
+                                    : undefined
+                            }
                             onChange={(date) => setData({ ...data, date })}
                         />
                         <CustomTimePicker

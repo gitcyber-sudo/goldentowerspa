@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,6 +16,7 @@ export interface Therapist {
     id: string;
     name: string;
     active: boolean;
+    unavailable_blockouts?: string[] | string;
 }
 
 export interface BookingFormData {

@@ -30,6 +30,7 @@ export interface Therapist {
     image_url?: string;
     active: boolean;
     user_id?: string;
+    unavailable_blockouts?: string[];
 }
 
 export interface Booking {
@@ -44,9 +45,13 @@ export interface Booking {
     booking_time: string;
     status: BookingStatus;
     created_at: string;
+    completed_at?: string;
+    user_id?: string;
     visitor_id?: string;
+    tip_amount?: number;
+    tip_recipient?: 'management' | 'therapist' | null;
     // Joined relations
-    services?: { title: string; price: number };
+    services?: { title: string; price: number; duration: number };
     therapists?: { name: string };
 }
 

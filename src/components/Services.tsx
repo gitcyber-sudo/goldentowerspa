@@ -184,7 +184,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
                           loading="eager"
                           className="w-full h-full object-cover glass-inner group-hover:scale-110 transition-transform duration-1000"
                         />
-                        <div className="absolute bottom-4 right-4 bg-gold text-white px-3 py-1 text-sm font-bold shadow-md">P {service.price}</div>
+                        <div className="absolute bottom-4 right-4 bg-gold text-white px-3 py-1 text-sm font-bold shadow-md">₱{service.price}</div>
                         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] uppercase font-bold tracking-widest">{service.duration}</div>
                       </div>
                       <h3 className={`font-serif text-2xl text-charcoal mb-2 group-hover:text-gold transition-colors ${index % 2 === 0 ? 'slide-from-left' : 'slide-from-right'}`}>
@@ -244,7 +244,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
                         <h3 className="font-serif text-3xl text-sepia-900 group-hover:text-gold transition-colors">{pkg.title}</h3>
                       </div>
                       <div className="bg-gold/10 text-gold px-4 py-2 rounded-xl font-bold group-hover:bg-gold group-hover:text-white transition-colors">
-                        P{pkg.price}
+                        ₱{pkg.price}
                       </div>
                     </div>
                     <p className="text-charcoal-light text-lg italic mb-6 whitespace-pre-line leading-relaxed border-l-2 border-gold/20 pl-6 group-hover:border-gold transition-colors">

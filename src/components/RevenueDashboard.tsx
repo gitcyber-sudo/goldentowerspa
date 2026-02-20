@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import gsap from 'gsap';
 import {
     TrendingUp,
     TrendingDown,
@@ -13,24 +14,22 @@ import {
     PieChart,
     Activity
 } from 'lucide-react';
+import {
+    AreaChart,
+    Area,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer
+} from 'recharts';
 
 import Logo from './Logo';
 import { getBusinessDate } from '../lib/utils';
+import { exportBookingsToExcel } from '../lib/excelExport';
 
-interface Booking {
-    id: string;
-    user_email: string;
-    guest_name?: string;
-    service_id: string;
-    therapist_id?: string;
-    booking_date: string;
-    booking_time: string;
-    status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-    services: { title: string; price: number };
-    therapists?: { name: string };
-    created_at: string;
-    completed_at?: string;
-}
+import type { Booking } from '../types';
+
 
 interface RevenueDashboardProps {
     bookings: Booking[];
@@ -108,14 +107,34 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         });
     }, [bookings, timeRange, customMonth, customYear]);
 
+    // Animate empty states
+    useEffect(() => {
+        gsap.to('.animate-float', {
+            y: -10,
+            duration: 2,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1
+        });
+    }, []);
+
     const stats = useMemo(() => {
         const completed = filteredBookings.filter(b => b.status === 'completed');
         const pending = filteredBookings.filter(b => b.status === 'pending' || b.status === 'confirmed');
         const cancelled = filteredBookings.filter(b => b.status === 'cancelled');
 
-        const totalRevenue = completed.reduce((sum, b) => sum + (b.services?.price || 0), 0);
+        const totalRevenue = completed.reduce((sum, b) => {
+            const servicePrice = b.services?.price || 0;
+            const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
+            return sum + servicePrice + managementTip;
+        }, 0);
+
         const pendingRevenue = pending.reduce((sum, b) => sum + (b.services?.price || 0), 0);
         const lostRevenue = cancelled.reduce((sum, b) => sum + (b.services?.price || 0), 0);
+
+        // Calculate specific tip metrics
+        const managementTips = completed.reduce((sum, b) => b.tip_recipient === 'management' ? sum + (b.tip_amount || 0) : sum, 0);
+        const therapistTips = completed.reduce((sum, b) => b.tip_recipient === 'therapist' ? sum + (b.tip_amount || 0) : sum, 0);
 
         // In-Spa vs Home Service Breakdown
         const homeServiceBookings = completed.filter(b =>
@@ -129,7 +148,9 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         const dailyRevenue: Record<string, number> = {};
         completed.forEach(b => {
             const dateLabel = getShiftDateLabel(b.completed_at || b.created_at);
-            dailyRevenue[dateLabel] = (dailyRevenue[dateLabel] || 0) + (b.services?.price || 0);
+            const servicePrice = b.services?.price || 0;
+            const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
+            dailyRevenue[dateLabel] = (dailyRevenue[dateLabel] || 0) + servicePrice + managementTip;
         });
 
         // Service breakdown
@@ -178,7 +199,11 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             return date >= previousPeriodStart && date < previousPeriodEnd && b.status === 'completed';
         });
 
-        const previousRevenue = previousPeriodBookings.reduce((sum, b) => sum + (b.services?.price || 0), 0);
+        const previousRevenue = previousPeriodBookings.reduce((sum, b) => {
+            const servicePrice = b.services?.price || 0;
+            const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
+            return sum + servicePrice + managementTip;
+        }, 0);
         const revenueTrend = previousRevenue > 0 ? ((totalRevenue - previousRevenue) / previousRevenue) * 100 : 0;
 
         // Weekly breakdown
@@ -194,7 +219,11 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                 return date >= weekStart && date < weekEnd;
             });
 
-            const weekRev = weekBookings.reduce((sum, b) => sum + (b.services?.price || 0), 0);
+            const weekRev = weekBookings.reduce((sum, b) => {
+                const servicePrice = b.services?.price || 0;
+                const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
+                return sum + servicePrice + managementTip;
+            }, 0);
             weeklyRevenue.push({
                 week: weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
                 revenue: weekRev,
@@ -257,7 +286,9 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             retentionRate,
             totalClients,
             avgSessionsPerClient,
-            avgLeadTime
+            avgLeadTime,
+            managementTips,
+            therapistTips
         };
     }, [filteredBookings, bookings, timeRange, customMonth, customYear]);
 
@@ -289,121 +320,66 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
     );
 
     const LineChart = ({ data }: { data: { week: string; revenue: number; bookings: number }[] }) => {
-        const height = 240;
-        const width = 800;
-        const padding = 40;
+        // Format x-axis label (e.g. "Mar 10" -> "10")
+        const formattedData = data.map(d => ({
+            ...d,
+            day: d.week.split(' ')[1]
+        }));
 
-        // Use fixed increments up to 7000, or higher if data exceeds it
-        const maxDataValue = Math.max(...data.map(d => d.revenue), 1);
-        const yMax = Math.max(7000, Math.ceil(maxDataValue / 1000) * 1000);
-
-        const yTicks = [1000, 2000, 3000, 4000, 5000, 6000, 7000];
-        if (yMax > 7000) {
-            // Add more ticks if we exceed 7k
-            for (let t = 8000; t <= yMax; t += 1000) yTicks.push(t);
-        }
-
-        const getX = (i: number) => padding + (i * (width - padding * 2)) / (data.length - 1 || 1);
-        const getY = (v: number) => height - padding - (v / yMax) * (height - padding * 2);
-
-        const points = data.map((d, i) => `${getX(i)},${getY(d.revenue)}`).join(' ');
-
-        const areaPoints = [
-            `${getX(0)},${height - padding}`,
-            ...data.map((d, i) => `${getX(i)},${getY(d.revenue)}`),
-            `${getX(data.length - 1)},${height - padding}`
-        ].join(' ');
+        const CustomTooltip = ({ active, payload, label }: any) => {
+            if (active && payload && payload.length) {
+                const data = payload[0].payload;
+                return (
+                    <div className="bg-charcoal text-white text-[10px] md:text-xs px-3 py-2 md:px-4 md:py-3 rounded-xl shadow-xl border border-gold/20 z-50">
+                        <p className="font-bold text-gold mb-1">{data.week}</p>
+                        <p className="font-serif text-sm md:text-base mb-0.5">₱{data.revenue.toLocaleString()}</p>
+                        <p className="text-white/60 text-[9px] md:text-[10px] uppercase font-bold tracking-widest">{data.bookings} Session{data.bookings > 1 ? 's' : ''}</p>
+                    </div>
+                );
+            }
+            return null;
+        };
 
         return (
-            <div className="w-full overflow-x-auto no-scrollbar">
-                <div className="min-w-[500px] relative">
-                    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible">
-                        {/* Grid Lines */}
-                        {yTicks.map(tick => (
-                            <g key={tick} className="opacity-10">
-                                <line
-                                    x1={padding}
-                                    y1={getY(tick)}
-                                    x2={width - padding}
-                                    y2={getY(tick)}
-                                    stroke="currentColor"
-                                    strokeWidth="1"
-                                    strokeDasharray="4 4"
-                                />
-                                <text
-                                    x={padding - 10}
-                                    y={getY(tick)}
-                                    textAnchor="end"
-                                    alignmentBaseline="middle"
-                                    className="text-[10px] fill-charcoal font-bold"
-                                >
-                                    {tick >= 1000 ? `${tick / 1000}k` : tick}
-                                </text>
-                            </g>
-                        ))}
-
-                        {/* X-Axis labels */}
-                        {data.map((item, i) => (
-                            <text
-                                key={i}
-                                x={getX(i)}
-                                y={height - padding + 20}
-                                textAnchor="middle"
-                                className="text-[10px] fill-charcoal/40 font-medium"
-                            >
-                                {item.week.split(' ')[1]}
-                            </text>
-                        ))}
-
-                        {/* Gradient Area */}
+            <div className="w-full h-[240px] md:h-[280px]">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                        data={formattedData}
+                        margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                    >
                         <defs>
-                            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#997B3D" stopOpacity="0.3" />
-                                <stop offset="95%" stopColor="#997B3D" stopOpacity="0" />
+                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#997B3D" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#997B3D" stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        <polyline
-                            points={areaPoints}
-                            fill="url(#chartGradient)"
-                            className="transition-all duration-700"
+                        <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#1A1A1A" strokeOpacity={0.1} />
+                        <XAxis
+                            dataKey="day"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#1A1A1A', opacity: 0.4, fontSize: 10, fontWeight: 500 }}
+                            dy={10}
                         />
-
-                        {/* The Line */}
-                        <polyline
-                            points={points}
-                            fill="none"
+                        <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#1A1A1A', fontWeight: 700, fontSize: 10 }}
+                            tickFormatter={(value) => value >= 1000 ? `${value / 1000}k` : value}
+                            width={40}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#997B3D', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                        <Area
+                            type="monotone"
+                            dataKey="revenue"
                             stroke="#997B3D"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="transition-all duration-700"
+                            strokeWidth={3}
+                            fillOpacity={1}
+                            fill="url(#colorRevenue)"
+                            activeDot={{ r: 6, fill: '#fff', stroke: '#997B3D', strokeWidth: 2 }}
                         />
-
-                        {/* Data Points */}
-                        {data.map((item, i) => (
-                            <g key={i} className="group cursor-pointer">
-                                <circle
-                                    cx={getX(i)}
-                                    cy={getY(item.revenue)}
-                                    r="4"
-                                    className="fill-white stroke-gold stroke-2 transition-transform group-hover:scale-150"
-                                />
-                                <foreignObject
-                                    x={getX(i) - 40}
-                                    y={getY(item.revenue) - 45}
-                                    width="80"
-                                    height="40"
-                                    className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                    <div className="bg-charcoal text-white text-[9px] px-2 py-1 rounded shadow-xl text-center">
-                                        <div className="font-bold">₱{item.revenue.toLocaleString()}</div>
-                                        <div className="opacity-60">{item.bookings} sessions</div>
-                                    </div>
-                                </foreignObject>
-                            </g>
-                        ))}
-                    </svg>
-                </div>
+                    </AreaChart>
+                </ResponsiveContainer>
             </div>
         );
     };
@@ -494,6 +470,16 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                             </div>
                         </div>
                     )}
+
+                    {/* Export Button */}
+                    <button
+                        onClick={() => exportBookingsToExcel(filteredBookings, `Revenue-Report-${timeRange}`)}
+                        className="flex items-center gap-2 bg-charcoal text-white px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-gold transition-colors ml-2"
+                        title="Export current view to Excel"
+                    >
+                        <DollarSign size={16} />
+                        Export
+                    </button>
                 </div>
             </div>
 
@@ -530,6 +516,26 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                     prefix="₱"
                     color="bg-rose-100 text-rose-600"
                     subValue={`${stats.cancelledCount} cancelled`}
+                />
+            </div>
+
+            {/* Tip Analytics Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                <StatCard
+                    icon={DollarSign}
+                    label="Management Tips"
+                    value={stats.managementTips}
+                    prefix="₱"
+                    color="bg-emerald-50 text-emerald-700"
+                    subValue="Included in Total Revenue"
+                />
+                <StatCard
+                    icon={Users}
+                    label="Therapist Tips"
+                    value={stats.therapistTips}
+                    prefix="₱"
+                    color="bg-charcoal/5 text-charcoal"
+                    subValue="Excluded from Spa Gross"
                 />
             </div>
 
@@ -589,7 +595,8 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                             ))}
                         </div>
                     ) : (
-                        <div className="h-40 flex items-center justify-center text-charcoal/40 text-sm">
+                        <div className="h-40 flex flex-col items-center justify-center text-charcoal/40 text-sm">
+                            <Users size={32} className="mb-2 opacity-30 animate-float" />
                             No completed bookings yet
                         </div>
                     )}
@@ -610,7 +617,8 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                     {stats.weeklyRevenue.length > 0 ? (
                         <LineChart data={stats.weeklyRevenue} />
                     ) : (
-                        <div className="h-40 flex items-center justify-center text-charcoal/40 text-sm">
+                        <div className="h-40 flex flex-col items-center justify-center text-charcoal/40 text-sm">
+                            <Activity size={32} className="mb-2 opacity-30 animate-float" />
                             No data available
                         </div>
                     )}

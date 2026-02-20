@@ -6,19 +6,21 @@ interface CustomTimePickerProps {
     onChange: (time: string) => void;
     label?: string;
     step?: number; // minutes
+    direction?: 'up' | 'down';
 }
 
-const CustomTimePicker: React.FC<CustomTimePickerProps> = ({ value, onChange, label, step = 5 }) => {
+const CustomTimePicker: React.FC<CustomTimePickerProps> = ({ value, onChange, label, step = 5, direction = 'up' }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const timeSlots = useMemo(() => {
         const slots = [];
-        for (let hour = 9; hour <= 23; hour++) { // 9 AM to 11 PM
+        for (let hour = 0; hour < 24; hour++) { // Full 24h range for flexibility
             for (let min = 0; min < 60; min += step) {
                 const h = hour.toString().padStart(2, '0');
                 const m = min.toString().padStart(2, '0');
                 const period = hour >= 12 ? 'PM' : 'AM';
-                const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+                let displayHour = hour % 12;
+                if (displayHour === 0) displayHour = 12;
                 slots.push({
                     value: `${h}:${m}`,
                     label: `${displayHour}:${m} ${period}`
@@ -57,7 +59,7 @@ const CustomTimePicker: React.FC<CustomTimePickerProps> = ({ value, onChange, la
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-[120]" onClick={() => setIsOpen(false)} />
-                    <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gold/20 rounded-2xl shadow-2xl p-4 z-[130] animate-in fade-in slide-in-from-bottom-2 duration-200">
+                    <div className={`absolute ${direction === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 right-0 bg-white border border-gold/20 rounded-2xl shadow-2xl p-4 z-[130] animate-in fade-in ${direction === 'up' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200`}>
                         {step <= 5 ? (
                             <div className="flex flex-col gap-4">
                                 <div className="flex items-center justify-center gap-4 h-[200px]">
@@ -87,7 +89,7 @@ const CustomTimePicker: React.FC<CustomTimePickerProps> = ({ value, onChange, la
                                     <div className="text-gold font-bold">:</div>
                                     {/* Minutes Column */}
                                     <div className="flex-1 overflow-y-auto h-full space-y-1 pr-1 custom-scrollbar text-center">
-                                        {Array.from({ length: 60 }, (_, i) => i).map(m => {
+                                        {Array.from({ length: Math.ceil(60 / step) }, (_, i) => i * step).map(m => {
                                             const currentM = parseInt(value.split(':')[1] || '0');
                                             return (
                                                 <button

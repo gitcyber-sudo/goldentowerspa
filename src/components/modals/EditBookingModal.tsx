@@ -84,6 +84,11 @@ const EditBookingModal: React.FC<EditBookingModalProps> = React.memo(({
                         <CustomDatePicker
                             label="Date"
                             value={data.booking_date}
+                            disabledDates={
+                                data.therapist_id
+                                    ? therapists.find(t => t.id === data.therapist_id)?.unavailable_blockouts as string[] | undefined
+                                    : undefined
+                            }
                             onChange={(date) => setData({ ...data, booking_date: date })}
                         />
                         <CustomTimePicker
@@ -95,7 +100,7 @@ const EditBookingModal: React.FC<EditBookingModalProps> = React.memo(({
 
                     <div>
                         <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Status</label>
-                        <select className="w-full border border-gold/20 rounded-lg p-3" value={data.status} onChange={e => setData({ ...data, status: e.target.value })}>
+                        <select className="w-full border border-gold/20 rounded-lg p-3" value={data.status} onChange={e => setData({ ...data, status: e.target.value as BookingStatus })}>
                             <option value="pending">Pending</option>
                             <option value="confirmed">Confirmed</option>
                             <option value="completed">Completed</option>

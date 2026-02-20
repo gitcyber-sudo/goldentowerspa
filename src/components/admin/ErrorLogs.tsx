@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { AlertTriangle, CheckCircle, Clock, Search, Trash2, ExternalLink } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Trash2, ExternalLink } from 'lucide-react';
 
 interface ErrorLog {
     id: string;
@@ -32,7 +32,7 @@ const ErrorLogs: React.FC = () => {
             query = query.eq('status', filter);
         }
 
-        const { data, error } = await query;
+        const { data } = await query;
         if (data) setLogs(data);
         setLoading(false);
     };

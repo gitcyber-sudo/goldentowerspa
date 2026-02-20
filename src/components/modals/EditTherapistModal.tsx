@@ -33,7 +33,7 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                 bio: therapist.bio || '',
                 active: therapist.active ?? true
             });
-            setImagePreview(therapist.image_url);
+            setImagePreview(therapist.image_url || null);
             setShowPasswordReset(false);
             setNewPassword('');
         }

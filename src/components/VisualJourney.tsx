@@ -61,11 +61,10 @@ const VisualJourney: React.FC = () => {
       });
 
       // Individual parallax effects for elements within sections
-      sections.forEach((section: Element) => {
+      sections.forEach((section: any) => {
         const title = section.querySelector('.section-title');
         const concept = section.querySelector('.section-concept');
         const img = section.querySelector('.section-img');
-        const quote = section.querySelector('.section-quote');
 
         gsap.to(img, {
           xPercent: 15,

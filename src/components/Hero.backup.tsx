@@ -111,7 +111,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
           <img
             src="/images/hero-bg.jpg"
             alt="Golden Tower Spa Hero Background"
-            fetchpriority="high"
+            fetchPriority="high"
             className={`w-full h-full object-cover hero-bg ${isMounted ? 'zoomed' : ''}`}
           />
         </div>

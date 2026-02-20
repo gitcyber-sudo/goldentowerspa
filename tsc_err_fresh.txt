@@ -1,0 +1,14 @@
+src/components/AdminDashboard.tsx(376,67): error TS2322: Type 'import("C:/Users/User/Documents/AntiGravity Projects/goldentowerspa/goldentowerspa/src/types/index").Booking[]' is not assignable to type 'Booking[]'.
+  Type 'import("C:/Users/User/Documents/AntiGravity Projects/goldentowerspa/goldentowerspa/src/types/index").Booking' is not assignable to type 'Booking'.
+    Types of property 'services' are incompatible.
+      Type '{ title: string; price: number; duration: number; } | undefined' is not assignable to type '{ title: string; price: number; duration: number; }'.
+        Type 'undefined' is not assignable to type '{ title: string; price: number; duration: number; }'.
+src/components/Hero.backup.tsx(114,13): error TS2322: Type '{ src: string; alt: string; fetchpriority: string; className: string; }' is not assignable to type 'DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>'.
+  Property 'fetchpriority' does not exist on type 'DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>'. Did you mean 'fetchPriority'?
+src/components/Hero.tsx(120,13): error TS2322: Type '{ src: string; alt: string; fetchpriority: string; className: string; }' is not assignable to type 'DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>'.
+  Property 'fetchpriority' does not exist on type 'DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>'. Did you mean 'fetchPriority'?
+src/components/TherapistDashboard.tsx(202,30): error TS2304: Cannot find name 'useMemo'.
+src/components/TherapistDashboard.tsx(207,31): error TS2304: Cannot find name 'useMemo'.
+src/components/TherapistDashboard.tsx(209,27): error TS2304: Cannot find name 'useMemo'.
+src/components/TherapistDashboard.tsx(213,23): error TS2304: Cannot find name 'useMemo'.
+src/components/TherapistDashboard.tsx(218,23): error TS2304: Cannot find name 'useMemo'.

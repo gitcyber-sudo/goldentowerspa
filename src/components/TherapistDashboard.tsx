@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useLayoutEffect, useMemo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { formatTimeTo12h } from '../lib/utils';
 import gsap from 'gsap';
+import { formatTimeTo12h } from '../lib/utils';
 import {
     Calendar,
     Clock,
@@ -20,12 +20,15 @@ import {
     Award,
     TrendingUp,
     BarChart3,
-    ChevronRight
+    ChevronRight,
+    Save
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
 import LoadingScreen from './LoadingScreen';
 import Logo from './Logo';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
 
 interface Review {
     id: string;
@@ -66,6 +69,11 @@ const TherapistDashboard: React.FC = () => {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [activeTab, setActiveTab] = useState<TabId>('schedule');
 
+    // Calendar blockouts state
+    const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
+    const [savingDates, setSavingDates] = useState(false);
+    const contentRef = useRef<HTMLDivElement>(null);
+
     // ─── Animations ───
     useLayoutEffect(() => {
         const ctx = gsap.context(() => {
@@ -82,17 +90,25 @@ const TherapistDashboard: React.FC = () => {
     }, [loading, activeTab, bookings]);
 
     // ─── Data ───
-    useEffect(() => {
-        if (user) fetchTherapistData();
-    }, [user]);
-
-    const fetchTherapistData = async () => {
+    const fetchTherapistData = useCallback(async () => {
         setLoading(true);
         try {
             const { data: therapist, error: therapistError } = await supabase
                 .from('therapists').select('*').eq('user_id', user?.id).single();
             if (therapistError) { console.error('Not linked to therapist account:', therapistError); return; }
             setTherapistInfo(therapist);
+
+            // Parse blockouts
+            if (therapist.unavailable_blockouts) {
+                try {
+                    const parsedDates = Array.isArray(therapist.unavailable_blockouts)
+                        ? therapist.unavailable_blockouts.map((d: string) => new Date(d))
+                        : JSON.parse(therapist.unavailable_blockouts).map((d: string) => new Date(d));
+                    setUnavailableDates(parsedDates);
+                } catch (e) {
+                    console.error('Failed to parse blockout dates', e);
+                }
+            }
 
             const { data, error } = await supabase.from('bookings')
                 .select(`*, services(title, duration), profiles(full_name, email)`)
@@ -108,26 +124,102 @@ const TherapistDashboard: React.FC = () => {
             if (reviewData) setReviews(reviewData as any);
         } catch (err) { console.error('Error fetching therapist bookings:', err); }
         finally { setLoading(false); }
+    }, [user]);
+
+    useEffect(() => {
+        let isSubscribed = true;
+
+        const loadData = async () => {
+            if (!user) return;
+            await fetchTherapistData();
+        };
+
+        loadData();
+
+        // Subscribe to real-time status updates ONLY
+        const statusSubscription = supabase
+            .channel('therapist_status_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'bookings',
+                    filter: `therapist_id = eq.${user?.id} `
+                },
+                (payload) => {
+                    // Only update if it's a status change (like confirmation or cancellation)
+                    if (payload.new && payload.old && payload.new.status !== payload.old.status) {
+                        if (isSubscribed) {
+                            fetchTherapistData();
+                        }
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            isSubscribed = false;
+            supabase.removeChannel(statusSubscription);
+        };
+    }, [user, fetchTherapistData]);
+
+    // Animate tab transition
+    useEffect(() => {
+        if (contentRef.current) {
+            gsap.fromTo(contentRef.current,
+                { opacity: 0, y: 20 },
+                { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
+            );
+        }
+    }, [activeTab]);
+
+    const handleSaveBlockouts = async () => {
+        if (!therapistInfo) return;
+        setSavingDates(true);
+        try {
+            // Store as purely ISO string arrays
+            const datesToSave = unavailableDates.map(d => d.toISOString());
+            const { error } = await supabase
+                .from('therapists')
+                .update({ unavailable_blockouts: datesToSave })
+                .eq('id', therapistInfo.id);
+
+            if (error) throw error;
+            // Show brief success alert
+            alert("Availability updated successfully");
+        } catch (error) {
+            console.error('Error saving blockout dates:', error);
+            alert("Failed to save availability");
+        } finally {
+            setSavingDates(false);
+        }
     };
 
     const handleSignOut = async () => { await signOut(); navigate('/'); };
 
     // ─── Computed ───
     const upcomingBookings = useMemo(() => bookings.filter(
-        b => (b.status === 'pending' || b.status === 'confirmed') &&
+        (b: any) => (b.status === 'pending' || b.status === 'confirmed') &&
             new Date(b.booking_date).setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0)
     ), [bookings]);
 
-    const completedBookings = useMemo(() => bookings.filter(b => b.status === 'completed'), [bookings]);
+    const completedBookings = useMemo(() => bookings.filter((b: any) => b.status === 'completed'), [bookings]);
 
     const todayBookings = useMemo(() => upcomingBookings.filter(
-        b => new Date(b.booking_date).toDateString() === new Date().toDateString()
+        (b: any) => new Date(b.booking_date).toDateString() === new Date().toDateString()
     ), [upcomingBookings]);
 
     const avgRating = useMemo(() => {
         if (reviews.length === 0) return 0;
-        return (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1);
+        return (reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length).toFixed(1);
     }, [reviews]);
+
+    const totalTips = useMemo(() => {
+        return completedBookings.reduce((sum: number, b: any) => {
+            return b.tip_recipient === 'therapist' ? sum + (b.tip_amount || 0) : sum;
+        }, 0);
+    }, [completedBookings]);
 
     const getStatusConfig = (status: string) => {
         switch (status) {
@@ -155,7 +247,7 @@ const TherapistDashboard: React.FC = () => {
         return (
             <div
                 key={booking.id}
-                className={`booking-card bg-white rounded-2xl border border-gold/10 overflow-hidden hover:shadow-xl hover:border-gold/20 transition-all group border-l-4 ${status.border}`}
+                className={`booking - card bg - white rounded - 2xl border border - gold / 10 overflow - hidden hover: shadow - xl hover: border - gold / 20 transition - all group border - l - 4 ${status.border} `}
             >
                 <div className="p-5 md:p-6">
                     {/* Top row: client + status */}
@@ -181,7 +273,7 @@ const TherapistDashboard: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex flex-col items-end gap-1.5">
-                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 ${status.bg} ${status.text}`}>
+                            <span className={`px - 2.5 py - 1 rounded - full text - [9px] font - bold uppercase tracking - widest flex items - center gap - 1 ${status.bg} ${status.text} `}>
                                 {status.icon} {booking.status}
                             </span>
                             {booking.services?.title.toLowerCase().includes('home') && (
@@ -274,14 +366,14 @@ const TherapistDashboard: React.FC = () => {
                         { icon: <CheckCircle2 className="text-emerald-600" size={20} />, bg: 'bg-emerald-50', value: completedBookings.length, label: 'Completed' },
                         { icon: <Star className="text-white" size={20} fill="currentColor" />, bg: 'bg-gradient-to-br from-gold to-gold-dark', value: avgRating || '—', label: `${reviews.length} Reviews`, isGold: true }
                     ].map((stat, i) => (
-                        <div key={i} className={`dashboard-stat p-4 md:p-5 rounded-xl border border-gold/10 hover:shadow-lg transition-all hover:-translate-y-0.5 group ${stat.isGold ? stat.bg + ' shadow-lg text-white' : 'bg-white'}`}>
+                        <div key={i} className={`dashboard - stat p - 4 md: p - 5 rounded - xl border border - gold / 10 hover: shadow - lg transition - all hover: -translate - y - 0.5 group ${stat.isGold ? stat.bg + ' shadow-lg text-white' : 'bg-white'} `}>
                             <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all ${stat.isGold ? 'bg-white/20 backdrop-blur-sm' : stat.bg + ' group-hover:scale-105'}`}>
+                                <div className={`w - 10 h - 10 md: w - 12 md: h - 12 rounded - full flex items - center justify - center transition - all ${stat.isGold ? 'bg-white/20 backdrop-blur-sm' : stat.bg + ' group-hover:scale-105'} `}>
                                     {stat.icon}
                                 </div>
                                 <div>
-                                    <p className={`text-2xl md:text-3xl font-serif ${stat.isGold ? 'text-white' : 'text-charcoal'}`}>{stat.value}</p>
-                                    <p className={`text-[10px] uppercase tracking-widest ${stat.isGold ? 'text-white/70' : 'text-charcoal/50'}`}>{stat.label}</p>
+                                    <p className={`text - 2xl md: text - 3xl font - serif ${stat.isGold ? 'text-white' : 'text-charcoal'} `}>{stat.value}</p>
+                                    <p className={`text - [10px] uppercase tracking - widest ${stat.isGold ? 'text-white/70' : 'text-charcoal/50'} `}>{stat.label}</p>
                                 </div>
                             </div>
                         </div>
@@ -291,11 +383,12 @@ const TherapistDashboard: React.FC = () => {
                 {/* ─── Desktop Tab Navigation ─── */}
                 <div className="hidden md:flex gap-1 mb-8 bg-white rounded-xl p-1.5 border border-gold/10 shadow-sm" role="tablist" aria-label="Dashboard sections">
                     {tabs.map(tab => (
-                        <button key={tab.id} role="tab" aria-selected={activeTab === tab.id} aria-controls={`panel-${tab.id}`}
+                        <button key={tab.id} role="tab" aria-selected={activeTab === tab.id} aria-controls={`panel - ${tab.id} `}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all flex-1 justify-center ${activeTab === tab.id
+                            className={`flex items - center gap - 2 px - 5 py - 3 rounded - lg text - xs font - bold uppercase tracking - widest transition - all flex - 1 justify - center ${activeTab === tab.id
                                 ? 'bg-gold text-white shadow-md'
-                                : 'text-charcoal/40 hover:text-charcoal/70 hover:bg-gold/5'}`}
+                                : 'text-charcoal/40 hover:text-charcoal/70 hover:bg-gold/5'
+                                } `}
                         >
                             {tab.icon} {tab.label}
                         </button>
@@ -309,7 +402,7 @@ const TherapistDashboard: React.FC = () => {
                         <p className="text-charcoal/40 mt-4 italic">Loading your schedule...</p>
                     </div>
                 ) : (
-                    <>
+                    <div ref={contentRef}>
                         {/* ─── Schedule Panel ─── */}
                         <div id="panel-schedule" role="tabpanel" className={activeTab !== 'schedule' ? 'hidden' : ''}>
                             {/* Today's Timeline */}
@@ -323,11 +416,11 @@ const TherapistDashboard: React.FC = () => {
                                     <div className="relative">
                                         <div className="absolute left-5 top-0 bottom-0 w-px bg-gold/15" aria-hidden="true" />
                                         <div className="space-y-3">
-                                            {todayBookings.sort((a, b) => a.booking_time.localeCompare(b.booking_time)).map(booking => {
+                                            {todayBookings.sort((a: any, b: any) => a.booking_time.localeCompare(b.booking_time)).map((booking: any) => {
                                                 const status = getStatusConfig(booking.status);
                                                 return (
                                                     <div key={booking.id} className="relative pl-12">
-                                                        <div className={`absolute left-3.5 top-6 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10 ${status.dot}`} aria-hidden="true" />
+                                                        <div className={`absolute left - 3.5 top - 6 w - 3 h - 3 rounded - full border - 2 border - white shadow - sm z - 10 ${status.dot} `} aria-hidden="true" />
                                                         <div className="absolute left-0 top-5 text-[10px] font-mono text-gold font-bold">
                                                             {formatTimeTo12h(booking.booking_time).replace(/ /g, '')}
                                                         </div>
@@ -352,7 +445,7 @@ const TherapistDashboard: React.FC = () => {
                             ) : (
                                 <div className="space-y-8">
                                     {timeBuckets.map((bucket, i) => {
-                                        const bucketBookings = upcomingBookings.filter(b => {
+                                        const bucketBookings = upcomingBookings.filter((b: any) => {
                                             if (new Date(b.booking_date).toDateString() === new Date().toDateString()) return false; // already shown in today
                                             const hour = parseInt(b.booking_time.split(':')[0]);
                                             return hour >= bucket.range[0] && hour < bucket.range[1];
@@ -375,6 +468,55 @@ const TherapistDashboard: React.FC = () => {
                                     })}
                                 </div>
                             )}
+
+                            {/* ─── Schedule Management (Calendar) ─── */}
+                            <div className="mt-12 bg-white rounded-2xl border border-gold/10 p-6 md:p-8 shadow-sm">
+                                <div className="flex flex-col md:flex-row gap-8 items-start">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
+                                                <Calendar className="text-gold" size={20} />
+                                            </div>
+                                            <div>
+                                                <h2 className="font-serif text-xl text-charcoal">Manage Availability</h2>
+                                                <p className="text-xs text-charcoal/50">Select days you will be completely unavailable for bookings.</p>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-charcoal/70 mb-6 leading-relaxed">
+                                            Click on any date to toggle your availability. Dates selected here will be blocked off on the main booking calendar, preventing clients from selecting you on your days off.
+                                        </p>
+
+                                        <button
+                                            onClick={handleSaveBlockouts}
+                                            disabled={savingDates}
+                                            className="w-full md:w-auto flex items-center justify-center gap-2 bg-charcoal text-white px-6 py-3 rounded-xl hover:bg-charcoal/90 transition-colors disabled:opacity-50 text-sm font-bold tracking-widest uppercase"
+                                        >
+                                            {savingDates ? (
+                                                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                            ) : (
+                                                <Save size={16} />
+                                            )}
+                                            {savingDates ? 'Saving...' : 'Save Availability'}
+                                        </button>
+                                    </div>
+
+                                    <div className="bg-[#F9F7F2] p-4 rounded-xl border border-gold/10 mx-auto md:mx-0">
+                                        <style dangerouslySetInnerHTML={{
+                                            __html: `
+    .rdp { --rdp - cell - size: 40px; --rdp - accent - color: #997B3D; --rdp - background - color: #f3f0e6; margin: 0; }
+                                            .rdp - day_selected, .rdp - day_selected: focus - visible, .rdp - day_selected:hover { background - color: #997B3D; color: white; border - radius: 8px; }
+                                            .rdp - button: hover: not([disabled]): not(.rdp - day_selected) { background - color: rgba(153, 123, 61, 0.1); border - radius: 8px; }
+                                            .rdp - day_today { font - weight: bold; color: #1A1A1A; border: 1px solid #997B3D; border - radius: 8px; }
+`}} />
+                                        <DayPicker
+                                            mode="multiple"
+                                            selected={unavailableDates}
+                                            onSelect={(dates) => setUnavailableDates(dates as Date[])}
+                                            disabled={{ before: new Date() }} // Cannot block past dates
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* ─── History Panel ─── */}
@@ -459,7 +601,7 @@ const TherapistDashboard: React.FC = () => {
                                     <div className="h-36 md:h-44 bg-gradient-to-br from-charcoal via-charcoal to-charcoal-light relative overflow-hidden">
                                         <div className="absolute inset-0 bg-gold/5" aria-hidden="true" />
                                         <div className="absolute bottom-4 right-6 flex items-center gap-1.5">
-                                            <div className={`w-2.5 h-2.5 rounded-full ${therapistInfo.active ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+                                            <div className={`w - 2.5 h - 2.5 rounded - full ${therapistInfo.active ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'} `} />
                                             <span className="text-white/70 text-[10px] uppercase font-bold tracking-widest">{therapistInfo.active ? 'Active' : 'Inactive'}</span>
                                         </div>
                                     </div>
@@ -492,7 +634,7 @@ const TherapistDashboard: React.FC = () => {
                                                 <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 mb-2">About Me</h3>
                                                 <p className="text-charcoal/70 leading-relaxed text-sm">{therapistInfo.bio || 'No bio available.'}</p>
                                             </div>
-                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                                 <div className="p-4 rounded-xl bg-cream/50 border border-gold/10">
                                                     <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 mb-1">Sessions</h3>
                                                     <p className="text-xl font-serif text-charcoal">{completedBookings.length}</p>
@@ -501,9 +643,13 @@ const TherapistDashboard: React.FC = () => {
                                                     <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 mb-1">Rating</h3>
                                                     <p className="text-xl font-serif text-gold">{avgRating || '—'}</p>
                                                 </div>
-                                                <div className="p-4 rounded-xl bg-cream/50 border border-gold/10 col-span-2 md:col-span-1">
+                                                <div className="p-4 rounded-xl bg-cream/50 border border-gold/10">
+                                                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 mb-1">Tips</h3>
+                                                    <p className="text-xl font-serif text-emerald-600">₱{totalTips.toLocaleString()}</p>
+                                                </div>
+                                                <div className="p-4 rounded-xl bg-cream/50 border border-gold/10 col-span-2 md:col-span-1 border-t-4 border-t-gold/20">
                                                     <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 mb-1">Joined</h3>
-                                                    <p className="text-sm text-charcoal">{new Date(therapistInfo.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+                                                    <p className="text-sm text-charcoal">{new Date(therapistInfo.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -511,7 +657,7 @@ const TherapistDashboard: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                    </>
+                    </div>
                 )}
             </main>
 
@@ -523,7 +669,8 @@ const TherapistDashboard: React.FC = () => {
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${activeTab === tab.id
                                 ? 'text-gold'
-                                : 'text-charcoal/30 hover:text-charcoal/50'}`}
+                                : 'text-charcoal/30 hover:text-charcoal/50'
+                                }`}
                         >
                             {tab.icon}
                             <span className="text-[9px] font-bold uppercase tracking-wider">{tab.mobileLabel}</span>

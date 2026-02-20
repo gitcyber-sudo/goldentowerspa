@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSEO } from '../hooks/useSEO';
+import gsap from 'gsap';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import RevenueDashboard from './RevenueDashboard';
 import TherapistManagement from './TherapistManagement';
@@ -18,6 +19,7 @@ import AdminHeader from './admin/AdminHeader';
 import ReviewsPanel from './admin/ReviewsPanel';
 import BookingsTab from './admin/BookingsTab';
 import ErrorLogs from './admin/ErrorLogs';
+import LiveTimeline from './admin/LiveTimeline';
 
 import type { Booking, Therapist, Service } from '../types';
 
@@ -35,6 +37,7 @@ const AdminDashboard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const contentRef = useRef<HTMLDivElement>(null);
 
     // Manual Booking State
     const [showManualBooking, setShowManualBooking] = useState(false);
@@ -59,7 +62,7 @@ const AdminDashboard: React.FC = () => {
         try {
             const { data, error } = await supabase
                 .from('bookings')
-                .select(`*, services (title, price), therapists (name)`)
+                .select(`*, services (title, price, duration), therapists (name)`)
                 .order('created_at', { ascending: false });
             if (error) throw error;
             if (data) setBookings(data as any);
@@ -128,12 +131,22 @@ const AdminDashboard: React.FC = () => {
     useEffect(() => {
         if (activeTab === 'dashboard' || activeTab === 'bookings' || activeTab === 'revenue') {
             fetchBookings();
+            // Need therapists for Live Timeline on dashboard and dropdown in bookings
+            if (therapists.length === 0) fetchTherapists();
         } else if (activeTab === 'therapists') {
             fetchTherapists();
         }
+
+        // Animate tab transition
+        if (contentRef.current) {
+            gsap.fromTo(contentRef.current,
+                { opacity: 0, y: 20 },
+                { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
+            );
+        }
     }, [activeTab, fetchBookings, fetchTherapists]);
 
-    const updateStatus = useCallback(async (id: string, newStatus: string, therapistId?: string, completionTime?: string) => {
+    const updateStatus = useCallback(async (id: string, newStatus: string, therapistId?: string, completionTime?: string, tipAmount?: number, tipRecipient?: 'management' | 'therapist' | null) => {
         if (newStatus === 'completed' && !completionTime) {
             const booking = bookings.find(b => b.id === id);
             if (booking) {
@@ -147,6 +160,8 @@ const AdminDashboard: React.FC = () => {
             if (therapistId) updateData.therapist_id = therapistId;
             if (newStatus === 'completed') {
                 updateData.completed_at = completionTime || new Date().toISOString();
+                updateData.tip_amount = tipAmount || 0;
+                updateData.tip_recipient = tipRecipient || null;
             }
             const { error } = await supabase.from('bookings').update(updateData).eq('id', id);
             if (error) throw error;
@@ -339,25 +354,30 @@ const AdminDashboard: React.FC = () => {
                 />
 
                 {/* Content Area */}
-                {(activeTab === 'dashboard' || activeTab === 'bookings') && (
-                    <BookingsTab
-                        bookings={bookings}
-                        therapists={therapists}
-                        feedbacks={feedbacks}
-                        stats={stats}
-                        revenueStats={revenueStats}
-                        searchTerm={searchTerm}
-                        onUpdateStatus={updateStatus}
-                        onEdit={openEditModal}
-                        onDelete={deleteBooking}
-                        onViewReview={setViewingReview}
-                    />
-                )}
-                {activeTab === 'website-analytics' && <AnalyticsDashboard />}
-                {activeTab === 'revenue' && <RevenueDashboard bookings={bookings} />}
-                {activeTab === 'therapists' && <TherapistManagement />}
-                {activeTab === 'clients' && <ClientIntelligence />}
-                {activeTab === 'errors' && <ErrorLogs />}
+                <div ref={contentRef}>
+                    {(activeTab === 'dashboard' || activeTab === 'bookings') && (
+                        <>
+                            {activeTab === 'dashboard' && <LiveTimeline bookings={bookings} therapists={therapists} />}
+                            <BookingsTab
+                                bookings={bookings}
+                                therapists={therapists}
+                                feedbacks={feedbacks}
+                                stats={stats}
+                                revenueStats={revenueStats}
+                                searchTerm={searchTerm}
+                                onUpdateStatus={updateStatus}
+                                onEdit={openEditModal}
+                                onDelete={deleteBooking}
+                                onViewReview={setViewingReview}
+                            />
+                        </>
+                    )}
+                    {activeTab === 'website-analytics' && <AnalyticsDashboard />}
+                    {activeTab === 'revenue' && <RevenueDashboard bookings={bookings} />}
+                    {activeTab === 'therapists' && <TherapistManagement />}
+                    {activeTab === 'clients' && <ClientIntelligence />}
+                    {activeTab === 'errors' && <ErrorLogs />}
+                </div>
 
                 {/* Modals */}
                 <ManualBookingModal
@@ -386,8 +406,11 @@ const AdminDashboard: React.FC = () => {
                 <CompleteBookingModal
                     isOpen={!!completingBooking}
                     onClose={() => setCompletingBooking(null)}
-                    onConfirm={(time) => updateStatus(completingBooking!.id, 'completed', undefined, time)}
+                    onConfirm={(time, tipAmount, tipRecipient) => updateStatus(completingBooking!.id, 'completed', undefined, time, tipAmount, tipRecipient)}
                     bookingDate={completingBooking?.booking_date || ''}
+                    bookingTime={completingBooking?.booking_time}
+                    duration={completingBooking?.services?.duration}
+                    servicePrice={completingBooking?.services?.price}
                 />
             </main>
         </div>

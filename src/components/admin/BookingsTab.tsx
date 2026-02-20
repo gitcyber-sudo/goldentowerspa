@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import gsap from 'gsap';
 import {
     ClipboardList, Clock3, CheckCircle2, Check, XCircle, DollarSign,
     Calendar, Clock, User, Edit3, RefreshCcw, Trash2, Star, MoreVertical, Users
@@ -6,6 +7,7 @@ import {
 import { formatTimeTo12h } from '../../lib/utils';
 import type { Booking, Therapist } from '../../types';
 import AssignTherapistModal from './AssignTherapistModal';
+import { exportBookingsToExcel } from '../../lib/excelExport';
 
 interface BookingsTabProps {
     bookings: Booking[];
@@ -68,6 +70,17 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
         }
     };
 
+    // Animate empty state
+    useEffect(() => {
+        gsap.to('.animate-float-bookings', {
+            y: -10,
+            duration: 2,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1
+        });
+    }, []);
+
     return (
         <div className="p-4 md:p-6 lg:p-8" onClick={() => setActionMenuOpen(null)}>
             {/* Quick Stats Cards */}
@@ -96,7 +109,7 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
 
                 <div className="flex items-center gap-3 mb-8 relative z-10">
                     <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center border border-gold/30">
-                        <DollarSign className="text-gold" size={20} />
+                        <span className="text-gold font-bold text-lg">₱</span>
                     </div>
                     <h3 className="font-serif text-xl text-white tracking-wide">Revenue Highlight</h3>
                 </div>
@@ -120,17 +133,27 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
                 </div>
             </div>
 
-            {/* Filter Pills */}
-            <div className="flex flex-wrap gap-2 mb-4 md:mb-6">
-                {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(f => (
-                    <button
-                        key={f}
-                        onClick={() => setFilter(f)}
-                        className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all ${filter === f ? 'bg-gold text-white' : 'bg-white border border-gold/20 text-charcoal/60 hover:border-gold'}`}
-                    >
-                        {f}
-                    </button>
-                ))}
+            {/* Filter Pills and Export Action */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4 md:mb-6">
+                <div className="flex flex-wrap gap-2">
+                    {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(f => (
+                        <button
+                            key={f}
+                            onClick={() => setFilter(f)}
+                            className={`px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all ${filter === f ? 'bg-gold text-white' : 'bg-white border border-gold/20 text-charcoal/60 hover:border-gold'}`}
+                        >
+                            {f}
+                        </button>
+                    ))}
+                </div>
+
+                <button
+                    onClick={() => exportBookingsToExcel(filteredBookings, filter === 'all' ? 'All-Bookings' : `${filter}-Bookings`)}
+                    className="flex items-center gap-2 bg-charcoal text-white px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-gold transition-colors"
+                >
+                    <ClipboardList size={16} />
+                    Export to Excel
+                </button>
             </div>
 
             {/* Bookings List - Mobile Card View / Desktop Table View */}
@@ -156,7 +179,35 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
                                     </td>
                                     <td className="px-6 py-4">
                                         <p className="text-sm">{b.services?.title}</p>
-                                        <p className="text-xs text-gold italic">{b.therapists?.name || 'Any Specialist'}</p>
+                                        {(b.status === 'pending' || b.status === 'confirmed') ? (
+                                            <div onClick={(e) => e.stopPropagation()} className="mt-2">
+                                                <div className="relative inline-block w-full max-w-[180px]">
+                                                    <select
+                                                        value={b.therapist_id || ''}
+                                                        onChange={(e) => {
+                                                            const newTherapistId = e.target.value;
+                                                            if (newTherapistId !== (b.therapist_id || '')) {
+                                                                onUpdateStatus(b.id, b.status, newTherapistId || undefined);
+                                                            }
+                                                        }}
+                                                        className="appearance-none w-full bg-charcoal/5 border border-gold/30 rounded-lg px-3 py-1.5 text-xs text-charcoal font-semibold focus:outline-none focus:border-gold cursor-pointer hover:bg-gold/5 transition-colors"
+                                                    >
+                                                        <option value="">Assign Specialist...</option>
+                                                        {therapists.filter(t => t.active).map(t => (
+                                                            <option key={t.id} value={t.id}>{t.name}</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gold">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="mt-2 flex items-center gap-1.5 text-xs text-charcoal/60 bg-charcoal/5 w-fit px-2 py-1 rounded-md">
+                                                <User size={12} className="text-gold" />
+                                                <span>{b.therapists?.name || 'Unassigned'}</span>
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         <p className="text-sm">{b.booking_date}</p>
@@ -284,9 +335,34 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
                                 <span className="flex items-center gap-1"><Calendar size={12} /> {b.booking_date}</span>
                                 <span className="flex items-center gap-1"><Clock size={12} /> {formatTimeTo12h(b.booking_time)}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-gold mb-3">
-                                <User size={12} />
-                                <span>{b.therapists?.name || 'Any Specialist'}</span>
+                            <div className="flex items-center gap-2 mb-4">
+                                <User size={14} className="text-gold flex-shrink-0" />
+                                {(b.status === 'pending' || b.status === 'confirmed') ? (
+                                    <div onClick={(e) => e.stopPropagation()} className="flex-1 relative">
+                                        <select
+                                            value={b.therapist_id || ''}
+                                            onChange={(e) => {
+                                                const newTherapistId = e.target.value;
+                                                if (newTherapistId !== (b.therapist_id || '')) {
+                                                    onUpdateStatus(b.id, b.status, newTherapistId || undefined);
+                                                }
+                                            }}
+                                            className="appearance-none w-full bg-charcoal/5 border border-gold/30 rounded-lg px-3 py-2 text-xs text-charcoal font-semibold focus:outline-none focus:border-gold cursor-pointer transition-colors"
+                                        >
+                                            <option value="">Assign Specialist...</option>
+                                            {therapists.filter(t => t.active).map(t => (
+                                                <option key={t.id} value={t.id}>{t.name}</option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gold">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex-1 bg-charcoal/5 px-3 py-1.5 rounded-md">
+                                        <span className="text-xs text-charcoal/80 font-semibold">{b.therapists?.name || 'Unassigned'}</span>
+                                    </div>
+                                )}
                             </div>
                             {/* Mobile Action Buttons */}
                             <div className="flex gap-2 flex-wrap">
@@ -350,7 +426,7 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
                     ))}
                     {filteredBookings.length === 0 && (
                         <div className="p-8 text-center text-charcoal/40">
-                            <ClipboardList size={40} className="mx-auto mb-3 opacity-40" />
+                            <ClipboardList size={40} className="mx-auto mb-3 opacity-40 animate-float-bookings" />
                             <p>No bookings found</p>
                         </div>
                     )}

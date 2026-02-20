@@ -277,6 +277,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                         label="Date"
                                         value={formData.date}
                                         minDate={new Date().toISOString().split('T')[0]}
+                                        disabledDates={
+                                            formData.therapist_id
+                                                ? therapists.find(t => t.id === formData.therapist_id)?.unavailable_blockouts as string[] | undefined
+                                                : undefined
+                                        }
                                         onChange={(date) => {
                                             setFormData({ ...formData, date });
                                             if (validationErrors.date) setValidationErrors(prev => ({ ...prev, date: '' }));

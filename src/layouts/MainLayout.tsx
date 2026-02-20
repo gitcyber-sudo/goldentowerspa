@@ -9,12 +9,10 @@ import HomeService from '../components/HomeService';
 import Footer from '../components/Footer';
 import BookingModal from '../components/BookingModal';
 import AuthModal from '../components/AuthModal';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import { ChevronUp } from 'lucide-react';
+// Unused imports removed
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import Logo from '../components/Logo';
 import { useSEO } from '../hooks/useSEO';
-import { useAuth } from '../context/AuthContext';
 import { useLocation } from 'react-router-dom';
 
 interface MainLayoutProps {
@@ -43,7 +41,6 @@ const MainLayout: React.FC<MainLayoutProps> = React.memo(({
     description: 'The premier destination for traditional Hilot massage and luxury wellness treatments in Quezon City. Book your path to tranquility today.'
   });
 
-  const { user } = useAuth();
   const location = useLocation();
 
   useEffect(() => {

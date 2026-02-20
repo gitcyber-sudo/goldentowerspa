@@ -8,7 +8,7 @@ export interface SelectionOption {
     description?: string;
     imageUrl?: string;
     price?: number | string;
-    duration?: string;
+    duration?: string | number;
 }
 
 interface SelectionGridProps {

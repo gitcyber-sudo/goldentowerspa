@@ -28,7 +28,7 @@ class ErrorBoundary extends Component<Props, State> {
         await logError({
             message: error.message,
             stack: error.stack,
-            component_stack: errorInfo.componentStack,
+            component_stack: errorInfo.componentStack || undefined,
         });
     }
 

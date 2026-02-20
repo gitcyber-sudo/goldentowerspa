@@ -37,3 +37,17 @@ export const getBusinessDate = (date: Date): string => {
     // Return in YYYY-MM-DD format (can use en-CA for simple ISO date)
     return d.toLocaleDateString('en-CA');
 };
+
+/**
+ * Formats a number as Philippine Peso (₱).
+ * @param amount - The numeric value to format
+ * @returns Formatted string, e.g., "₱1,250.00"
+ */
+export const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(amount);
+};

@@ -50,7 +50,7 @@ interface AnalyticsData {
     events: AnalyticsEvent[];
 }
 
-type TimeRange = '24h' | '7d' | '30d' | 'all';
+type TimeRange = 'today' | '24h' | '7d' | '30d' | 'all';
 
 const AnalyticsDashboard: React.FC = () => {
     const [data, setData] = useState<AnalyticsData>({ pageViews: [], visitors: [], events: [] });

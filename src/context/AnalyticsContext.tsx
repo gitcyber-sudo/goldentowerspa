@@ -233,8 +233,6 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 .maybeSingle();
 
             if (existingVisitor) {
-                // Determine if we need to update the user_id (if it was previously null but now we have a user)
-                const shouldUpdateUserId = !existingVisitor.user_id && user?.id;
 
                 await supabase
                     .from('visitors')

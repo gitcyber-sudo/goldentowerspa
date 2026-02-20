@@ -6,9 +6,11 @@ interface CustomDatePickerProps {
     onChange: (date: string) => void;
     minDate?: string;
     label?: string;
+    disabledDates?: string[]; // Array of YYYY-MM-DD strings
+    direction?: 'up' | 'down';
 }
 
-const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onChange, minDate, label }) => {
+const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onChange, minDate, label, disabledDates, direction = 'up' }) => {
     const [viewDate, setViewDate] = useState(new Date(value || new Date()));
     const [isOpen, setIsOpen] = useState(false);
 
@@ -30,7 +32,10 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onChange, mi
 
     const handleSelectDate = (day: number) => {
         const selected = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        const dateStr = selected.toISOString().split('T')[0];
+        const year = selected.getFullYear();
+        const month = String(selected.getMonth() + 1).padStart(2, '0');
+        const currentDay = String(selected.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${currentDay}`;
         onChange(dateStr);
         setIsOpen(false);
     };
@@ -64,11 +69,28 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onChange, mi
     };
 
     const isDisabled = (day: number) => {
-        if (!minDate) return false;
+        if (!minDate && (!disabledDates || disabledDates.length === 0)) return false;
         const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        const m = new Date(minDate);
-        m.setHours(0, 0, 0, 0);
-        return d < m;
+
+        // 1. Check minDate
+        if (minDate) {
+            const m = new Date(minDate);
+            m.setHours(0, 0, 0, 0);
+            if (d < m) return true;
+        }
+
+        // 2. Check explicitly disabled dates
+        if (disabledDates && disabledDates.length > 0) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const currentDay = String(d.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${currentDay}`;
+
+            // disabledDates items might be full ISO strings or just dates
+            return disabledDates.some(blocked => blocked.startsWith(dateStr));
+        }
+
+        return false;
     };
 
     const isToday = (day: number) => {
@@ -100,7 +122,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onChange, mi
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-[120]" onClick={() => setIsOpen(false)} />
-                    <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gold/20 rounded-2xl shadow-2xl p-4 z-[130] animate-in fade-in slide-in-from-bottom-2 duration-200">
+                    <div className={`absolute ${direction === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 right-0 bg-white border border-gold/20 rounded-2xl shadow-2xl p-4 z-[130] animate-in fade-in ${direction === 'up' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200`}>
                         {/* Header */}
                         <div className="flex items-center justify-between mb-4">
                             <button
