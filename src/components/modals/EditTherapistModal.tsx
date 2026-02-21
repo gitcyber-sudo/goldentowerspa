@@ -115,13 +115,17 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
 
                     const generatedEmail = `${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '')}_${therapist.id.substring(0, 4)}@goldentower.internal`;
 
+                    const session = await supabase.auth.getSession();
                     const { data, error: createError } = await supabase.functions.invoke('create-therapist', {
                         body: {
                             ...formData,
                             email: generatedEmail,
-                            password: newPassword,
+                            password: `${newPassword}-GTS`,
                             image_url: imageUrl,
                             existing_therapist_id: therapist.id
+                        },
+                        headers: {
+                            Authorization: `Bearer ${session.data.session?.access_token}`
                         }
                     });
 
@@ -136,10 +140,14 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                         return;
                     }
 
+                    const session = await supabase.auth.getSession();
                     const { data, error: passError } = await supabase.functions.invoke('update-therapist-password', {
                         body: {
                             therapist_id: therapist.id,
-                            new_password: newPassword
+                            new_password: `${newPassword}-GTS`
+                        },
+                        headers: {
+                            Authorization: `Bearer ${session.data.session?.access_token}`
                         }
                     });
 

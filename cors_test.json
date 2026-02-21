@@ -1,0 +1,25 @@
+{
+  "status": 200,
+  "headers": {
+    "access-control-allow-headers": "authorization, x-client-info, apikey, content-type",
+    "access-control-allow-origin": "*",
+    "alt-svc": "h3=\":443\"; ma=86400",
+    "cf-cache-status": "DYNAMIC",
+    "cf-ray": "9d16fa78cd65fee9-MNL",
+    "connection": "keep-alive",
+    "content-encoding": "gzip",
+    "content-type": "text/plain;charset=UTF-8",
+    "date": "Sat, 21 Feb 2026 14:36:52 GMT",
+    "sb-gateway-version": "1",
+    "sb-project-ref": "ivxmfztllyzwljaizhrk",
+    "sb-request-id": "019c80a1-c788-7991-9194-b99c6a8b0e02",
+    "server": "cloudflare",
+    "set-cookie": "__cf_bm=ChHDcGb7DeL7oPqI.5m8_VF.VW_m2j7SzvhRf6YuV.I-1771684612-1.0.1.1-O.pVt8Hcdbmu4xrKgVGpL0xH17XcWz1XHluQ_3mxY5rUEpT71B9Qsofq__DCz_wsaFzXzdbZrGOGJDG9Te8b.keP5CHibodeUwXUg1t7wHo; path=/; expires=Sat, 21-Feb-26 15:06:52 GMT; domain=.supabase.co; HttpOnly; Secure; SameSite=None",
+    "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+    "transfer-encoding": "chunked",
+    "vary": "Accept-Encoding",
+    "x-deno-execution-id": "eaac9c2d-d7b4-4a2b-9974-8c45016a6c9a",
+    "x-sb-edge-region": "ap-northeast-2",
+    "x-served-by": "supabase-edge-runtime"
+  }
+}

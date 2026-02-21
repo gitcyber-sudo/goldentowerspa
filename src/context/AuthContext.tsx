@@ -160,9 +160,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 .eq('id', userId)
                 .single();
 
-            // Race the database query against a 5s timeout
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error("Profile fetch timeout")), 5000)
+            // Race the database query against a 8s timeout
+            const timeoutPromise = new Promise((resolve) =>
+                setTimeout(() => resolve({ data: null, error: { message: "Profile fetch timeout", code: "TIMEOUT" } }), 8000)
             );
 
             const result = await Promise.race([profilePromise, timeoutPromise]) as { data: Profile | null; error: { message: string; code?: string } | null };

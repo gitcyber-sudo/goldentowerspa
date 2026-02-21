@@ -9,7 +9,7 @@ import HomeService from '../components/HomeService';
 import Footer from '../components/Footer';
 import BookingModal from '../components/BookingModal';
 import AuthModal from '../components/AuthModal';
-// Unused imports removed
+import AvailabilityCTA from '../components/AvailabilityCTA';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import Logo from '../components/Logo';
 import { useSEO } from '../hooks/useSEO';
@@ -92,6 +92,10 @@ const MainLayout: React.FC<MainLayoutProps> = React.memo(({
 
         <div className="section-reveal will-change-transform">
           <HomeService onBookClick={(id) => handleBookingAttempt(id)} />
+        </div>
+
+        <div className="section-reveal will-change-transform">
+          <AvailabilityCTA />
         </div>
 
         <Therapists onBookClick={() => handleBookingAttempt()} />

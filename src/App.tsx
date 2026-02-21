@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
 import MainLayout from './layouts/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
+import ScrollToTop from './components/ScrollToTop';
 
 // Lazy-loaded routes — each becomes a separate chunk
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
@@ -17,6 +18,7 @@ const AdminLogin = React.lazy(() => import('./components/AdminLogin'));
 const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = React.lazy(() => import('./components/TermsOfService'));
 const About = React.lazy(() => import('./pages/About'));
+const Availability = React.lazy(() => import('./pages/Availability'));
 
 const App: React.FC = () => {
   const { loading: authLoading } = useAuth();
@@ -44,6 +46,7 @@ const App: React.FC = () => {
     <AnalyticsProvider>
       <ErrorBoundary>
         <Suspense fallback={<LoadingScreen message="Loading" />}>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={
               <MainLayout
@@ -84,6 +87,7 @@ const App: React.FC = () => {
             <Route path="/therapist-login" element={<TherapistLogin />} />
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/about" element={<About />} />
+            <Route path="/availability" element={<Availability />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
           </Routes>

@@ -132,7 +132,7 @@ const VisualJourney: React.FC = () => {
 
       <div ref={horizontalRef} className="flex h-screen w-max items-center relative">
         {/* Intro Section */}
-        <div className="w-[50vw] flex flex-col justify-center px-12 md:px-24">
+        <div className="w-[100vw] md:w-[50vw] flex flex-col justify-center px-12 md:px-24">
           <span className="text-gold font-bold uppercase tracking-[0.5em] text-xs mb-4">The Suite</span>
           <h2 className="text-white font-serif text-6xl md:text-8xl leading-tight">
             A Cinematic <br />
@@ -184,7 +184,7 @@ const VisualJourney: React.FC = () => {
         ))}
 
         {/* Outro / Transition */}
-        <div className="w-[50vw] flex flex-col items-center justify-center px-12">
+        <div className="w-[100vw] md:w-[50vw] flex flex-col items-center justify-center px-12">
           <div className="w-24 h-24 rounded-full border border-gold/30 flex items-center justify-center animate-spin-slow">
             <div className="w-2 h-2 bg-gold rounded-full"></div>
           </div>

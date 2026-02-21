@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { User, LogOut, Calendar } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
 
@@ -63,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ onBookClick, onLoginClick }) => {
     >
       <div className="container mx-auto px-4 md:px-12 flex justify-between items-center">
         {/* Brand */}
-        <a href="/" className="group flex items-center gap-2 md:gap-3" aria-label="Golden Tower Spa - Home">
+        <a href="/" className="group flex items-center gap-2 md:gap-3 shrink-0" aria-label="Golden Tower Spa - Home">
           <Logo
             className={`transition-all duration-300 ease-out ${isScrolled
               ? 'h-8 md:h-10 w-auto'
@@ -71,12 +70,12 @@ const Header: React.FC<HeaderProps> = ({ onBookClick, onLoginClick }) => {
               }`}
             color="#997B3D"
           />
-          <div className="flex flex-col justify-center">
-            <span className={`font-serif font-bold tracking-tight leading-none transition-colors duration-300 text-gold ${isScrolled ? 'text-base md:text-xl' : 'text-lg md:text-3xl'
+          <div className="flex flex-col justify-center -mt-0.5">
+            <span className={`font-serif font-bold tracking-tight leading-tight transition-colors duration-300 text-gold ${isScrolled ? 'text-sm md:text-xl' : 'text-base md:text-3xl'
               }`}>
               Golden Tower
             </span>
-            <span className={`text-gold uppercase tracking-[0.2em] md:tracking-[0.25em] leading-none mt-0.5 md:mt-1 transition-all duration-300 ${isScrolled ? 'text-[0.5rem] md:text-[0.6rem]' : 'text-[0.55rem] md:text-xs'
+            <span className={`text-gold uppercase tracking-[0.15em] md:tracking-[0.25em] leading-none -mt-0.5 md:mt-1 transition-all duration-300 ${isScrolled ? 'text-[0.45rem] md:text-[0.6rem]' : 'text-[0.5rem] md:text-xs'
               }`}>
               Spa & Wellness
             </span>
@@ -85,6 +84,11 @@ const Header: React.FC<HeaderProps> = ({ onBookClick, onLoginClick }) => {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation">
+
+          <Link to="/availability" className="text-gold hover:text-gold-dark text-xs font-bold uppercase tracking-widest transition-all duration-300">
+            Therapist Schedules
+          </Link>
+
           {!user ? (
             <div className="flex items-center gap-4">
               <button
@@ -96,10 +100,9 @@ const Header: React.FC<HeaderProps> = ({ onBookClick, onLoginClick }) => {
 
               <button
                 onClick={() => navigate('/dashboard')}
-                className="text-gold hover:text-gold-dark text-xs font-bold uppercase tracking-widest transition-all duration-300 flex items-center gap-1.5"
+                className="text-gold hover:text-gold-dark text-xs font-bold uppercase tracking-widest transition-all duration-300"
                 aria-label="View your current bookings"
               >
-                <Calendar size={14} aria-hidden="true" />
                 <span>My Bookings</span>
               </button>
             </div>
@@ -159,39 +162,40 @@ const Header: React.FC<HeaderProps> = ({ onBookClick, onLoginClick }) => {
         </nav>
 
         {/* Mobile Action Button */}
-        <div className="md:hidden flex items-center gap-2">
+        <div className="md:hidden flex items-center">
           {!user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center h-full">
+              <Link to="/availability" className="text-gold hover:text-gold-dark text-[9px] font-bold uppercase tracking-wider px-1 py-2 flex items-center transition-colors">
+                Schedules
+              </Link>
               <button
                 onClick={onLoginClick}
-                className="text-gold text-[10px] font-bold uppercase tracking-widest px-3 py-2"
+                className="text-gold hover:text-gold-dark text-[9px] font-bold uppercase tracking-wider px-1 py-2 flex items-center transition-colors"
               >
                 Login
               </button>
               <button
                 onClick={() => navigate('/dashboard')}
-                className="bg-gold/10 text-gold px-4 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5"
-                aria-label="View my bookings"
+                className="bg-gold text-white px-2.5 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider ml-1.5 shadow-md shadow-gold/20 active:scale-95 transition-transform"
+                aria-label="View your current bookings"
               >
-                <Calendar size={12} aria-hidden="true" />
                 <span>Bookings</span>
               </button>
-
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => navigate(getDashboardLink())}
-                className="bg-charcoal text-white px-4 py-2.5 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-md border border-gold/10"
+                className="bg-charcoal text-white px-3.5 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider shadow-md border border-gold/10 active:scale-95 transition-transform"
               >
                 Dashboard
               </button>
               <button
                 onClick={handleSignOut}
-                className="bg-rose-50 text-rose-600 p-2.5 rounded-full border border-rose-100 shadow-sm"
+                className="bg-rose-50 hover:bg-rose-100 text-rose-600 p-1.5 rounded-full border border-rose-100 shadow-sm active:scale-95 transition-all"
                 aria-label="Sign out of your account"
               >
-                <LogOut size={16} aria-hidden="true" />
+                <LogOut size={14} aria-hidden="true" />
               </button>
             </div>
           )}

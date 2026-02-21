@@ -21,12 +21,36 @@ const AssignTherapistModal: React.FC<AssignTherapistModalProps> = ({ isOpen, onC
                 <p className="text-sm text-charcoal/60 mt-1">Manage and monitor client treatments</p>
                 <p className="text-sm text-charcoal/60 mb-6">Select a therapist for <b>{booking.guest_name || booking.user_email}</b></p>
                 <div className="space-y-3 mb-8 max-h-[40vh] overflow-y-auto">
-                    {therapists.map(t => (
-                        <button key={t.id} onClick={() => onAssign(booking.id, t.id)} className="w-full p-4 border border-gold/10 rounded-xl hover:border-gold hover:bg-gold/5 flex items-center gap-4 transition-all">
-                            <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center font-serif text-gold">{t.name.charAt(0)}</div>
-                            <div className="text-left"><p className="font-bold text-charcoal">{t.name}</p></div>
-                        </button>
-                    ))}
+                    {therapists.map(t => {
+                        const isUnavailable = booking.booking_date && t.unavailable_blockouts &&
+                            Array.isArray(t.unavailable_blockouts) &&
+                            t.unavailable_blockouts.some(d => {
+                                const blockedDate = new Date(d).toDateString();
+                                const selectedDate = new Date(booking.booking_date).toDateString();
+                                return blockedDate === selectedDate;
+                            });
+
+                        return (
+                            <button
+                                key={t.id}
+                                onClick={() => !isUnavailable && onAssign(booking.id, t.id)}
+                                disabled={!!isUnavailable}
+                                className={`w-full p-4 border rounded-xl flex items-center gap-4 transition-all ${isUnavailable
+                                        ? 'opacity-50 grayscale border-gray-200 bg-gray-50 cursor-not-allowed'
+                                        : 'border-gold/10 hover:border-gold hover:bg-gold/5'
+                                    }`}
+                            >
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-serif ${isUnavailable ? 'bg-gray-200 text-gray-400' : 'bg-gold/10 text-gold'}`}>
+                                    {t.name.charAt(0)}
+                                </div>
+                                <div className="text-left">
+                                    <p className={`font-bold ${isUnavailable ? 'text-gray-400' : 'text-charcoal'}`}>
+                                        {t.name} {isUnavailable && <span className="text-[10px] font-normal block text-rose-500">(Unavailable on this date)</span>}
+                                    </p>
+                                </div>
+                            </button>
+                        );
+                    })}
                 </div>
                 <button onClick={onClose} className="text-charcoal/40 text-xs font-bold uppercase tracking-widest">Cancel</button>
             </div>

@@ -147,12 +147,26 @@ const AdminDashboard: React.FC = () => {
     }, [activeTab, fetchBookings, fetchTherapists]);
 
     const updateStatus = useCallback(async (id: string, newStatus: string, therapistId?: string, completionTime?: string, tipAmount?: number, tipRecipient?: 'management' | 'therapist' | null) => {
-        if (newStatus === 'completed' && !completionTime) {
-            const booking = bookings.find(b => b.id === id);
-            if (booking) {
-                setCompletingBooking(booking);
-                return;
+        const booking = bookings.find(b => b.id === id);
+        if (!booking) return;
+
+        // Availability Check if therapist is being assigned/changed
+        if (therapistId) {
+            const therapist = therapists.find(t => t.id === therapistId);
+            if (therapist?.unavailable_blockouts && Array.isArray(therapist.unavailable_blockouts)) {
+                const isBlocked = therapist.unavailable_blockouts.some(d =>
+                    new Date(d).toDateString() === new Date(booking.booking_date).toDateString()
+                );
+                if (isBlocked) {
+                    alert(`CONFLICT: ${therapist.name} is unavailable on ${booking.booking_date}.`);
+                    return;
+                }
             }
+        }
+
+        if (newStatus === 'completed' && !completionTime) {
+            setCompletingBooking(booking);
+            return;
         }
 
         try {
@@ -182,6 +196,19 @@ const AdminDashboard: React.FC = () => {
             alert("SPECIALIST REQUIRED: Please assign an available therapist.");
             return;
         }
+
+        // Final Availability Check
+        const selectedTherapist = therapists.find(t => t.id === manualBookingData.therapist_id);
+        if (selectedTherapist?.unavailable_blockouts && Array.isArray(selectedTherapist.unavailable_blockouts)) {
+            const isBlocked = selectedTherapist.unavailable_blockouts.some(d =>
+                new Date(d).toDateString() === new Date(manualBookingData.date).toDateString()
+            );
+            if (isBlocked) {
+                alert(`CONFLICT: ${selectedTherapist.name} is marked as unavailable on this date.`);
+                return;
+            }
+        }
+
         setLoading(true);
         try {
             let linkedUserId = null;
@@ -242,6 +269,20 @@ const AdminDashboard: React.FC = () => {
     const handleEditBooking = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         if (!editingBooking) return;
+
+        // Final Availability Check
+        if (editFormData.therapist_id) {
+            const selectedTherapist = therapists.find(t => t.id === editFormData.therapist_id);
+            if (selectedTherapist?.unavailable_blockouts && Array.isArray(selectedTherapist.unavailable_blockouts)) {
+                const isBlocked = selectedTherapist.unavailable_blockouts.some(d =>
+                    new Date(d).toDateString() === new Date(editFormData.booking_date).toDateString()
+                );
+                if (isBlocked) {
+                    alert(`CONFLICT: ${selectedTherapist.name} is marked as unavailable on this date.`);
+                    return;
+                }
+            }
+        }
 
         setLoading(true);
         try {

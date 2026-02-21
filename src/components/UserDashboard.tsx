@@ -70,13 +70,13 @@ const UserDashboard: React.FC = () => {
     // ─── Animations ───
     useLayoutEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.from(bannerRef.current, { y: 20, opacity: 0, duration: 0.8, ease: "power2.out" });
+            gsap.from(bannerRef.current, { y: 15, opacity: 0, duration: 0.8, ease: "power2.out" });
             if (statsRef.current) {
                 gsap.from((statsRef.current as HTMLElement).children, {
-                    y: 30, opacity: 0, stagger: 0.1, duration: 0.6, delay: 0.3, ease: "back.out(1.2)"
+                    y: 15, opacity: 0, stagger: 0.08, duration: 0.5, delay: 0.2, ease: "power2.out"
                 });
             }
-            gsap.from(".fade-up-item", { y: 20, opacity: 0, duration: 0.6, delay: 0.6 });
+            gsap.from(".fade-up-item", { y: 15, opacity: 0, duration: 0.5, delay: 0.4 });
         });
         return () => ctx.revert();
     }, []);
@@ -316,27 +316,27 @@ const UserDashboard: React.FC = () => {
 
     // ─── Guest CTA ───
     const GuestRegistrationBanner = () => (
-        <div className="bg-gradient-to-r from-charcoal to-charcoal-light rounded-2xl p-6 md:p-8 mb-8 relative overflow-hidden shadow-2xl group border border-gold/30">
+        <div className="bg-gradient-to-r from-charcoal to-charcoal-light rounded-2xl p-6 md:p-8 mb-6 relative overflow-hidden shadow-2xl group border border-gold/30">
             <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 group-hover:bg-gold/20 transition-all duration-1000" aria-hidden="true" />
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 relative z-10">
-                <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="bg-gold/20 p-2.5 rounded-xl">
-                            <Logo className="w-5 h-5" color="#C5A059" />
+                <div className="flex-1 text-center md:text-left">
+                    <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
+                        <div className="bg-gold/20 p-2 rounded-xl">
+                            <Logo className="w-4 h-4" color="#C5A059" />
                         </div>
-                        <span className="text-gold text-xs font-black uppercase tracking-[0.3em]">Unlock Your Full Journey</span>
+                        <span className="text-gold text-[10px] font-black uppercase tracking-[0.3em]">Unlock Your Full Journey</span>
                     </div>
                     <h3 className="font-serif text-2xl md:text-3xl text-white mb-2 leading-tight">Elevate Your Experience</h3>
                     <p className="text-white/50 text-sm max-w-xl leading-relaxed">
-                        Create an account to preserve your booking history, earn exclusive rewards, and <strong className="text-white/70">unlock the freedom to orchestrate your entire wellness calendar with multiple advance bookings</strong>.
+                        Create an account to preserve your booking history, earn exclusive rewards, and <strong className="text-white/70">unlock the freedom to orchestrate your entire wellness calendar</strong>.
                     </p>
                 </div>
                 <button
                     onClick={() => { setAuthMode('signup'); setIsAuthOpen(true); }}
-                    className="bg-gold hover:bg-gold-dark text-white px-8 md:px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all shadow-[0_10px_30px_rgba(197,160,89,0.3)] hover:shadow-gold/40 transform hover:-translate-y-1 flex items-center gap-2 whitespace-nowrap"
+                    className="bg-gold hover:bg-gold-dark text-white px-8 md:px-10 py-3.5 rounded-full font-bold uppercase tracking-widest text-[10px] transition-all shadow-[0_10px_30px_rgba(197,160,89,0.3)] hover:shadow-gold/40 transform hover:-translate-y-1 flex items-center gap-2 whitespace-nowrap"
                     aria-label="Create a free account"
                 >
-                    <User size={18} /> Create Free Account
+                    <User size={16} /> Create Free Account
                 </button>
             </div>
         </div>
@@ -441,41 +441,43 @@ const UserDashboard: React.FC = () => {
                 {!user && <GuestRegistrationBanner />}
 
                 {/* ─── Stats Grid ─── */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8" ref={statsRef}>
-                    {[
-                        { icon: <Clock3 className="text-amber-600" size={20} />, bg: 'bg-amber-50', value: currentBookings.length, label: 'Active' },
-                        { icon: <CheckCircle2 className="text-emerald-600" size={20} />, bg: 'bg-emerald-50', value: completedBookings.length, label: 'Completed' },
-                        { icon: <Logo className="h-5 w-5" color="#997B3D" />, bg: 'bg-gold/10', value: bookings.length, label: 'Total' },
-                        { icon: <DollarSign className="text-white" size={20} />, bg: 'bg-gradient-to-br from-gold to-gold-dark', value: `₱${totalAmountSpent.toLocaleString()}`, label: 'Total Spent', isGold: true }
-                    ].map((stat, i) => (
-                        <div key={i} className={`p-4 md:p-5 rounded-xl border border-gold/10 hover:shadow-lg transition-all hover:-translate-y-0.5 group ${stat.isGold ? stat.bg + ' shadow-lg text-white' : 'bg-white'}`}>
-                            <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-colors ${stat.isGold ? 'bg-white/20 backdrop-blur-sm' : stat.bg + ' group-hover:scale-105'}`}>
-                                    {stat.icon}
-                                </div>
-                                <div>
-                                    <p className={`text-2xl md:text-3xl font-serif ${stat.isGold ? 'text-white' : 'text-charcoal'}`}>{stat.value}</p>
-                                    <p className={`text-[10px] uppercase tracking-widest ${stat.isGold ? 'text-white/70' : 'text-charcoal/50'}`}>{stat.label}</p>
+                {bookings.length > 0 && (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6" ref={statsRef}>
+                        {[
+                            { icon: <Clock3 className="text-amber-600" size={18} />, bg: 'bg-amber-50', value: currentBookings.length, label: 'Active', numeric: currentBookings.length },
+                            { icon: <CheckCircle2 className="text-emerald-600" size={18} />, bg: 'bg-emerald-50', value: completedBookings.length, label: 'Completed', numeric: completedBookings.length },
+                            { icon: <Logo className="h-4 w-4" color="#997B3D" />, bg: 'bg-gold/10', value: bookings.length, label: 'Total', numeric: bookings.length },
+                            { icon: <DollarSign className="text-white" size={18} />, bg: 'bg-gradient-to-br from-gold to-gold-dark', value: `₱${totalAmountSpent.toLocaleString()}`, label: 'Total Spent', isGold: true, numeric: totalAmountSpent }
+                        ].filter(s => s.numeric > 0).map((stat, i) => (
+                            <div key={i} className={`p-4 rounded-xl border border-gold/20 hover:shadow-lg transition-all hover:-translate-y-0.5 group opacity-100 ${stat.isGold ? stat.bg + ' shadow-lg text-white' : 'bg-white'}`}>
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-9 h-9 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-colors ${stat.isGold ? 'bg-white/20 backdrop-blur-sm' : stat.bg + ' group-hover:scale-105'}`}>
+                                        {stat.icon}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className={`text-xl md:text-2xl font-serif truncate ${stat.isGold ? 'text-white' : 'text-charcoal'}`}>{stat.value}</p>
+                                        <p className={`text-[8px] md:text-[9px] uppercase tracking-widest font-black ${stat.isGold ? 'text-white/70' : 'text-charcoal/40'}`}>{stat.label}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* ─── Quick Actions ─── */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-8 fade-up-item">
-                    <button onClick={() => { setSelectedServiceId(undefined); setIsBookingOpen(true); }} className="bg-white p-4 rounded-xl border border-gold/10 hover:border-gold/30 hover:shadow-md transition-all flex items-center gap-4 group" aria-label="Schedule a new appointment">
-                        <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center group-hover:bg-gold/20 transition-all"><Calendar className="text-gold" size={20} /></div>
-                        <div className="text-left"><p className="font-bold text-charcoal text-sm">Schedule Appointment</p><p className="text-xs text-charcoal/50">Book your next session</p></div>
-                        <TrendingUp size={16} className="text-gold/30 ml-auto group-hover:text-gold transition-all" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6 fade-up-item">
+                    <button onClick={() => { setSelectedServiceId(undefined); setIsBookingOpen(true); }} className="bg-white p-3.5 rounded-xl border border-gold/20 hover:border-gold/30 hover:shadow-md transition-all flex items-center gap-4 group" aria-label="Schedule a new appointment">
+                        <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center group-hover:bg-gold/20 transition-all"><Calendar className="text-gold" size={18} /></div>
+                        <div className="text-left"><p className="font-bold text-charcoal text-sm">Schedule Appointment</p><p className="text-[10px] text-charcoal/40">Book your next session</p></div>
+                        <TrendingUp size={14} className="text-gold/30 ml-auto group-hover:text-gold transition-all" />
                     </button>
-                    <a href="tel:09228262336" className="bg-white p-4 rounded-xl border border-gold/10 hover:border-gold/30 hover:shadow-md transition-all flex items-center gap-4 group" aria-label="Call Golden Tower Spa">
-                        <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-all"><Phone className="text-emerald-600" size={20} /></div>
-                        <div className="text-left"><p className="font-bold text-charcoal text-sm">Call Us</p><p className="text-xs text-charcoal/50">0922 826 2336</p></div>
+                    <a href="tel:09228262336" className="bg-white p-3.5 rounded-xl border border-gold/20 hover:border-gold/30 hover:shadow-md transition-all flex items-center gap-4 group" aria-label="Call Golden Tower Spa">
+                        <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-all"><Phone className="text-emerald-600" size={18} /></div>
+                        <div className="text-left"><p className="font-bold text-charcoal text-sm">Call Us</p><p className="text-[10px] text-charcoal/40">0922 826 2336</p></div>
                     </a>
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=Golden+Tower+Spa+Project+6+Quezon+City" target="_blank" rel="noopener noreferrer" className="bg-white p-4 rounded-xl border border-gold/10 hover:border-gold/30 hover:shadow-md transition-all flex items-center gap-4 group" aria-label="Get directions to Golden Tower Spa">
-                        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-all"><MapPin className="text-blue-600" size={20} /></div>
-                        <div className="text-left"><p className="font-bold text-charcoal text-sm">Find Us</p><p className="text-xs text-charcoal/50">Get directions</p></div>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=Golden+Tower+Spa+Project+6+Quezon+City" target="_blank" rel="noopener noreferrer" className="bg-white p-3.5 rounded-xl border border-gold/20 hover:border-gold/30 hover:shadow-md transition-all flex items-center gap-4 group" aria-label="Get directions to Golden Tower Spa">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-all"><MapPin className="text-blue-600" size={18} /></div>
+                        <div className="text-left"><p className="font-bold text-charcoal text-sm">Find Us</p><p className="text-[10px] text-charcoal/40">Get directions</p></div>
                     </a>
                 </div>
 

@@ -53,6 +53,7 @@ const Footer: React.FC = () => {
                 <li><button onClick={() => handleScroll('services')} className="hover:text-gold transition-colors text-left w-full">Services</button></li>
                 <li><button onClick={() => handleScroll('specialists')} className="hover:text-gold transition-colors text-left w-full">Our Team</button></li>
                 <li><button onClick={() => handleScroll('sanctuary')} className="hover:text-gold transition-colors text-left w-full">Locations</button></li>
+                <li><Link to="/availability" className="hover:text-gold transition-colors">Therapist Schedules</Link></li>
                 <li><Link to="/about" className="hover:text-gold transition-colors">About Us</Link></li>
               </ul>
             </div>

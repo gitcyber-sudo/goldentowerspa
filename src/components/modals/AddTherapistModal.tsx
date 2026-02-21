@@ -65,13 +65,17 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
             const generatedEmail = `${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@goldentower.internal`;
             const generatedPassword = Math.floor(1000 + Math.random() * 9000).toString();
 
+            const session = await supabase.auth.getSession();
             // 2. Call Edge Function to create user and therapist record
             const { data, error } = await supabase.functions.invoke('create-therapist', {
                 body: {
                     ...formData,
                     email: generatedEmail,
-                    password: generatedPassword,
+                    password: `${generatedPassword}-GTS`,
                     image_url: imageUrl
+                },
+                headers: {
+                    Authorization: `Bearer ${session.data.session?.access_token}`
                 }
             });
 

@@ -91,8 +91,21 @@ const ManualBookingModal: React.FC<ManualBookingModalProps> = React.memo(({
                                 value={data.therapist_id}
                                 onChange={e => setData({ ...data, therapist_id: e.target.value })}
                             >
-                                <option value="">-- Choose Specialist --</option>
-                                {activeTherapists.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                {activeTherapists.map(t => {
+                                    const isUnavailable = data.date && t.unavailable_blockouts &&
+                                        Array.isArray(t.unavailable_blockouts) &&
+                                        t.unavailable_blockouts.some(d => {
+                                            const blockedDate = new Date(d).toDateString();
+                                            const selectedDate = new Date(data.date).toDateString();
+                                            return blockedDate === selectedDate;
+                                        });
+
+                                    return (
+                                        <option key={t.id} value={t.id} disabled={!!isUnavailable}>
+                                            {t.name} {isUnavailable ? '(Unavailable)' : ''}
+                                        </option>
+                                    );
+                                })}
                             </select>
                         </div>
                         <CustomDatePicker

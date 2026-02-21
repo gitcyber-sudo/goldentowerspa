@@ -25,24 +25,22 @@ const TherapistLogin: React.FC = () => {
         setLoading(true);
 
         try {
-            // 1. Fetch the user's email from profiles table using their name (case-insensitive)
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('email')
-                .ilike('full_name', formData.name.trim())
-                .eq('role', 'therapist')
-                .maybeSingle();
+            // 1. Fetch the user's email securely via RPC (bypasses RLS)
+            const { data: email, error: profileError } = await supabase.rpc('get_therapist_email', {
+                therapist_name: formData.name.trim()
+            });
 
             if (profileError) throw profileError;
 
-            if (!profile) {
+            if (!email) {
                 throw new Error('Invalid credentials. Please try again.');
             }
 
             // 2. Sign in with the fetched email
+            // Note: We append '-GTS' to satisfy Supabase's 6-character minimum requirement for the 4-digit PINs
             const { error: signInError } = await supabase.auth.signInWithPassword({
-                email: profile.email,
-                password: formData.password
+                email: email as string,
+                password: `${formData.password}-GTS`
             });
 
             if (signInError) throw signInError;

@@ -193,9 +193,21 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
                                                         className="appearance-none w-full bg-charcoal/5 border border-gold/30 rounded-lg px-3 py-1.5 text-xs text-charcoal font-semibold focus:outline-none focus:border-gold cursor-pointer hover:bg-gold/5 transition-colors"
                                                     >
                                                         <option value="">Assign Specialist...</option>
-                                                        {therapists.filter(t => t.active).map(t => (
-                                                            <option key={t.id} value={t.id}>{t.name}</option>
-                                                        ))}
+                                                        {therapists.filter(t => t.active).map(t => {
+                                                            const isUnavailable = b.booking_date && t.unavailable_blockouts &&
+                                                                Array.isArray(t.unavailable_blockouts) &&
+                                                                t.unavailable_blockouts.some(d => {
+                                                                    const blockedDate = new Date(d).toDateString();
+                                                                    const selectedDate = new Date(b.booking_date).toDateString();
+                                                                    return blockedDate === selectedDate;
+                                                                });
+
+                                                            return (
+                                                                <option key={t.id} value={t.id} disabled={!!isUnavailable}>
+                                                                    {t.name} {isUnavailable ? '(Unavailable)' : ''}
+                                                                </option>
+                                                            );
+                                                        })}
                                                     </select>
                                                     <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gold">
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -350,9 +362,21 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
                                             className="appearance-none w-full bg-charcoal/5 border border-gold/30 rounded-lg px-3 py-2 text-xs text-charcoal font-semibold focus:outline-none focus:border-gold cursor-pointer transition-colors"
                                         >
                                             <option value="">Assign Specialist...</option>
-                                            {therapists.filter(t => t.active).map(t => (
-                                                <option key={t.id} value={t.id}>{t.name}</option>
-                                            ))}
+                                            {therapists.filter(t => t.active).map(t => {
+                                                const isUnavailable = b.booking_date && t.unavailable_blockouts &&
+                                                    Array.isArray(t.unavailable_blockouts) &&
+                                                    t.unavailable_blockouts.some(d => {
+                                                        const blockedDate = new Date(d).toDateString();
+                                                        const selectedDate = new Date(b.booking_date).toDateString();
+                                                        return blockedDate === selectedDate;
+                                                    });
+
+                                                return (
+                                                    <option key={t.id} value={t.id} disabled={!!isUnavailable}>
+                                                        {t.name} {isUnavailable ? '(Unavailable)' : ''}
+                                                    </option>
+                                                );
+                                            })}
                                         </select>
                                         <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gold">
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>

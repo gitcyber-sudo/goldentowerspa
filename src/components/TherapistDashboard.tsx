@@ -503,10 +503,36 @@ const TherapistDashboard: React.FC = () => {
                                     <div className="bg-[#F9F7F2] p-4 rounded-xl border border-gold/10 mx-auto md:mx-0">
                                         <style dangerouslySetInnerHTML={{
                                             __html: `
-    .rdp { --rdp - cell - size: 40px; --rdp - accent - color: #997B3D; --rdp - background - color: #f3f0e6; margin: 0; }
-                                            .rdp - day_selected, .rdp - day_selected: focus - visible, .rdp - day_selected:hover { background - color: #997B3D; color: white; border - radius: 8px; }
-                                            .rdp - button: hover: not([disabled]): not(.rdp - day_selected) { background - color: rgba(153, 123, 61, 0.1); border - radius: 8px; }
-                                            .rdp - day_today { font - weight: bold; color: #1A1A1A; border: 1px solid #997B3D; border - radius: 8px; }
+                                            .rdp { 
+                                                --rdp-accent-color: #E11D48;
+                                                --rdp-accent-color-dark: #BE123C;
+                                            }
+                                            
+                                            /* Selected dates in v9 */
+                                            .rdp-selected .rdp-day_button {
+                                                background-color: #E11D48 !important;
+                                                color: white !important;
+                                                border-radius: 8px !important;
+                                            }
+
+                                            .rdp-selected {
+                                                background-color: #E11D48 !important;
+                                                color: white !important;
+                                                border-radius: 8px !important;
+                                            }
+                                            
+                                            /* Today's marker (using Gold to distinguish from Red-blocked days) */
+                                            .rdp-today .rdp-day_button {
+                                                border: 2px solid #997B3D !important;
+                                                border-radius: 8px !important;
+                                                font-weight: bold !important;
+                                            }
+
+                                            /* Hover effect in v9 */
+                                            .rdp-day_button:hover:not([disabled]) {
+                                                background-color: rgba(225, 29, 72, 0.1) !important;
+                                                border-radius: 8px !important;
+                                            }
 `}} />
                                         <DayPicker
                                             mode="multiple"
