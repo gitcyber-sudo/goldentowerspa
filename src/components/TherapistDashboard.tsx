@@ -165,7 +165,7 @@ const TherapistDashboard: React.FC = () => {
                     event: 'UPDATE',
                     schema: 'public',
                     table: 'bookings',
-                    filter: `therapist_id = eq.${user?.id} `
+                    filter: `therapist_id=eq.${therapistInfo?.id}`
                 },
                 (payload) => {
                     // Only update if it's a status change (like confirmation or cancellation)
@@ -367,7 +367,7 @@ const TherapistDashboard: React.FC = () => {
                     <div className="flex justify-between items-center px-1">
                         <p className="text-[10px] text-charcoal/30 font-bold uppercase tracking-widest">Ref: {booking.id.substring(0, 8)}</p>
                         <div className="flex items-center gap-2">
-                            {booking.tip_amount > 0 && booking.tip_recipient === 'therapist' && (
+                            {booking.tip_amount && booking.tip_amount > 0 && booking.tip_recipient === 'therapist' && (
                                 <div className="flex items-center gap-1.5 bg-gold/5 text-gold px-3 py-1 rounded-full border border-gold/10">
                                     <Star size={10} className="fill-gold" />
                                     <span className="text-[10px] font-bold uppercase tracking-widest">Tip ₱{booking.tip_amount}</span>
