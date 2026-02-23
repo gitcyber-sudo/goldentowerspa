@@ -522,10 +522,10 @@ const TherapistDashboard: React.FC = () => {
                                 <div className="p-3 bg-white/50 rounded-2xl border border-gold/10">
                                     <Star className="text-gold fill-gold" size={24} />
                                 </div>
-                                <span className="bg-gold text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-widest">Bonus Pay</span>
+                                <span className="bg-gold text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-widest">Tips</span>
                             </div>
                             <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-2">₱{totalTips.toLocaleString()}</h2>
-                            <p className="text-charcoal/40 text-[11px] font-bold uppercase tracking-widest">Gratitude Received</p>
+                            <p className="text-charcoal/40 text-[11px] font-bold uppercase tracking-widest">Tips Received</p>
                         </div>
                     </div>
 
