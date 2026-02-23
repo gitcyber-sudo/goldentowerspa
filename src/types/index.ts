@@ -50,6 +50,8 @@ export interface Booking {
     visitor_id?: string;
     tip_amount?: number;
     tip_recipient?: 'management' | 'therapist' | null;
+    commission_amount?: number;
+    revenue_amount?: number;
     // Joined relations
     services?: { title: string; price: number; duration: number };
     therapists?: { name: string };

@@ -5,6 +5,60 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 
+// --- AUTOMATIC CACHE BUSTING ---
+declare const __APP_VERSION__: string;
+const currentVersion = __APP_VERSION__;
+const savedVersion = localStorage.getItem('app_version');
+
+const performUpdate = async () => {
+  // 1. Safety check: NEVER reload in development mode
+  if (currentVersion === 'dev' || !currentVersion) {
+    console.log('Update check skipped in development.');
+    localStorage.setItem('app_version', currentVersion || 'dev');
+    return;
+  }
+
+  // 2. Circuit breaker: Don't reload if we just did (within 10 seconds)
+  const lastReload = parseInt(sessionStorage.getItem('gt_last_reload') || '0');
+  if (Date.now() - lastReload < 10000) {
+    console.warn('Update triggered too recently. Aborting reload loop.');
+    localStorage.setItem('app_version', currentVersion);
+    return;
+  }
+
+  console.log('New version detected. Cleaning up and refreshing...');
+  sessionStorage.setItem('gt_last_reload', Date.now().toString());
+
+  try {
+    // Unregister SWs and Clear Caches
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const reg of registrations) await reg.unregister();
+    }
+    if ('caches' in window) {
+      const names = await caches.keys();
+      for (const name of names) await caches.delete(name);
+    }
+
+    localStorage.setItem('app_version', currentVersion);
+    window.location.reload();
+  } catch (err) {
+    console.error('Update failed:', err);
+    sessionStorage.removeItem('gt_last_reload');
+  }
+};
+
+if (savedVersion && savedVersion !== currentVersion) {
+  performUpdate();
+  // STOP execution here if a reload is potentially pending
+  if (currentVersion !== 'dev') {
+    const container = document.getElementById('root');
+    if (container) container.innerHTML = '<div style="background:#1a1a1a;color:#C5A059;height:100vh;display:flex;align-items:center;justify-content:center;font-family:serif;font-size:1.2rem;">Updating Golden Tower Spa...</div>';
+  }
+} else {
+  localStorage.setItem('app_version', currentVersion || 'dev');
+}
+
 const container = document.getElementById('root');
 if (container) {
   const root = createRoot(container);
@@ -52,13 +106,24 @@ if (container) {
     });
   });
 
-  // Register Service Worker
+  // Register Service Worker with robust update detection
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').then(() => {
-        // SW registered successfully
-      }).catch(() => {
-        // SW registration failed
+      navigator.serviceWorker.register('/sw.js').then((registration) => {
+        // Check for updates periodically
+        registration.onupdatefound = () => {
+          const installingWorker = registration.installing;
+          if (installingWorker) {
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New version found, reload page
+                window.location.reload();
+              }
+            };
+          }
+        };
+      }).catch((err) => {
+        console.warn('SW registration failed:', err);
       });
     });
   }

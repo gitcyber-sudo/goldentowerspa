@@ -21,7 +21,8 @@ import {
     TrendingUp,
     BarChart3,
     ChevronRight,
-    Save
+    Save,
+    Wallet
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
@@ -49,7 +50,8 @@ interface Booking {
     booking_date: string;
     booking_time: string;
     status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-    services: { title: string; duration: number };
+    services: { title: string; duration: number; price?: number };
+    commission_amount?: number;
     created_at: string;
     profiles?: { full_name: string; email: string };
 }
@@ -68,6 +70,22 @@ const TherapistDashboard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [activeTab, setActiveTab] = useState<TabId>('schedule');
+
+    // Commission Filter State
+    const [timeRange, setTimeRange] = useState<'all' | 'today' | '7d' | '30d' | 'month' | 'date'>('all');
+    const [specificDate, setSpecificDate] = useState(new Date().toISOString().split('T')[0]);
+    const [specificMonth, setSpecificMonth] = useState(new Date().getMonth());
+    const [specificYear, setSpecificYear] = useState(new Date().getFullYear());
+
+    const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+    const years = useMemo(() => {
+        const currentYear = new Date().getFullYear();
+        return [currentYear, currentYear - 1, currentYear - 2];
+    }, []);
 
     // Calendar blockouts state
     const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
@@ -221,6 +239,31 @@ const TherapistDashboard: React.FC = () => {
         }, 0);
     }, [completedBookings]);
 
+    const totalCommissions = useMemo(() => {
+        let filtered = completedBookings;
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+        if (timeRange === 'today') {
+            filtered = filtered.filter(b => new Date(b.booking_date).getTime() === today);
+        } else if (timeRange === '7d') {
+            const sevenDaysAgo = today - (7 * 24 * 60 * 60 * 1000);
+            filtered = filtered.filter(b => new Date(b.booking_date).getTime() >= sevenDaysAgo);
+        } else if (timeRange === '30d') {
+            const thirtyDaysAgo = today - (30 * 24 * 60 * 60 * 1000);
+            filtered = filtered.filter(b => new Date(b.booking_date).getTime() >= thirtyDaysAgo);
+        } else if (timeRange === 'date') {
+            filtered = filtered.filter(b => b.booking_date === specificDate);
+        } else if (timeRange === 'month') {
+            filtered = filtered.filter(b => {
+                const bDate = new Date(b.booking_date);
+                return bDate.getMonth() === specificMonth && bDate.getFullYear() === specificYear;
+            });
+        }
+
+        return filtered.reduce((sum: number, b: any) => sum + (b.commission_amount || 0), 0);
+    }, [completedBookings, timeRange, specificDate, specificMonth, specificYear]);
+
     const getStatusConfig = (status: string) => {
         switch (status) {
             case 'pending': return { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-l-amber-400', dot: 'bg-amber-400', icon: <Clock3 size={12} /> };
@@ -357,13 +400,66 @@ const TherapistDashboard: React.FC = () => {
             </header>
 
             {/* ─── Main Content ─── */}
-            <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-6 md:py-10 flex-1 pb-24 md:pb-10" id="main-content">
+            <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-4 md:py-6 flex-1 pb-24 md:pb-10" id="main-content">
+
+                {/* ─── Commission Filter Bar ─── */}
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-6 bg-white p-3 md:p-4 rounded-2xl border border-gold/10 shadow-sm">
+                    <div className="flex items-center gap-2">
+                        <Wallet size={16} className="text-gold" />
+                        <span className="text-[10px] uppercase font-bold text-charcoal/40 tracking-widest">Commission Filter</span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                        <select
+                            value={timeRange}
+                            onChange={(e) => setTimeRange(e.target.value as any)}
+                            className="bg-cream/50 border border-gold/10 rounded-lg px-3 py-1.5 text-[10px] font-bold text-charcoal focus:outline-none"
+                        >
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="7d">7 Days</option>
+                            <option value="30d">30 Days</option>
+                            <option value="month">Month</option>
+                            <option value="date">Date</option>
+                        </select>
+
+                        {timeRange === 'date' && (
+                            <input
+                                type="date"
+                                value={specificDate}
+                                onChange={(e) => setSpecificDate(e.target.value)}
+                                className="bg-cream/50 border border-gold/10 rounded-lg px-3 py-1.5 text-[10px] font-bold text-charcoal focus:outline-none"
+                            />
+                        )}
+
+                        {timeRange === 'month' && (
+                            <div className="flex items-center gap-1">
+                                <select
+                                    value={specificMonth}
+                                    onChange={(e) => setSpecificMonth(parseInt(e.target.value))}
+                                    className="bg-cream/50 border border-gold/10 rounded-lg px-3 py-1.5 text-[10px] font-bold text-charcoal focus:outline-none"
+                                >
+                                    {months.map((m, i) => <option key={m} value={i}>{m.substring(0, 3)}</option>)}
+                                </select>
+                                <select
+                                    value={specificYear}
+                                    onChange={(e) => setSpecificYear(parseInt(e.target.value))}
+                                    className="bg-cream/50 border border-gold/10 rounded-lg px-3 py-1.5 text-[10px] font-bold text-charcoal focus:outline-none"
+                                >
+                                    {years.map(y => <option key={y} value={y}>{y}</option>)}
+                                </select>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
                 {/* ─── Stats Row ─── */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-8">
                     {[
                         { icon: <Calendar className="text-gold" size={20} />, bg: 'bg-gold/10', value: todayBookings.length, label: 'Today' },
                         { icon: <Clock3 className="text-amber-600" size={20} />, bg: 'bg-amber-50', value: upcomingBookings.length, label: 'Upcoming' },
                         { icon: <CheckCircle2 className="text-emerald-600" size={20} />, bg: 'bg-emerald-50', value: completedBookings.length, label: 'Completed' },
+                        { icon: <Wallet className="text-blue-600" size={20} />, bg: 'bg-blue-50', value: `₱${totalCommissions.toLocaleString()}`, label: 'Commission' },
                         { icon: <Star className="text-white" size={20} fill="currentColor" />, bg: 'bg-gradient-to-br from-gold to-gold-dark', value: avgRating || '—', label: `${reviews.length} Reviews`, isGold: true }
                     ].map((stat, i) => (
                         <div key={i} className={`dashboard - stat p - 4 md: p - 5 rounded - xl border border - gold / 10 hover: shadow - lg transition - all hover: -translate - y - 0.5 group ${stat.isGold ? stat.bg + ' shadow-lg text-white' : 'bg-white'} `}>

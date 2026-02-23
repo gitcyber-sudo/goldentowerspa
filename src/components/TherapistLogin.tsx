@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { User, Lock, Loader2, ArrowLeft, AlertCircle } from 'lucide-react';
+import { User, Lock, Loader2, ArrowLeft, AlertCircle, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
 import Logo from './Logo';
@@ -143,6 +143,13 @@ const TherapistLogin: React.FC = () => {
                                 Authorized Personnel Only.<br />
                                 All access is monitored and logged.
                             </p>
+                            <button
+                                onClick={() => navigate('/admin-login')}
+                                className="mt-4 p-2 rounded-lg text-charcoal/5 hover:text-gold/60 hover:bg-gold/5 transition-all duration-500 group inline-flex items-center justify-center"
+                                aria-label="Admin Portal"
+                            >
+                                <Shield size={72} className="opacity-10 group-hover:opacity-100 transition-opacity" />
+                            </button>
                         </div>
                     </div>
                 </div>

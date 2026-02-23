@@ -20,6 +20,7 @@ import ReviewsPanel from './admin/ReviewsPanel';
 import BookingsTab from './admin/BookingsTab';
 import ErrorLogs from './admin/ErrorLogs';
 import LiveTimeline from './admin/LiveTimeline';
+import CommissionsTab from './admin/CommissionsTab';
 
 import type { Booking, Therapist, Service } from '../types';
 
@@ -176,6 +177,11 @@ const AdminDashboard: React.FC = () => {
                 updateData.completed_at = completionTime || new Date().toISOString();
                 updateData.tip_amount = tipAmount || 0;
                 updateData.tip_recipient = tipRecipient || null;
+
+                // Calculate Commission (30%) and Revenue (70%)
+                const servicePrice = booking.services?.price || 0;
+                updateData.commission_amount = servicePrice * 0.30;
+                updateData.revenue_amount = servicePrice * 0.70;
             }
             const { error } = await supabase.from('bookings').update(updateData).eq('id', id);
             if (error) throw error;
@@ -306,7 +312,9 @@ const AdminDashboard: React.FC = () => {
                 booking_date: editFormData.booking_date,
                 booking_time: editFormData.booking_time,
                 status: editFormData.status,
-                completed_at: editFormData.status === 'completed' ? new Date().toISOString() : null,
+                completed_at: editFormData.status === 'completed' ? (editingBooking.completed_at || new Date().toISOString()) : null,
+                commission_amount: editFormData.status === 'completed' ? ((services.find(s => s.id === editFormData.service_id)?.price || 0) * 0.30) : 0,
+                revenue_amount: editFormData.status === 'completed' ? ((services.find(s => s.id === editFormData.service_id)?.price || 0) * 0.70) : 0,
                 user_email: editFormData.guest_email || editingBooking.user_email
             }).eq('id', editingBooking.id);
 
@@ -415,6 +423,7 @@ const AdminDashboard: React.FC = () => {
                     )}
                     {activeTab === 'website-analytics' && <AnalyticsDashboard />}
                     {activeTab === 'revenue' && <RevenueDashboard bookings={bookings} />}
+                    {activeTab === 'commissions' && <CommissionsTab bookings={bookings} therapists={therapists} />}
                     {activeTab === 'therapists' && <TherapistManagement />}
                     {activeTab === 'clients' && <ClientIntelligence />}
                     {activeTab === 'errors' && <ErrorLogs />}

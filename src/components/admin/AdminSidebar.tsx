@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, LayoutDashboard, ClipboardList, Users, UserSearch, Eye, TrendingUp, LogOut, AlertTriangle } from 'lucide-react';
+import { X, LayoutDashboard, ClipboardList, Users, UserSearch, Eye, TrendingUp, LogOut, AlertTriangle, Wallet } from 'lucide-react';
 
 interface AdminSidebarProps {
     activeTab: string;
@@ -44,6 +44,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab, is
                     </div>
                     {renderSidebarItem('website-analytics', <Eye size={20} />, 'Website Visits')}
                     {renderSidebarItem('revenue', <TrendingUp size={20} />, 'Revenue')}
+                    {renderSidebarItem('commissions', <Wallet size={20} />, 'Commissions')}
                     {renderSidebarItem('errors', <AlertTriangle size={20} />, 'Error Logs')}
                 </nav>
                 <div className="p-4 lg:p-6 border-t border-white/10">

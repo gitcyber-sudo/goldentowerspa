@@ -124,9 +124,9 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         const cancelled = filteredBookings.filter(b => b.status === 'cancelled');
 
         const totalRevenue = completed.reduce((sum, b) => {
-            const servicePrice = b.services?.price || 0;
+            const revenueAmt = b.revenue_amount || ((b.services?.price || 0) * 0.70);
             const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
-            return sum + servicePrice + managementTip;
+            return sum + revenueAmt + managementTip;
         }, 0);
 
         const pendingRevenue = pending.reduce((sum, b) => sum + (b.services?.price || 0), 0);
@@ -148,9 +148,9 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         const dailyRevenue: Record<string, number> = {};
         completed.forEach(b => {
             const dateLabel = getShiftDateLabel(b.completed_at || b.created_at);
-            const servicePrice = b.services?.price || 0;
+            const revenueAmt = b.revenue_amount || ((b.services?.price || 0) * 0.70);
             const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
-            dailyRevenue[dateLabel] = (dailyRevenue[dateLabel] || 0) + servicePrice + managementTip;
+            dailyRevenue[dateLabel] = (dailyRevenue[dateLabel] || 0) + revenueAmt + managementTip;
         });
 
         // Service breakdown
@@ -200,9 +200,9 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         });
 
         const previousRevenue = previousPeriodBookings.reduce((sum, b) => {
-            const servicePrice = b.services?.price || 0;
+            const revenueAmt = b.revenue_amount || ((b.services?.price || 0) * 0.70);
             const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
-            return sum + servicePrice + managementTip;
+            return sum + revenueAmt + managementTip;
         }, 0);
         const revenueTrend = previousRevenue > 0 ? ((totalRevenue - previousRevenue) / previousRevenue) * 100 : 0;
 
@@ -220,9 +220,9 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             });
 
             const weekRev = weekBookings.reduce((sum, b) => {
-                const servicePrice = b.services?.price || 0;
+                const revenueAmt = b.revenue_amount || ((b.services?.price || 0) * 0.70);
                 const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
-                return sum + servicePrice + managementTip;
+                return sum + revenueAmt + managementTip;
             }, 0);
             weeklyRevenue.push({
                 week: weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -487,7 +487,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                 <StatCard
                     icon={DollarSign}
-                    label="Total Revenue"
+                    label="Total Revenue (70%)"
                     value={stats.totalRevenue}
                     prefix="₱"
                     color="bg-emerald-100 text-emerald-600"
@@ -727,7 +727,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                             <DollarSign className="w-5 h-5 md:w-6 md:h-6 text-gold" />
                         </div>
                         <div>
-                            <p className="font-serif text-base md:text-lg text-charcoal">Revenue Summary</p>
+                            <p className="font-serif text-base md:text-lg text-charcoal">Revenue Summary (70%)</p>
                             <p className="text-[10px] md:text-xs text-charcoal/60">
                                 Data from {getDateRangeLabel()}
                             </p>

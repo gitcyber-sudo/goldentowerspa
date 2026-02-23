@@ -111,33 +111,32 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
 
       {/* --- BACKGROUNDS --- */}
 
+      {/* Mobile Background: Portrait Video */}
+      <div className="md:hidden absolute inset-0 z-0 bg-black">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="/hero.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+      </div>
+
       {/* Desktop Background: Image with Parallax */}
       <div className="hidden md:block absolute inset-0 z-0 overflow-hidden">
         <div ref={bgWrapperRef} className="absolute inset-0 w-full h-[120%] -top-[10%]">
           <img
             src="/images/hero-bg.jpg"
             alt="Golden Tower Spa Hero Background"
-            fetchPriority="high"
+            fetchpriority="high"
             className={`w-full h-full object-cover hero-bg ${isMounted ? 'zoomed' : ''}`}
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-cream/90" aria-hidden="true" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-transparent via-black/10 to-black/40" aria-hidden="true" />
-      </div>
-
-      {/* Mobile Background: Portrait Video */}
-      <div className="md:hidden absolute inset-0 z-0">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="/images/hero-bg.jpg"
-          className="w-full h-full object-cover"
-        >
-          <source src="/hero.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
       </div>
 
       {/* --- DECORATIVE ELEMENTS --- */}
@@ -150,7 +149,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
       {/* --- CONTENT (Centered for BOTH) --- */}
       <div className="relative z-10 text-center px-4 max-w-5xl mx-auto flex flex-col items-center">
 
-        <span ref={badgeRef} className="glass-panel px-8 py-3 rounded-full text-white text-sm md:text-base font-bold uppercase tracking-[0.4em] mb-8 border border-white/30 hero-glow-gold reveal backdrop-blur-md">
+        <span ref={badgeRef} className="glass-panel px-6 md:px-8 py-3 rounded-full text-white text-sm md:text-base font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-8 md:mb-12 md:mt-8 border border-white/30 hero-glow-gold reveal backdrop-blur-md">
           Luxury Wellness in Quezon City
         </span>
 
