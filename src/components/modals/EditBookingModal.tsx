@@ -1,8 +1,10 @@
 import React from 'react';
 import { X, Edit3, Save } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import type { Service, Therapist, BookingStatus } from '../../types';
 import CustomDatePicker from '../ui/CustomDatePicker';
 import CustomTimePicker from '../ui/CustomTimePicker';
+import { formatPhoneNumber, validatePhoneNumber } from '../../lib/utils';
 
 interface EditBookingFormData {
     guest_name: string;
@@ -34,9 +36,19 @@ const EditBookingModal: React.FC<EditBookingModalProps> = React.memo(({
     services,
     therapists
 }) => {
+    const handleLocalSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const error = validatePhoneNumber(data.guest_phone, true);
+        if (error) {
+            alert(error === 'Incomplete number' ? 'Incomplete phone number (11 digits required)' : 'Invalid phone number');
+            return;
+        }
+        onSubmit(e);
+    };
+
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 overflow-y-auto flex justify-center items-start md:items-center p-4 md:p-6 bg-charcoal/80 backdrop-blur-sm">
             <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
                 <button onClick={onClose} className="absolute top-4 right-4 text-charcoal/40 hover:text-gold"><X size={24} /></button>
@@ -49,7 +61,7 @@ const EditBookingModal: React.FC<EditBookingModalProps> = React.memo(({
                         <p className="text-xs text-charcoal/50">Modify booking details</p>
                     </div>
                 </div>
-                <form onSubmit={onSubmit} className="space-y-4">
+                <form onSubmit={handleLocalSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="col-span-1 md:col-span-2">
                             <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Client Name</label>
@@ -60,8 +72,16 @@ const EditBookingModal: React.FC<EditBookingModalProps> = React.memo(({
                             <input type="email" className="w-full border border-gold/20 rounded-lg p-3" value={data.guest_email} onChange={e => setData({ ...data, guest_email: e.target.value })} />
                         </div>
                         <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Phone</label>
-                            <input type="tel" className="w-full border border-gold/20 rounded-lg p-3" value={data.guest_phone} onChange={e => setData({ ...data, guest_phone: e.target.value })} />
+                            <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Phone *</label>
+                            <input
+                                type="tel"
+                                className="w-full border border-gold/20 rounded-lg p-3"
+                                value={data.guest_phone || '09'}
+                                onChange={e => {
+                                    setData({ ...data, guest_phone: formatPhoneNumber(e.target.value) });
+                                }}
+                                placeholder="09xxxxxxxxx"
+                            />
                         </div>
                     </div>
 
@@ -131,7 +151,8 @@ const EditBookingModal: React.FC<EditBookingModalProps> = React.memo(({
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 });
 

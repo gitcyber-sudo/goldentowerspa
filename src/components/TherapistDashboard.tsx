@@ -52,8 +52,10 @@ interface Booking {
     status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
     services: { title: string; duration: number; price?: number };
     commission_amount?: number;
+    tip_amount?: number;
+    tip_recipient?: string;
     created_at: string;
-    profiles?: { full_name: string; email: string };
+    profiles?: { full_name: string; email: string; phone?: string };
 }
 
 type TabId = 'schedule' | 'history' | 'reviews' | 'profile';
@@ -233,13 +235,7 @@ const TherapistDashboard: React.FC = () => {
         return (reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length).toFixed(1);
     }, [reviews]);
 
-    const totalTips = useMemo(() => {
-        return completedBookings.reduce((sum: number, b: any) => {
-            return b.tip_recipient === 'therapist' ? sum + (b.tip_amount || 0) : sum;
-        }, 0);
-    }, [completedBookings]);
-
-    const totalCommissions = useMemo(() => {
+    const filteredBookingsByDate = useMemo(() => {
         let filtered = completedBookings;
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -260,9 +256,18 @@ const TherapistDashboard: React.FC = () => {
                 return bDate.getMonth() === specificMonth && bDate.getFullYear() === specificYear;
             });
         }
-
-        return filtered.reduce((sum: number, b: any) => sum + (b.commission_amount || 0), 0);
+        return filtered;
     }, [completedBookings, timeRange, specificDate, specificMonth, specificYear]);
+
+    const totalTips = useMemo(() => {
+        return filteredBookingsByDate.reduce((sum: number, b: any) => {
+            return b.tip_recipient === 'therapist' ? sum + (b.tip_amount || 0) : sum;
+        }, 0);
+    }, [filteredBookingsByDate]);
+
+    const totalCommissions = useMemo(() => {
+        return filteredBookingsByDate.reduce((sum: number, b: any) => sum + (b.commission_amount || 0), 0);
+    }, [filteredBookingsByDate]);
 
     const getStatusConfig = (status: string) => {
         switch (status) {
@@ -290,63 +295,92 @@ const TherapistDashboard: React.FC = () => {
         return (
             <div
                 key={booking.id}
-                className={`booking - card bg - white rounded - 2xl border border - gold / 10 overflow - hidden hover: shadow - xl hover: border - gold / 20 transition - all group border - l - 4 ${status.border} `}
+                className="booking-card bg-white rounded-3xl border border-gold/10 overflow-hidden hover:shadow-2xl hover:border-gold/30 transition-all duration-300 group relative"
             >
-                <div className="p-5 md:p-6">
+                {/* Status Border Accent */}
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${status.dot}`} aria-hidden="true" />
+
+                <div className="p-6 md:p-8">
                     {/* Top row: client + status */}
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-gold/20 to-gold/5 flex items-center justify-center ring-2 ring-gold/20 font-serif text-gold font-bold text-lg">
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gold/20 to-gold/5 flex items-center justify-center ring-4 ring-white shadow-inner font-serif text-gold font-bold text-xl transition-transform group-hover:scale-110 duration-500">
                                 {clientInitial}
                             </div>
-                            <div>
-                                <h3 className="font-semibold text-charcoal group-hover:text-gold transition-colors text-sm md:text-base">
+                            <div className="min-w-0">
+                                <h3 className="font-serif text-xl text-charcoal group-hover:text-gold transition-colors truncate">
                                     {clientName}
                                 </h3>
-                                {booking.profiles?.email && (
-                                    <p className="text-[11px] text-charcoal/50 flex items-center gap-1">
-                                        <Mail size={10} /> {booking.profiles.email}
-                                    </p>
-                                )}
-                                {booking.guest_phone && (
-                                    <p className="text-[11px] text-charcoal/50 flex items-center gap-1">
-                                        <Phone size={10} /> {booking.guest_phone}
-                                    </p>
-                                )}
+                                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                                    {booking.profiles?.email && (
+                                        <p className="text-[11px] text-charcoal/40 flex items-center gap-1.5">
+                                            <Mail size={12} className="text-gold" /> {booking.profiles.email}
+                                        </p>
+                                    )}
+                                    {(booking.guest_phone || booking.profiles?.phone) && (
+                                        <p className="text-[11px] text-charcoal/40 flex items-center gap-1.5">
+                                            <Phone size={12} className="text-gold" /> {booking.guest_phone || booking.profiles?.phone}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1.5">
-                            <span className={`px - 2.5 py - 1 rounded - full text - [9px] font - bold uppercase tracking - widest flex items - center gap - 1 ${status.bg} ${status.text} `}>
+                        <div className="flex flex-col items-end gap-2">
+                            <span className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] flex items-center gap-2 shadow-sm ${status.bg} ${status.text} border border-gold/5`}>
                                 {status.icon} {booking.status}
                             </span>
-                            {booking.services?.title.toLowerCase().includes('home') && (
-                                <span className="flex items-center gap-1 text-[9px] uppercase font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                                    <MapPin size={9} /> Home
-                                </span>
-                            )}
                         </div>
                     </div>
 
                     {/* Service details */}
-                    <div className="bg-cream/30 rounded-xl p-4 mb-3 border border-gold/5 group-hover:bg-cream/50 transition-colors">
-                        <p className="font-serif text-base md:text-lg text-charcoal mb-2">{booking.services?.title || 'Service'}</p>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-charcoal/60">
-                            <div className="flex items-center gap-1.5">
-                                <Calendar size={13} className="text-gold" />
-                                {new Date(booking.booking_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    <div className="bg-cream/20 rounded-2xl p-5 mb-4 border border-gold/5 group-hover:bg-cream/40 transition-all duration-300 hover:border-gold/20">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Star size={14} className="text-gold fill-gold" />
+                            <p className="font-serif text-lg md:text-xl text-charcoal">{booking.services?.title || 'Service'}</p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                            <div className="flex items-center gap-2 text-charcoal/70">
+                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-gold/5">
+                                    <Calendar size={14} className="text-gold" />
+                                </div>
+                                <span className="text-xs font-bold uppercase tracking-widest">
+                                    {new Date(booking.booking_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                </span>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                                <Clock size={13} className="text-gold" />
-                                {formatTimeTo12h(booking.booking_time)}
+                            <div className="flex items-center gap-2 text-charcoal/70">
+                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-gold/5">
+                                    <Clock size={14} className="text-gold" />
+                                </div>
+                                <span className="text-xs font-bold uppercase tracking-widest">
+                                    {formatTimeTo12h(booking.booking_time)}
+                                </span>
                             </div>
                             {booking.services?.duration && (
-                                <span className="text-gold font-bold bg-gold/10 px-2 py-0.5 rounded text-xs">
+                                <div className="ml-auto bg-gold/10 text-gold px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-gold/10">
                                     {booking.services.duration} min
-                                </span>
+                                </div>
                             )}
                         </div>
                     </div>
-                    <p className="text-[11px] text-charcoal/35 font-medium">Booked {new Date(booking.created_at).toLocaleDateString()}</p>
+
+                    <div className="flex justify-between items-center px-1">
+                        <p className="text-[10px] text-charcoal/30 font-bold uppercase tracking-widest">Ref: {booking.id.substring(0, 8)}</p>
+                        <div className="flex items-center gap-2">
+                            {booking.tip_amount > 0 && booking.tip_recipient === 'therapist' && (
+                                <div className="flex items-center gap-1.5 bg-gold/5 text-gold px-3 py-1 rounded-full border border-gold/10">
+                                    <Star size={10} className="fill-gold" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest">Tip ₱{booking.tip_amount}</span>
+                                </div>
+                            )}
+                            {booking.commission_amount && (
+                                <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100/50">
+                                    <Wallet size={10} />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest">Earned ₱{booking.commission_amount}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -367,34 +401,36 @@ const TherapistDashboard: React.FC = () => {
         <div className="min-h-screen bg-[#F9F7F2] flex flex-col">
             {/* ─── Desktop Header ─── */}
             <header className="bg-white/80 backdrop-blur-xl border-b border-gold/10 px-4 md:px-6 py-4 md:py-5 sticky top-0 z-40">
-                <div className="max-w-6xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-3 md:gap-4">
-                        <button onClick={() => navigate('/')} className="text-gold hover:text-gold-dark transition-all group" aria-label="Return to homepage">
-                            <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                        </button>
-                        <div className="flex items-center gap-3">
+                <div className="flex justify-between items-center bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-gold/20 shadow-xl mb-6">
+                    <div className="flex items-center gap-5">
+                        <div className="relative group">
                             {therapistInfo.image_url ? (
-                                <img src={therapistInfo.image_url} alt="" className="w-10 h-10 md:w-11 md:h-11 rounded-full object-cover ring-2 ring-gold/20" />
+                                <img src={therapistInfo.image_url} alt="" className="w-14 h-14 md:w-16 md:h-16 rounded-3xl object-cover shadow-lg border-2 border-gold/10 group-hover:border-gold/30 transition-all duration-500" />
                             ) : (
-                                <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center ring-2 ring-gold/20">
-                                    <User className="text-white" size={18} />
+                                <div className="w-14 h-14 md:w-16 md:h-16 rounded-3xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center shadow-lg border-2 border-gold/10">
+                                    <User className="text-white" size={24} />
                                 </div>
                             )}
-                            <div>
-                                <h1 className="font-serif text-lg md:text-xl text-charcoal leading-tight">{therapistInfo.name}</h1>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[10px] text-gold font-bold uppercase tracking-[0.2em]">{therapistInfo.specialty || 'Specialist'}</span>
-                                    {reviews.length > 0 && (
-                                        <span className="flex items-center gap-0.5 text-[10px] font-bold text-gold bg-gold/10 px-1.5 py-0.5 rounded-full">
-                                            <Star size={8} fill="currentColor" /> {avgRating}
-                                        </span>
-                                    )}
-                                </div>
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white shadow-sm" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <h1 className="font-serif text-xl md:text-2xl text-charcoal">{therapistInfo.name}</h1>
+                                {reviews.length > 0 && (
+                                    <span className="flex items-center gap-1 text-[10px] font-bold text-gold bg-gold/5 px-2 py-0.5 rounded-full border border-gold/10">
+                                        <Star size={8} fill="currentColor" /> {avgRating}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-[0.2em] bg-emerald-50 px-2 py-0.5 rounded-md">{therapistInfo.specialty || 'Master Specialist'}</span>
+                                <span className="w-1 h-1 rounded-full bg-gold/30" />
+                                <span className="text-[10px] text-charcoal/40 font-bold uppercase tracking-widest">Therapist Portal</span>
                             </div>
                         </div>
                     </div>
-                    <button onClick={handleSignOut} className="flex items-center gap-1.5 text-rose-500 hover:text-rose-700 transition-colors font-bold uppercase tracking-widest text-[10px]" aria-label="Sign out">
-                        <LogOut size={16} /> <span className="hidden md:inline">Sign Out</span>
+                    <button onClick={handleSignOut} className="p-3 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-2xl transition-all shadow-sm border border-rose-100 group" title="Sign Out">
+                        <LogOut size={20} className="group-hover:scale-110 transition-transform" />
                     </button>
                 </div>
             </header>
@@ -402,33 +438,34 @@ const TherapistDashboard: React.FC = () => {
             {/* ─── Main Content ─── */}
             <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-4 md:py-6 flex-1 pb-24 md:pb-10" id="main-content">
 
-                {/* ─── Commission Filter Bar ─── */}
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-6 bg-white p-3 md:p-4 rounded-2xl border border-gold/10 shadow-sm">
-                    <div className="flex items-center gap-2">
-                        <Wallet size={16} className="text-gold" />
-                        <span className="text-[10px] uppercase font-bold text-charcoal/40 tracking-widest">Commission Filter</span>
+                {/* ─── Compact Filter Bar ─── */}
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-cream/30 p-4 rounded-3xl border border-gold/10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center">
+                            <Wallet size={14} className="text-gold" />
+                        </div>
+                        <h3 className="text-[10px] uppercase font-bold text-charcoal/60 tracking-[0.2em]">Financial Insights</h3>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                        <select
-                            value={timeRange}
-                            onChange={(e) => setTimeRange(e.target.value as any)}
-                            className="bg-cream/50 border border-gold/10 rounded-lg px-3 py-1.5 text-[10px] font-bold text-charcoal focus:outline-none"
-                        >
-                            <option value="all">All Time</option>
-                            <option value="today">Today</option>
-                            <option value="7d">7 Days</option>
-                            <option value="30d">30 Days</option>
-                            <option value="month">Month</option>
-                            <option value="date">Date</option>
-                        </select>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center bg-white rounded-2xl border border-gold/5 p-1 shadow-sm">
+                            {(['all', 'today', '7d', '30d', 'month', 'date'] as const).map((range) => (
+                                <button
+                                    key={range}
+                                    onClick={() => setTimeRange(range)}
+                                    className={`px-3 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all ${timeRange === range ? 'bg-gold text-white shadow-md' : 'text-charcoal/40 hover:text-charcoal'}`}
+                                >
+                                    {range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : range}
+                                </button>
+                            ))}
+                        </div>
 
                         {timeRange === 'date' && (
                             <input
                                 type="date"
                                 value={specificDate}
                                 onChange={(e) => setSpecificDate(e.target.value)}
-                                className="bg-cream/50 border border-gold/10 rounded-lg px-3 py-1.5 text-[10px] font-bold text-charcoal focus:outline-none"
+                                className="bg-white border border-gold/10 rounded-2xl px-4 py-2 text-[10px] font-bold text-charcoal shadow-sm focus:ring-2 focus:ring-gold/20 focus:outline-none transition-all"
                             />
                         )}
 
@@ -453,38 +490,73 @@ const TherapistDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* ─── Stats Row ─── */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-8">
-                    {[
-                        { icon: <Calendar className="text-gold" size={20} />, bg: 'bg-gold/10', value: todayBookings.length, label: 'Today' },
-                        { icon: <Clock3 className="text-amber-600" size={20} />, bg: 'bg-amber-50', value: upcomingBookings.length, label: 'Upcoming' },
-                        { icon: <CheckCircle2 className="text-emerald-600" size={20} />, bg: 'bg-emerald-50', value: completedBookings.length, label: 'Completed' },
-                        { icon: <Wallet className="text-blue-600" size={20} />, bg: 'bg-blue-50', value: `₱${totalCommissions.toLocaleString()}`, label: 'Commission' },
-                        { icon: <Star className="text-white" size={20} fill="currentColor" />, bg: 'bg-gradient-to-br from-gold to-gold-dark', value: avgRating || '—', label: `${reviews.length} Reviews`, isGold: true }
-                    ].map((stat, i) => (
-                        <div key={i} className={`dashboard - stat p - 4 md: p - 5 rounded - xl border border - gold / 10 hover: shadow - lg transition - all hover: -translate - y - 0.5 group ${stat.isGold ? stat.bg + ' shadow-lg text-white' : 'bg-white'} `}>
-                            <div className="flex items-center gap-3">
-                                <div className={`w - 10 h - 10 md: w - 12 md: h - 12 rounded - full flex items - center justify - center transition - all ${stat.isGold ? 'bg-white/20 backdrop-blur-sm' : stat.bg + ' group-hover:scale-105'} `}>
-                                    {stat.icon}
+                {/* ─── Premium Stats Row ─── */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    {/* Primary Earnings Card */}
+                    <div className="md:col-span-2 lg:col-span-1 bg-gradient-to-br from-charcoal to-charcoal-light rounded-3xl p-6 border border-gold/30 shadow-2xl relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-gold/20 transition-all duration-700" />
+                        <div className="relative z-10">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 bg-gold/10 rounded-2xl border border-gold/20">
+                                    <Wallet className="text-gold" size={24} />
                                 </div>
-                                <div>
-                                    <p className={`text - 2xl md: text - 3xl font - serif ${stat.isGold ? 'text-white' : 'text-charcoal'} `}>{stat.value}</p>
-                                    <p className={`text - [10px] uppercase tracking - widest ${stat.isGold ? 'text-white/70' : 'text-charcoal/50'} `}>{stat.label}</p>
+                                <div className="text-right">
+                                    <p className="text-[10px] uppercase font-bold text-gold tracking-[0.2em] mb-1">Current Earnings</p>
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                        <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Live Updates</span>
+                                    </div>
                                 </div>
                             </div>
+                            <h2 className="text-4xl md:text-5xl font-serif text-white mb-2 tracking-tight">₱{totalCommissions.toLocaleString()}</h2>
+                            <p className="text-white/50 text-[11px] font-medium leading-relaxed">
+                                Commission earned from <span className="text-gold font-bold">{filteredBookingsByDate.length} sessions</span> in this period.
+                            </p>
                         </div>
-                    ))}
+                    </div>
+
+                    {/* Tips Card */}
+                    <div className="bg-gradient-to-br from-gold/20 to-gold/5 rounded-3xl p-6 border border-gold/10 shadow-xl relative overflow-hidden group hover:border-gold/30 transition-all">
+                        <div className="relative z-10">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="p-3 bg-white/50 rounded-2xl border border-gold/10">
+                                    <Star className="text-gold fill-gold" size={24} />
+                                </div>
+                                <span className="bg-gold text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-widest">Bonus Pay</span>
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-2">₱{totalTips.toLocaleString()}</h2>
+                            <p className="text-charcoal/40 text-[11px] font-bold uppercase tracking-widest">Gratitude Received</p>
+                        </div>
+                    </div>
+
+                    {/* Summary Stats Card */}
+                    <div className="bg-white rounded-3xl p-6 border border-gold/10 shadow-xl">
+                        <div className="grid grid-cols-3 gap-2 h-full">
+                            <div className="flex flex-col items-center justify-center p-3 bg-cream/30 rounded-2xl border border-gold/5">
+                                <span className="text-lg font-serif text-charcoal">{todayBookings.length}</span>
+                                <span className="text-[8px] uppercase font-bold text-charcoal/40 tracking-widest">Today</span>
+                            </div>
+                            <div className="flex flex-col items-center justify-center p-3 bg-gold/5 rounded-2xl border border-gold/5">
+                                <span className="text-lg font-serif text-gold">{upcomingBookings.length}</span>
+                                <span className="text-[8px] uppercase font-bold text-gold/60 tracking-widest">Pending</span>
+                            </div>
+                            <div className="flex flex-col items-center justify-center p-3 bg-emerald-50 rounded-2xl border border-emerald-100">
+                                <span className="text-lg font-serif text-emerald-600">{completedBookings.length}</span>
+                                <span className="text-[8px] uppercase font-bold text-emerald-600/60 tracking-widest">Done</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* ─── Desktop Tab Navigation ─── */}
                 <div className="hidden md:flex gap-1 mb-8 bg-white rounded-xl p-1.5 border border-gold/10 shadow-sm" role="tablist" aria-label="Dashboard sections">
                     {tabs.map(tab => (
-                        <button key={tab.id} role="tab" aria-selected={activeTab === tab.id} aria-controls={`panel - ${tab.id} `}
+                        <button key={tab.id} role="tab" aria-selected={activeTab === tab.id} aria-controls={`panel-${tab.id}`}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items - center gap - 2 px - 5 py - 3 rounded - lg text - xs font - bold uppercase tracking - widest transition - all flex - 1 justify - center ${activeTab === tab.id
+                            className={`flex items-center gap-2 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all flex-1 justify-center ${activeTab === tab.id
                                 ? 'bg-gold text-white shadow-md'
                                 : 'text-charcoal/40 hover:text-charcoal/70 hover:bg-gold/5'
-                                } `}
+                                }`}
                         >
                             {tab.icon} {tab.label}
                         </button>
@@ -516,7 +588,7 @@ const TherapistDashboard: React.FC = () => {
                                                 const status = getStatusConfig(booking.status);
                                                 return (
                                                     <div key={booking.id} className="relative pl-12">
-                                                        <div className={`absolute left - 3.5 top - 6 w - 3 h - 3 rounded - full border - 2 border - white shadow - sm z - 10 ${status.dot} `} aria-hidden="true" />
+                                                        <div className={`absolute left-3.5 top-6 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10 ${status.dot}`} aria-hidden="true" />
                                                         <div className="absolute left-0 top-5 text-[10px] font-mono text-gold font-bold">
                                                             {formatTimeTo12h(booking.booking_time).replace(/ /g, '')}
                                                         </div>
@@ -529,41 +601,36 @@ const TherapistDashboard: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Upcoming bucketed by time */}
-                            {upcomingBookings.length === 0 ? (
-                                <div className="text-center py-16 bg-white rounded-2xl border border-gold/10">
-                                    <div className="w-20 h-20 rounded-full bg-gold/10 flex items-center justify-center mx-auto mb-6">
-                                        <Logo className="h-8 w-8" color="#997B3D" />
+                            {/* ─── Upcoming Feed (One by One) ─── */}
+                            <div className="mb-12">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
+                                        <Clock3 className="text-gold" size={20} />
                                     </div>
-                                    <h3 className="font-serif text-xl text-charcoal mb-2">No Upcoming Sessions</h3>
-                                    <p className="text-charcoal/50 italic">Your schedule is clear. Time to relax!</p>
+                                    <div>
+                                        <h2 className="font-serif text-xl text-charcoal">Upcoming Schedule</h2>
+                                        <p className="text-xs text-charcoal/40">Chronological list of your future sessions.</p>
+                                    </div>
                                 </div>
-                            ) : (
-                                <div className="space-y-8">
-                                    {timeBuckets.map((bucket, i) => {
-                                        const bucketBookings = upcomingBookings.filter((b: any) => {
-                                            if (new Date(b.booking_date).toDateString() === new Date().toDateString()) return false; // already shown in today
-                                            const hour = parseInt(b.booking_time.split(':')[0]);
-                                            return hour >= bucket.range[0] && hour < bucket.range[1];
-                                        });
-                                        if (bucketBookings.length === 0) return null;
-                                        return (
-                                            <div key={i}>
-                                                <div className="flex items-center gap-2 mb-4 border-b border-gold/10 pb-2">
-                                                    <span className="text-xl">{bucket.icon}</span>
-                                                    <h2 className="font-serif text-lg text-charcoal">{bucket.title}</h2>
-                                                    <span className="ml-auto bg-gold/10 text-gold text-[9px] font-bold px-2 py-0.5 rounded-full">
-                                                        {bucketBookings.length} SESSION{bucketBookings.length > 1 ? 'S' : ''}
-                                                    </span>
-                                                </div>
-                                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                                    {bucketBookings.map(renderBookingCard)}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+
+                                {upcomingBookings.filter(b => new Date(b.booking_date).toDateString() !== new Date().toDateString()).length === 0 ? (
+                                    <div className="text-center py-16 bg-white rounded-3xl border border-gold/10 shadow-sm">
+                                        <Logo className="h-10 w-10 mx-auto mb-4 opacity-20" color="#997B3D" />
+                                        <p className="text-charcoal/40 italic font-serif">Your future schedule is clear.</p>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col gap-4 max-w-3xl">
+                                        {upcomingBookings
+                                            .filter(b => new Date(b.booking_date).toDateString() !== new Date().toDateString())
+                                            .sort((a, b) => {
+                                                const dateCompare = a.booking_date.localeCompare(b.booking_date);
+                                                if (dateCompare !== 0) return dateCompare;
+                                                return a.booking_time.localeCompare(b.booking_time);
+                                            })
+                                            .map(renderBookingCard)}
+                                    </div>
+                                )}
+                            </div>
 
                             {/* ─── Schedule Management (Calendar) ─── */}
                             <div className="mt-12 bg-white rounded-2xl border border-gold/10 p-6 md:p-8 shadow-sm">
@@ -602,9 +669,22 @@ const TherapistDashboard: React.FC = () => {
                                             .rdp { 
                                                 --rdp-accent-color: #E11D48;
                                                 --rdp-accent-color-dark: #BE123C;
+                                                margin: 0;
                                             }
                                             
-                                            /* Selected dates in v9 */
+                                            /* Mobile responsiveness fix */
+                                            @media (max-width: 400px) {
+                                                .rdp {
+                                                    --rdp-cell-size: 38px;
+                                                }
+                                                .rdp-month {
+                                                    width: 100%;
+                                                }
+                                                .rdp-table {
+                                                    max-width: 100%;
+                                                }
+                                            }
+
                                             .rdp-selected .rdp-day_button {
                                                 background-color: #E11D48 !important;
                                                 color: white !important;
@@ -647,11 +727,11 @@ const TherapistDashboard: React.FC = () => {
                                 <div className="text-center py-16 bg-white rounded-2xl border border-gold/10">
                                     <CheckCircle2 className="text-charcoal/20 mx-auto mb-4" size={48} />
                                     <h3 className="font-serif text-xl text-charcoal mb-2">No Completed Sessions</h3>
-                                    <p className="text-charcoal/40 italic">Completed sessions will appear here.</p>
+                                    <p className="text-charcoal/40 italic">Sessions you finish will be listed here.</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                    {completedBookings.map(renderBookingCard)}
+                                <div className="flex flex-col gap-4 max-w-2xl mx-auto">
+                                    {completedBookings.sort((a, b) => new Date(b.booking_date).getTime() - new Date(a.booking_date).getTime()).map(renderBookingCard)}
                                 </div>
                             )}
                         </div>
@@ -723,7 +803,7 @@ const TherapistDashboard: React.FC = () => {
                                     <div className="h-36 md:h-44 bg-gradient-to-br from-charcoal via-charcoal to-charcoal-light relative overflow-hidden">
                                         <div className="absolute inset-0 bg-gold/5" aria-hidden="true" />
                                         <div className="absolute bottom-4 right-6 flex items-center gap-1.5">
-                                            <div className={`w - 2.5 h - 2.5 rounded - full ${therapistInfo.active ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'} `} />
+                                            <div className={`w-2.5 h-2.5 rounded-full ${therapistInfo.active ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
                                             <span className="text-white/70 text-[10px] uppercase font-bold tracking-widest">{therapistInfo.active ? 'Active' : 'Inactive'}</span>
                                         </div>
                                     </div>
@@ -764,10 +844,6 @@ const TherapistDashboard: React.FC = () => {
                                                 <div className="p-4 rounded-xl bg-cream/50 border border-gold/10">
                                                     <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 mb-1">Rating</h3>
                                                     <p className="text-xl font-serif text-gold">{avgRating || '—'}</p>
-                                                </div>
-                                                <div className="p-4 rounded-xl bg-cream/50 border border-gold/10">
-                                                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 mb-1">Tips</h3>
-                                                    <p className="text-xl font-serif text-emerald-600">₱{totalTips.toLocaleString()}</p>
                                                 </div>
                                                 <div className="p-4 rounded-xl bg-cream/50 border border-gold/10 col-span-2 md:col-span-1 border-t-4 border-t-gold/20">
                                                     <h3 className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 mb-1">Joined</h3>

@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import { useBooking } from '../hooks/useBooking';
 import CustomDatePicker from './ui/CustomDatePicker';
 import CustomTimePicker from './ui/CustomTimePicker';
+import { formatPhoneNumber } from '../lib/utils';
 
 interface BookingModalProps {
     isOpen: boolean;
@@ -160,7 +161,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                     />
                                 </div>
                                 {user ? (
-                                    <div className="bg-gold/10 border border-gold/20 rounded-lg p-4 mb-4 md:mb-6">
+                                    <div className="bg-gold/10 border border-gold/20 rounded-lg p-4 mb-4">
                                         <div className="flex items-center gap-2 text-charcoal">
                                             <User size={16} className="text-gold" aria-hidden="true" />
                                             <div>
@@ -170,10 +171,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="space-y-4 mb-4 md:mb-6">
+                                    <div className="space-y-4 mb-4">
                                         {/* Returning Guest Welcome */}
                                         {isReturningGuest && (
-                                            <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-center justify-between mb-4">
+                                            <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-center justify-between">
                                                 <div>
                                                     <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Welcome Back!</p>
                                                     <p className="text-xs text-emerald-600/80 mt-0.5">We've pre-filled your details.</p>
@@ -188,47 +189,53 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                             </div>
                                         )}
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label htmlFor="guest-name" className="text-xs uppercase tracking-widest font-bold text-gold mb-2 block">Your Name</label>
-                                                <input
-                                                    id="guest-name"
-                                                    required
-                                                    type="text"
-                                                    placeholder="Enter your name"
-                                                    className={`w-full bg-white border p-3.5 md:p-4 rounded-xl focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold/30 transition-colors ${validationErrors.guest_name ? 'border-rose-400' : 'border-gold/20'}`}
-                                                    value={formData.guest_name}
-                                                    onChange={(e) => {
-                                                        setFormData({ ...formData, guest_name: e.target.value });
-                                                        if (validationErrors.guest_name) setValidationErrors(prev => ({ ...prev, guest_name: '' }));
-                                                    }}
-                                                    aria-invalid={!!validationErrors.guest_name}
-                                                    aria-describedby={validationErrors.guest_name ? 'guest-name-error' : undefined}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label htmlFor="guest-phone" className="text-xs uppercase tracking-widest font-bold text-gold mb-2 block">Phone Number</label>
-                                                <input
-                                                    id="guest-phone"
-                                                    required
-                                                    type="tel"
-                                                    placeholder="For confirmation"
-                                                    className={`w-full bg-white border p-3.5 md:p-4 rounded-xl focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold/30 transition-colors ${validationErrors.guest_phone ? 'border-rose-400' : 'border-gold/20'}`}
-                                                    value={formData.guest_phone}
-                                                    onChange={(e) => {
-                                                        setFormData({ ...formData, guest_phone: e.target.value });
-                                                        if (validationErrors.guest_phone) setValidationErrors(prev => ({ ...prev, guest_phone: '' }));
-                                                    }}
-                                                    aria-invalid={!!validationErrors.guest_phone}
-                                                    aria-describedby={validationErrors.guest_phone ? 'guest-phone-error' : undefined}
-                                                />
-                                            </div>
+                                        <div>
+                                            <label htmlFor="guest-name" className="text-xs uppercase tracking-widest font-bold text-gold mb-2 block">Your Name</label>
+                                            <input
+                                                id="guest-name"
+                                                required
+                                                type="text"
+                                                placeholder="Enter your name"
+                                                className={`w-full bg-white border p-3.5 md:p-4 rounded-xl focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold/30 transition-colors ${validationErrors.guest_name ? 'border-rose-400' : 'border-gold/20'}`}
+                                                value={formData.guest_name}
+                                                onChange={(e) => {
+                                                    setFormData({ ...formData, guest_name: e.target.value });
+                                                    if (validationErrors.guest_name) setValidationErrors(prev => ({ ...prev, guest_name: '' }));
+                                                }}
+                                                aria-invalid={!!validationErrors.guest_name}
+                                                aria-describedby={validationErrors.guest_name ? 'guest-name-error' : undefined}
+                                            />
+                                            {validationErrors.guest_name && (
+                                                <p id="guest-name-error" className="text-[10px] text-rose-500 mt-1 font-medium">{validationErrors.guest_name}</p>
+                                            )}
                                         </div>
-                                        {!isReturningGuest && (
-                                            <p className="text-[10px] text-charcoal/40 italic">We use your device ID to track your booking. No account required.</p>
-                                        )}
                                     </div>
                                 )}
+
+                                <div className="mb-4 md:mb-6">
+                                    <label htmlFor="guest-phone" className="text-xs uppercase tracking-widest font-bold text-gold mb-2 block">Phone Number</label>
+                                    <input
+                                        id="guest-phone"
+                                        required
+                                        type="tel"
+                                        placeholder="For confirmation (09xxxxxxxxx)"
+                                        className={`w-full bg-white border p-3.5 md:p-4 rounded-xl focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold/30 transition-colors ${validationErrors.guest_phone ? 'border-rose-400' : 'border-gold/20'}`}
+                                        value={formData.guest_phone || '09'}
+                                        onChange={(e) => {
+                                            const formatted = formatPhoneNumber(e.target.value);
+                                            setFormData({ ...formData, guest_phone: formatted });
+                                            if (validationErrors.guest_phone) setValidationErrors(prev => ({ ...prev, guest_phone: '' }));
+                                        }}
+                                        aria-invalid={!!validationErrors.guest_phone}
+                                        aria-describedby={validationErrors.guest_phone ? 'guest-phone-error' : undefined}
+                                    />
+                                    {validationErrors.guest_phone && (
+                                        <p id="guest-phone-error" className="text-[10px] text-rose-500 mt-1 font-medium">{validationErrors.guest_phone}</p>
+                                    )}
+                                    {!user && !isReturningGuest && (
+                                        <p className="text-[10px] text-charcoal/40 italic mt-2">We use your device ID to track your booking. No account required.</p>
+                                    )}
+                                </div>
 
                                 <div className="space-y-5 md:space-y-6">
                                     <div>

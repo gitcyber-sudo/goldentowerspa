@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { X, Check } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import CustomDatePicker from '../ui/CustomDatePicker';
 import { formatTimeTo12h, formatCurrency } from '../../lib/utils';
 import CustomTimePicker from '../ui/CustomTimePicker';
@@ -74,7 +75,7 @@ const CompleteBookingModal: React.FC<CompleteBookingModalProps> = ({ isOpen, onC
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
             <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex justify-between items-center mb-6">
@@ -160,7 +161,8 @@ const CompleteBookingModal: React.FC<CompleteBookingModalProps> = ({ isOpen, onC
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

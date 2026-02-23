@@ -84,7 +84,6 @@ export interface ManualBookingFormData {
     booking_date: string;
     booking_time: string;
     guest_name: string;
-    guest_email: string;
     guest_phone: string;
     status: BookingStatus;
 }

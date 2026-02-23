@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { validatePhoneNumber, formatPhoneNumber } from '../lib/utils';
 
 export interface Service {
     id: string;
@@ -117,7 +118,10 @@ export const useBooking = (initialServiceId?: string, isOpen?: boolean) => {
         const errors: Record<string, string> = {};
         if (!formData.service_id) errors.service = 'Please choose a massage treatment.';
         if (!user && !formData.guest_name.trim()) errors.guest_name = 'Please enter your name.';
-        if (!user && !formData.guest_phone.trim()) errors.guest_phone = 'Please enter your phone number.';
+
+        const phoneError = validatePhoneNumber(formData.guest_phone);
+        if (phoneError) errors.guest_phone = phoneError === 'Incomplete number' ? 'Please enter a complete 11-digit phone number.' : phoneError;
+
         if (!formData.date) errors.date = 'Please select a date.';
         if (!formData.time) errors.time = 'Please select a time.';
         setValidationErrors(errors);

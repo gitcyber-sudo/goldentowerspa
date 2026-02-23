@@ -3,6 +3,8 @@ import { supabase } from '../lib/supabase';
 import { Plus, Search, Edit3, User, RefreshCw } from 'lucide-react';
 import AddTherapistModal from './modals/AddTherapistModal';
 import EditTherapistModal from './modals/EditTherapistModal';
+import ManageAvailabilityModal from './modals/ManageAvailabilityModal';
+import { Calendar } from 'lucide-react';
 
 const TherapistManagement: React.FC = () => {
     const [therapists, setTherapists] = useState<any[]>([]);
@@ -10,6 +12,7 @@ const TherapistManagement: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingTherapist, setEditingTherapist] = useState<any>(null);
+    const [availabilityTherapist, setAvailabilityTherapist] = useState<any>(null);
 
     const fetchTherapists = useCallback(async () => {
         setLoading(true);
@@ -78,12 +81,22 @@ const TherapistManagement: React.FC = () => {
                                         {therapist.active ? 'Active' : 'Inactive'}
                                     </div>
                                 </div>
-                                <button
-                                    onClick={() => setEditingTherapist(therapist)}
-                                    className="p-2 text-gold hover:bg-gold/5 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                                >
-                                    <Edit3 size={18} />
-                                </button>
+                                <div className="flex flex-col gap-1">
+                                    <button
+                                        onClick={() => setEditingTherapist(therapist)}
+                                        className="p-2 text-gold hover:bg-gold/5 rounded-lg transition-colors"
+                                        title="Edit Profile"
+                                    >
+                                        <Edit3 size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => setAvailabilityTherapist(therapist)}
+                                        className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                        title="Manage Availability"
+                                    >
+                                        <Calendar size={18} />
+                                    </button>
+                                </div>
                             </div>
                             {therapist.bio && (
                                 <p className="mt-4 text-sm text-charcoal/60 line-clamp-2">{therapist.bio}</p>
@@ -109,6 +122,13 @@ const TherapistManagement: React.FC = () => {
                 isOpen={!!editingTherapist}
                 therapist={editingTherapist}
                 onClose={() => setEditingTherapist(null)}
+                onSuccess={fetchTherapists}
+            />
+
+            <ManageAvailabilityModal
+                isOpen={!!availabilityTherapist}
+                therapist={availabilityTherapist}
+                onClose={() => setAvailabilityTherapist(null)}
                 onSuccess={fetchTherapists}
             />
         </div>

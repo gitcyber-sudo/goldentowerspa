@@ -44,8 +44,7 @@ const AdminDashboard: React.FC = () => {
     const [showManualBooking, setShowManualBooking] = useState(false);
     const [manualBookingData, setManualBookingData] = useState({
         guest_name: '',
-        guest_email: '',
-        guest_phone: '',
+        guest_phone: '09',
         service_id: '',
         therapist_id: '',
         date: '',
@@ -142,7 +141,7 @@ const AdminDashboard: React.FC = () => {
         if (contentRef.current) {
             gsap.fromTo(contentRef.current,
                 { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
+                { opacity: 1, y: 0, duration: 0.4, ease: "power2.out", clearProps: "transform" }
             );
         }
     }, [activeTab, fetchBookings, fetchTherapists]);
@@ -218,33 +217,20 @@ const AdminDashboard: React.FC = () => {
         setLoading(true);
         try {
             let linkedUserId = null;
-            if (manualBookingData.guest_email) {
-                const { data: profileData } = await supabase
-                    .from('profiles')
-                    .select('id')
-                    .eq('email', manualBookingData.guest_email)
-                    .single();
-                if (profileData) linkedUserId = profileData.id;
-            }
-
             const { error } = await supabase.from('bookings').insert([{
-                user_id: linkedUserId,
                 guest_name: manualBookingData.guest_name,
-                guest_email: manualBookingData.guest_email || null,
-                guest_phone: manualBookingData.guest_phone || null,
+                guest_phone: manualBookingData.guest_phone === '09' ? null : manualBookingData.guest_phone,
                 service_id: manualBookingData.service_id,
-                therapist_id: manualBookingData.therapist_id,
+                therapist_id: manualBookingData.therapist_id || null,
                 booking_date: manualBookingData.date,
                 booking_time: manualBookingData.time,
-                status: 'confirmed',
-                user_email: manualBookingData.guest_email || 'Walk-in Client'
+                status: 'pending'
             }]);
             if (error) throw error;
             setShowManualBooking(false);
             setManualBookingData({
                 guest_name: '',
-                guest_email: '',
-                guest_phone: '',
+                guest_phone: '09',
                 service_id: '',
                 therapist_id: '',
                 date: '',
@@ -252,11 +238,12 @@ const AdminDashboard: React.FC = () => {
             });
             fetchBookings();
         } catch (err: unknown) {
-            alert("Error: " + (err instanceof Error ? err.message : 'Unknown error'));
+            console.error('Error creating manual booking:', err);
+            alert('Failed to create manual booking. Please check console for details.');
         } finally {
             setLoading(false);
         }
-    }, [manualBookingData, fetchBookings]);
+    }, [manualBookingData, fetchBookings, therapists]);
 
     const openEditModal = useCallback((booking: Booking) => {
         setEditingBooking(booking);
@@ -306,7 +293,7 @@ const AdminDashboard: React.FC = () => {
                 user_id: linkedUserId,
                 guest_name: editFormData.guest_name,
                 guest_email: editFormData.guest_email,
-                guest_phone: editFormData.guest_phone,
+                guest_phone: editFormData.guest_phone === '09' ? null : editFormData.guest_phone,
                 service_id: editFormData.service_id,
                 therapist_id: editFormData.therapist_id || null,
                 booking_date: editFormData.booking_date,

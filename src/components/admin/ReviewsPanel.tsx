@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Star } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import type { Booking } from '../../types';
 
 interface ReviewsPanelProps {
@@ -14,7 +15,7 @@ interface ReviewsPanelProps {
 const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ isOpen, onClose, review }) => {
     if (!isOpen || !review) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
             <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
@@ -70,7 +71,8 @@ const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ isOpen, onClose, review }) 
                     <button onClick={onClose} className="w-full py-4 bg-charcoal text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-black transition-colors">Close Review</button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

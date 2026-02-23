@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, X, Upload, Copy, Check } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../../lib/supabase';
 
 interface AddTherapistModalProps {
@@ -113,7 +114,7 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
             <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
                 <div className="flex justify-between items-center mb-6">
@@ -254,7 +255,8 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
                     </form>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

@@ -176,7 +176,9 @@ const CommissionsTab: React.FC<CommissionsTabProps> = ({ bookings, therapists })
                         <DollarSign size={14} /> 30% Therapist Split
                     </div>
                 </div>
-                <div className="overflow-x-auto">
+
+                {/* Desktop View: Table */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-cream/50 text-[10px] uppercase tracking-[0.2em] text-charcoal/40">
@@ -220,16 +222,57 @@ const CommissionsTab: React.FC<CommissionsTabProps> = ({ bookings, therapists })
                                     </td>
                                 </tr>
                             ))}
-                            {filteredBookings.length === 0 && (
-                                <tr>
-                                    <td colSpan={4} className="px-6 py-12 text-center text-charcoal/40 italic">
-                                        No completed sessions found for this period.
-                                    </td>
-                                </tr>
-                            )}
                         </tbody>
                     </table>
                 </div>
+
+                {/* Mobile View: Cards */}
+                <div className="md:hidden divide-y divide-gold/5">
+                    {filteredBookings.map((booking) => (
+                        <div key={booking.id} className="p-4 space-y-4">
+                            <div className="flex justify-between items-start">
+                                <div className="flex gap-3">
+                                    <div className="p-2 bg-gold/5 rounded-lg">
+                                        <Calendar size={18} className="text-gold" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-charcoal">
+                                            {new Date(booking.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        </p>
+                                        <p className="text-[10px] text-charcoal/40 uppercase tracking-widest font-black">{booking.booking_time}</p>
+                                    </div>
+                                </div>
+                                <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full font-bold text-xs">
+                                    +₱{(booking.commission_amount || 0).toLocaleString()}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-[8px] uppercase tracking-widest text-charcoal/40 font-bold mb-1">Specialist</p>
+                                    <p className="text-xs font-bold text-charcoal truncate">
+                                        {therapists.find(t => t.id === booking.therapist_id)?.name || 'Unknown'}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-[8px] uppercase tracking-widest text-charcoal/40 font-bold mb-1">Service</p>
+                                    <p className="text-xs font-bold text-charcoal truncate">{booking.services?.title}</p>
+                                </div>
+                            </div>
+
+                            <div className="pt-2 flex justify-between items-center border-t border-gold/5">
+                                <span className="text-[10px] text-charcoal/40 italic">30% Share Price</span>
+                                <span className="text-sm font-serif text-charcoal/60">₱{(booking.services?.price || 0).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {filteredBookings.length === 0 && (
+                    <div className="px-6 py-12 text-center text-charcoal/40 italic">
+                        No completed sessions found for this period.
+                    </div>
+                )}
             </div>
         </div>
     );

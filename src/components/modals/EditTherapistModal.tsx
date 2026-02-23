@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, X, Upload, RefreshCw, Plus, User } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../../lib/supabase';
 import type { Therapist } from '../../types';
 
@@ -172,7 +173,7 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
 
     if (!isOpen || !therapist) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
             <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
                 <div className="flex justify-between items-center mb-6">
@@ -348,7 +349,8 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

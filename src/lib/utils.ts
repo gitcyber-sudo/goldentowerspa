@@ -51,3 +51,39 @@ export const formatCurrency = (amount: number): string => {
         maximumFractionDigits: 2,
     }).format(amount);
 };
+/**
+ * Enforces Philippine phone number formatting (09XXXXXXXXX)
+ * - Always starts with 09
+ * - Max 11 digits
+ * - Strips non-digits
+ */
+export const formatPhoneNumber = (value: string): string => {
+    // Strip everything but digits
+    const digits = value.replace(/\D/g, '');
+
+    // If empty or just starting, return 09
+    if (!digits || digits.length <= 2) return '09';
+
+    // Ensure it starts with 09 (if they tried to type something else after 09)
+    let formatted = digits;
+    if (!formatted.startsWith('09')) {
+        formatted = '09' + formatted;
+    }
+
+    // Limit to 11 digits
+    return formatted.slice(0, 11);
+};
+
+/**
+ * Validates a Philippine phone number
+ * @param isOptional - If true, treats "09" or empty as valid
+ * @returns error message or null if valid
+ */
+export const validatePhoneNumber = (phone: string, isOptional: boolean = false): string | null => {
+    if (!phone || phone.length === 0 || (isOptional && phone === '09')) return null;
+    if (!isOptional && phone === '09') return 'Phone number is required';
+    if (!phone.startsWith('09')) return 'Must start with 09';
+    if (phone.length < 11) return 'Incomplete number';
+    if (phone.length > 11) return 'Invalid number';
+    return null;
+};
