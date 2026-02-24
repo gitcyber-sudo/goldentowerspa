@@ -266,45 +266,83 @@ const CommissionsTab: React.FC<CommissionsTabProps> = ({ bookings, therapists, o
                         <h3 className="font-serif text-lg text-charcoal">Historical Settlement Ledger</h3>
                     </div>
                     <div className="bg-white rounded-2xl border border-gold/10 shadow-sm overflow-hidden text-sm">
-                        <table className="w-full text-left">
-                            <thead className="bg-[#Fdfbf7] border-b border-gold/10">
-                                <tr className="text-[10px] uppercase font-black text-charcoal/40 tracking-[0.2em]">
-                                    <th className="px-6 py-4">Settlement ID</th>
-                                    <th className="px-6 py-4">Specialist</th>
-                                    <th className="px-6 py-4">Period</th>
-                                    <th className="px-6 py-4">Amount</th>
-                                    <th className="px-6 py-4 text-right">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gold/5">
-                                {payouts.map(p => (
-                                    <tr key={p.id} className="hover:bg-cream/20 transition-colors group">
-                                        <td className="px-6 py-5 font-mono text-[10px] text-charcoal/30 font-bold uppercase tracking-tighter">
-                                            PAY-{p.id.slice(0, 8)}
-                                        </td>
-                                        <td className="px-6 py-5 font-bold text-charcoal">
-                                            {therapists.find(t => t.id === p.therapist_id)?.name}
-                                        </td>
-                                        <td className="px-6 py-5 text-charcoal/60">
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block">
+                            <table className="w-full text-left">
+                                <thead className="bg-[#Fdfbf7] border-b border-gold/10">
+                                    <tr className="text-[10px] uppercase font-black text-charcoal/40 tracking-[0.2em]">
+                                        <th className="px-6 py-4">Settlement ID</th>
+                                        <th className="px-6 py-4">Specialist</th>
+                                        <th className="px-6 py-4">Period</th>
+                                        <th className="px-6 py-4">Amount</th>
+                                        <th className="px-6 py-4 text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gold/5">
+                                    {payouts.map(p => (
+                                        <tr key={p.id} className="hover:bg-cream/20 transition-colors group">
+                                            <td className="px-6 py-5 font-mono text-[10px] text-charcoal/30 font-bold uppercase tracking-tighter">
+                                                PAY-{p.id.slice(0, 8)}
+                                            </td>
+                                            <td className="px-6 py-5 font-bold text-charcoal">
+                                                {therapists.find(t => t.id === p.therapist_id)?.name}
+                                            </td>
+                                            <td className="px-6 py-5 text-charcoal/60">
+                                                {format(new Date(p.period_start), 'MMM d')} - {format(new Date(p.period_end), 'MMM d, yyyy')}
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <span className="font-serif text-charcoal font-bold text-lg">₱{p.amount.toLocaleString()}</span>
+                                            </td>
+                                            <td className="px-6 py-5 text-right">
+                                                <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-1.5">
+                                                    <CheckCircle2 size={12} /> {p.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {payouts.length === 0 && (
+                                        <tr>
+                                            <td colSpan={5} className="px-6 py-12 text-center text-charcoal/30 italic">No historical settlements found.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden divide-y divide-gold/5">
+                            {payouts.map(p => (
+                                <div key={p.id} className="p-5 space-y-4">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="font-mono text-[9px] text-charcoal/30 font-bold uppercase tracking-tighter mb-1">
+                                                PAY-{p.id.slice(0, 8)}
+                                            </p>
+                                            <h4 className="font-bold text-charcoal">
+                                                {therapists.find(t => t.id === p.therapist_id)?.name}
+                                            </h4>
+                                        </div>
+                                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[8px] font-black uppercase tracking-widest flex items-center gap-1">
+                                            <CheckCircle2 size={10} /> {p.status}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between items-end">
+                                        <div className="text-[10px] text-charcoal/60">
+                                            <p className="uppercase tracking-widest font-bold text-[8px] opacity-40 mb-1">Settlement Period</p>
                                             {format(new Date(p.period_start), 'MMM d')} - {format(new Date(p.period_end), 'MMM d, yyyy')}
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <span className="font-serif text-charcoal font-bold text-lg">₱{p.amount.toLocaleString()}</span>
-                                        </td>
-                                        <td className="px-6 py-5 text-right">
-                                            <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-1.5">
-                                                <CheckCircle2 size={12} /> {p.status}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {payouts.length === 0 && (
-                                    <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-charcoal/30 italic">No historical settlements found.</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="uppercase tracking-widest font-bold text-[8px] opacity-40 mb-1">Amount Paid</p>
+                                            <span className="font-serif text-gold font-bold text-xl">₱{p.amount.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            {payouts.length === 0 && (
+                                <div className="p-12 text-center text-charcoal/30 italic">No historical settlements found.</div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

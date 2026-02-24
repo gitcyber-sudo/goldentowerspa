@@ -1,10 +1,9 @@
-# PROMPT:
-DO NOT use the `generate_image` tool (referred to as "nano banana") to create images automatically. 
+---
 
-If images are needed for the UI or content:
-1. INFORM the user that image creation is required.
-2. REQUEST the user to provide the images manually.
-3. USE the provided images in the implementation.
+## 🤖 AGENT OPERATION RULES
+1. **TERMINAL AUTOMATION**: Always set `SafeToAutoRun: true` for non-destructive commands (ls, npm run, grep, etc.).
+2. **ZERO BROWSER USAGE**: Never use `browser_subagent` or `read_url_content`. 
+3. **MANUAL VERIFICATION**: When a UI or browser check is needed, provide the USER with exact steps and wait for their confirmation.
 
 ---
 

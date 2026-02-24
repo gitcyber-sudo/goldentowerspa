@@ -83,28 +83,70 @@ const UserDashboard: React.FC = () => {
 
     // ─── Data ───
     useEffect(() => {
-        if (!authLoading) {
-            if (user && profile?.role === 'admin') { navigate('/admin'); return; }
-            fetchBookings();
-        }
-    }, [user, profile, authLoading]);
+        // Use an AbortController for the fetch logic
+        const controller = new AbortController();
 
-    const fetchBookings = async (retryCount = 0) => {
+        // 1. Wait for auth to settle
+        if (authLoading) return;
+
+        // 2. Redirect admins (Safety)
+        if (user && profile?.role === 'admin') {
+            navigate('/admin');
+            return;
+        }
+
+        // 3. Trigger fetch for authenticated users OR identified guests
+        const visitorId = localStorage.getItem('gt_visitor_id');
+        if (user || visitorId) {
+            console.log("[UserDashboard] useEffect triggered fetch", { userId: user?.id, hasVisitor: !!visitorId });
+            fetchBookings(0, controller.signal);
+        } else {
+            // Truly empty state (no user, no visitor ID)
+            setLoading(false);
+        }
+
+        return () => {
+            console.log("[UserDashboard] cleaning up fetch controller");
+            controller.abort();
+        };
+    }, [user?.id, authLoading]);
+
+    const lastFetchId = useRef<string | null>(null);
+
+    const fetchBookings = async (retryCount = 0, signal?: AbortSignal) => {
+        // Only skip if it's the exact same user/visitor state we already fetched
+        const visitorId = localStorage.getItem('gt_visitor_id');
+        const currentFetchKey = `${user?.id || 'guest'}-${visitorId}`;
+
+        if (lastFetchId.current === currentFetchKey && retryCount === 0) {
+            console.log("[UserDashboard] skipping redundant fetch");
+            return;
+        }
+
         setLoading(true);
         try {
-            const visitorId = localStorage.getItem('gt_visitor_id');
             let query = supabase.from('bookings').select(`*, services (title, duration, price), therapists (name), therapist_feedback (*)`);
             if (user) { query = query.or(`user_id.eq.${user.id},and(visitor_id.eq.${visitorId},user_id.is.null),and(user_email.eq.${user.email},user_id.is.null)`); }
             else if (visitorId) { query = query.eq('visitor_id', visitorId); }
             else { setLoading(false); return; }
+
             const { data, error } = await query.order('booking_date', { ascending: false });
             if (error) throw error;
             if (data) {
                 setBookings(data as any);
-                if (data.length === 0 && retryCount < 1) setTimeout(() => fetchBookings(retryCount + 1), 2000);
+                lastFetchId.current = currentFetchKey;
+
+                // If data is empty and we haven't retried yet, try once more after a delay
+                // (useful for new signups where background triggers might be slow)
+                if (data.length === 0 && retryCount < 1) {
+                    setTimeout(() => fetchBookings(retryCount + 1), 2000);
+                }
             }
-        } catch (err) { console.error('Error fetching bookings:', err); }
-        finally { setLoading(false); }
+        } catch (err) {
+            console.error('Error fetching bookings:', err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const cancelBooking = async (id: string) => {

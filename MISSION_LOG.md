@@ -13,6 +13,15 @@
 - [x] Advanced Checkout (Payment & Tips).
 - [x] 100% TypeScript Error Mitigation.
 - [x] Verified Production Build.
+- [x] Optimized Live Shift Timeline visibility.
+- [x] Standardized Full Automation & Browser Restriction.
+- [x] Fixed mobile visibility for Commission Payout History.
+
+### [2026-02-24 09:05] Commission History Mobility Alignment
+- **Action Taken**: 
+  - Implemented card-based fallback for `payouts` ledger in `CommissionsTab.tsx`.
+  - Statically defined breakpoints to swap `<table>` for stacked `<div>` cards on mobile.
+- **Result/Lesson**: Improved accessibility for administrators on the go. Stacking data vertically is superior to horizontal scrolling for financial ledgers on small screens.
 
 ---
 *Safe Landing achieved. Documentation is the source of truth.*

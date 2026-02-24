@@ -15,7 +15,7 @@ const LiveTimeline: React.FC<LiveTimelineProps> = ({ bookings, therapists }) => 
     const { inShiftBookings, outOfShiftBookings } = useMemo(() => {
 
         const sorted = bookings.filter(b =>
-            (b.status === 'confirmed' || b.status === 'completed')
+            b.status === 'confirmed'
         ).sort((a, b) => {
             const timeA = a.booking_time || '00:00';
             const timeB = b.booking_time || '00:00';

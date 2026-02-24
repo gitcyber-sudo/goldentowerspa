@@ -77,14 +77,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 // Success - Redirect based on role
                 if (data.user) {
                     // Check profile for role-based redirect
-                    const { data: profileData } = await supabase
+                    const { data: profileData, error: profileErr, status } = await supabase
                         .from('profiles')
                         .select('role')
                         .eq('id', data.user.id)
                         .single();
 
-                    const role = profileData?.role || 'user';
+                    // PGRST116 is "No rows found", status 406 sometimes appears in some client configs for empty singles
+                    const role = (profileData?.role) || 'user';
                     const dashboardPath = role === 'admin' ? '/admin' : (role === 'therapist' ? '/therapist' : '/dashboard');
+
+                    console.log(`[AuthModal] Redirecting to ${dashboardPath} (Role: ${role}, Status: ${status})`);
 
                     // Use window.location.href for reliable redirect (avoids React state race conditions)
                     window.location.href = dashboardPath;

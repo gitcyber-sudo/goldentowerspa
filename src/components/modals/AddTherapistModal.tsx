@@ -144,7 +144,7 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
                                 <p className="text-lg font-medium text-charcoal font-serif">{generatedCredentials.name}</p>
                             </div>
                             <div>
-                                <label className="text-xs font-bold uppercase tracking-wider text-charcoal/40">4-Digit Access PIN</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-charcoal/40">Access PIN</label>
                                 <div className="flex items-center gap-3">
                                     <p className="text-3xl font-bold text-gold tracking-widest font-mono">
                                         {generatedCredentials.password}
@@ -194,7 +194,7 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Full Name</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Name</label>
                                 <input
                                     required
                                     type="text"
@@ -223,7 +223,7 @@ const AddTherapistModal: React.FC<AddTherapistModalProps> = ({ isOpen, onClose, 
                             </h4>
                             <p className="text-xs text-charcoal/60 leading-relaxed">
                                 A login account will be automatically generated for this specialist using their name.
-                                You will receive a <strong>One-Time PIN</strong> upon creation to share with them.
+                                You will receive an <strong>Access PIN</strong> upon creation to share with them.
                             </p>
                         </div>
 

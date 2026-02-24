@@ -100,6 +100,19 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
 
             if (updateError) throw updateError;
 
+            // 2.5 Sync Name to Profile (Critical for login)
+            if (therapist.user_id && formData.name !== therapist.name) {
+                const { error: profileSyncError } = await supabase
+                    .from('profiles')
+                    .update({ full_name: formData.name })
+                    .eq('id', therapist.user_id);
+
+                if (profileSyncError) {
+                    console.warn('Profile name sync failed:', profileSyncError);
+                    // We don't throw here to avoid blocking the whole update, but it's important to log
+                }
+            }
+
             // 3. Update Password or Create Account if requested
             if (showPasswordReset && newPassword) {
                 if (newPassword.length < 4) {
@@ -203,7 +216,7 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Full Name</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Name</label>
                             <input
                                 required
                                 type="text"
@@ -252,7 +265,7 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                                     </h4>
                                     <p className="text-xs text-charcoal/60 leading-relaxed">
                                         This specialist doesn't have a login account yet. You can create one now.
-                                        They will sign in using their <strong>Full Name</strong> and a <strong>4-Digit PIN</strong>.
+                                        They will sign in using their <strong>Name</strong> and an <strong>Access PIN</strong>.
                                     </p>
                                 </div>
 
@@ -271,7 +284,7 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                                 ) : (
                                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                                         <div className="flex justify-between items-center">
-                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Generated 4-Digit PIN</label>
+                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Generated Access PIN</label>
                                         </div>
                                         <div className="flex gap-2">
                                             <input
@@ -306,13 +319,13 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                                 ) : (
                                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                                         <div className="flex justify-between items-center">
-                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">New 4-Digit PIN</label>
+                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">New Access PIN</label>
                                         </div>
                                         <div className="flex gap-2">
                                             <input
                                                 type="text"
                                                 maxLength={4}
-                                                placeholder="Enter new 4-digit PIN"
+                                                placeholder="Enter new access PIN"
                                                 className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold font-mono font-bold tracking-widest text-center text-lg"
                                                 value={newPassword}
                                                 onChange={e => setNewPassword(e.target.value.replace(/[^0-9]/g, ''))}

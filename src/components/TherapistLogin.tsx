@@ -82,13 +82,13 @@ const TherapistLogin: React.FC = () => {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-[10px] uppercase tracking-widest font-bold text-charcoal/40 ml-1">
-                                    Full Name
+                                    Name
                                 </label>
                                 <div className="relative group">
                                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gold/40 group-focus-within:text-gold transition-colors" size={18} />
                                     <input
                                         type="text"
-                                        placeholder="Name"
+                                        placeholder="e.g. Sarah Smith"
                                         required
                                         className="w-full bg-cream/30 border border-gold/10 pl-12 pr-4 py-4 rounded-xl focus:outline-none focus:border-gold focus:bg-white transition-all text-charcoal placeholder:text-charcoal/20"
                                         value={formData.name}
@@ -99,13 +99,13 @@ const TherapistLogin: React.FC = () => {
 
                             <div className="space-y-2">
                                 <label className="text-[10px] uppercase tracking-widest font-bold text-charcoal/40 ml-1">
-                                    Access Key
+                                    Access PIN
                                 </label>
                                 <div className="relative group">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gold/40 group-focus-within:text-gold transition-colors" size={18} />
                                     <input
                                         type="password"
-                                        placeholder="4-Digit Access PIN"
+                                        placeholder="Access PIN"
                                         required
                                         className="w-full bg-cream/30 border border-gold/10 pl-12 pr-4 py-4 rounded-xl focus:outline-none focus:border-gold focus:bg-white transition-all text-charcoal placeholder:text-charcoal/20"
                                         value={formData.password}

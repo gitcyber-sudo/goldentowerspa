@@ -2,6 +2,8 @@
 description: Activates the high-intelligence "Opus Mode" for deep architectural reasoning and strict quality checks.
 ---
 
+// turbo-all
+
 I am now switching to **Opus Mode 🧠**.
 
 Please describe the complex task or architectural change you would like me to analyze. I will now:

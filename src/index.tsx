@@ -4,6 +4,20 @@ import './index.css';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
+import { initDebugBridge } from './lib/debugBridge';
+
+// --- PROFESSIONAL CONSOLE IDENTITY ---
+initDebugBridge();
+console.log(
+  "%c Golden Tower Spa %c Developed by John Paul Valdez ",
+  "color: white; background: #C5A059; padding: 5px 10px; border-radius: 5px 0 0 5px; font-weight: bold; font-family: serif; font-size: 1.1rem;",
+  "color: #C5A059; background: #1a1a1a; padding: 5px 10px; border-radius: 0 5px 5px 0; font-weight: bold; font-family: sans-serif; font-size: 1rem; border: 1px solid #C5A059;"
+);
+console.log(
+  "%c ⚡ Need a premium website? %c Contact: valdezjohnpaul15.jv@gmail.com ",
+  "color: #C5A059; font-weight: bold; font-family: sans-serif; font-size: 0.9rem;",
+  "color: white; background: #333; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.9rem;"
+);
 
 // --- AUTOMATIC CACHE BUSTING ---
 declare const __APP_VERSION__: string;

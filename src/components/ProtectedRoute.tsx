@@ -14,25 +14,25 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles,
     const { user, role, loading } = useAuth();
     const location = useLocation();
 
-    // 1. Wait if auth or profile is still loading
+    // 1. Wait if auth or profile is still loading (Initial restoration)
     if (loading) {
         return <LoadingScreen message="Verifying access" />;
     }
 
     // 2. If not logged in at all:
     if (!user) {
-        // If guests are allowed (e.g. for guest dashboard), let them through
         if (allowGuests) return <>{children}</>;
-        // Otherwise, redirect to home
         return <Navigate to="/" state={{ from: location }} replace />;
     }
 
-    // 3. If logged in but ROLE is not yet loaded, wait (prevent race to /dashboard)
+    // 3. Fallback if role is STILL missing after loading is done
+    // (This ensures we don't proceed if authorization is fundamentally broken)
     if (!role) {
-        return <LoadingScreen message="Loading profile..." />;
+        console.error("[ProtectedRoute] Authorization failed: No role found for user.");
+        return <Navigate to="/" replace />;
     }
 
-    // 4. If logged in but wrong role, go to their correct dashboard
+    // 4. If logged in but wrong role
     if (allowedRoles && !allowedRoles.includes(role)) {
         console.warn(`Access denied for role: ${role}. Redirecting to correct portal.`);
         const defaultPath = role === 'admin' ? '/admin' : (role === 'therapist' ? '/therapist' : '/dashboard');

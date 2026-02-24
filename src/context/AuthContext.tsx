@@ -1,125 +1,142 @@
-
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import type { Profile } from '../types';
+import { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
     user: User | null;
-    session: Session | null;
-    profile: Profile | null;
-    role: 'user' | 'therapist' | 'admin' | null;
+    profile: any | null;
     loading: boolean;
-    signIn: (email: string) => Promise<void>;
+    role: 'user' | 'therapist' | 'admin' | null;
     signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-    user: null,
-    session: null,
-    profile: null,
-    role: null,
-    loading: true,
-    signIn: async () => { },
-    signOut: async () => { },
-});
-
-export const useAuth = () => useContext(AuthContext);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [profile, setProfile] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
-    const fetchProfileRef = React.useRef<string | null>(null);
+
+    const profileRef = useRef<any | null>(null);
+    const activeFetchUserIdRef = useRef<string | null>(null);
+    const isInitialCheckDoneRef = useRef(false);
+
+    const fetchProfileWithRetry = async (userId: string, attemptsRemaining = 2): Promise<any> => {
+        try {
+            console.log(`[Auth] Starting profile resolve for ${userId} (Attempt ${3 - attemptsRemaining})...`);
+
+            const { data, error, status } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error) {
+                if (error.code === 'PGRST116' || status === 406) {
+                    console.info("[Auth] Profile record missing, defaulting to 'user' role");
+                    return { id: userId, role: 'user' };
+                }
+                throw error;
+            }
+
+            console.log(`[Auth] Profile successfully resolved:`, data?.role);
+            return data;
+        } catch (err: any) {
+            console.warn(`[Auth] Profile resolve error:`, err.message);
+
+            if (attemptsRemaining > 0) {
+                await new Promise(r => setTimeout(r, 1000));
+                return fetchProfileWithRetry(userId, attemptsRemaining - 1);
+            }
+
+            return { id: userId, role: 'user' };
+        }
+    };
 
     useEffect(() => {
         let mounted = true;
 
-        const initAuth = async () => {
-            try {
-                // 1. Check existing session immediately
-                const { data: { session: initialSession } } = await supabase.auth.getSession();
-
-                if (mounted) {
-                    if (initialSession) {
-                        setSession(initialSession);
-                        setUser(initialSession.user);
-                        fetchProfileRef.current = initialSession.user.id;
-                        await fetchProfile(initialSession.user.id);
-                    } else {
-                        setLoading(false);
-                    }
-                }
-            } catch (err: any) {
-                console.error("Manual session check error:", err);
-
-                import('../lib/errorLogger').then(({ logError }) => {
-                    logError({
-                        message: `[GTS-101]: Critical failure during auth initialization. ${err.message || ''}`,
-                        severity: 'error',
-                        metadata: { error: err }
-                    });
-                });
-
-                if (mounted) setLoading(false);
-            }
-        };
-
-        initAuth();
-
-        // 2. Listen for all auth events
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-
-
+        const settleSession = async (currentSession: Session | null, source: string) => {
             if (!mounted) return;
 
-            setSession(session);
-            const currentUser = session?.user ?? null;
+            const currentUser = currentSession?.user ?? null;
+            console.log(`[Auth] Settle Session (${source}):`, { userId: currentUser?.id });
+
+            // Set basic identity immediately
+            setSession(currentSession);
             setUser(currentUser);
 
             if (currentUser) {
-                // If we already have this profile in state from initAuth, just stop loading
-                if (fetchProfileRef.current === currentUser.id && profile) {
-                    setLoading(false);
-                    return;
-                }
+                // LOCK IDENTITY: We have a user, unlock UI as a 'user' role automatically
+                setLoading(false);
+                isInitialCheckDoneRef.current = true;
 
-                // Otherwise, fetch it if not already fetching
-                if (fetchProfileRef.current !== currentUser.id) {
-                    setLoading(true); // Ensure loading is true while we fetch
-                    fetchProfileRef.current = currentUser.id;
-                    const profileData = await fetchProfile(currentUser.id);
+                // Handle background profile resolution
+                if (profileRef.current?.id === currentUser.id) return;
+                if (activeFetchUserIdRef.current === currentUser.id) return;
 
-                    // Claim guest bookings (ONLY for regular users, prevent admin/therapist pollution)
-                    const visitorId = localStorage.getItem('gt_visitor_id');
-                    if (visitorId && profileData?.role === 'user') {
-                        await claimGuestBookings(currentUser.id, currentUser.email || '', visitorId);
+                activeFetchUserIdRef.current = currentUser.id;
+                try {
+                    const profileData = await fetchProfileWithRetry(currentUser.id);
+                    if (mounted) {
+                        profileRef.current = profileData;
+                        setProfile(profileData);
+
+                        // SYNC METADATA
+                        const currentRole = profileData?.role || 'user';
+                        const jwtRole = currentUser.app_metadata?.role || currentUser.user_metadata?.role;
+
+                        if (currentRole && currentRole !== jwtRole) {
+                            console.log(`[Auth] Syncing role '${currentRole}' to JWT...`);
+                            supabase.auth.updateUser({ data: { role: currentRole } }).catch(() => { });
+                        }
                     }
-
-                    // Role-based auto-redirect on home page
-                    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') &&
-                        (window.location.pathname === '/' || window.location.pathname === '/index.html')) {
-                        const r = profileData?.role || 'user';
-                        const path = r === 'admin' ? '/admin' : (r === 'therapist' ? '/therapist' : '/dashboard');
-                        // Auto-redirect based on role
-                        window.location.replace(path);
+                } finally {
+                    if (activeFetchUserIdRef.current === currentUser.id) {
+                        activeFetchUserIdRef.current = null;
                     }
                 }
             } else {
-                fetchProfileRef.current = null;
-                setProfile(null);
-                setLoading(false);
+                // GUEST STATE: Only unlock if we are sure no session exists
+                if (source === 'init' || source === 'INITIAL_SESSION') {
+                    console.log("[Auth] Guest state confirmed via", source);
+                    profileRef.current = null;
+                    setProfile(null);
+                    setLoading(false);
+                    isInitialCheckDoneRef.current = true;
+                }
             }
+        };
+
+        // 1. Initial Storage Check
+        const initAuth = async () => {
+            const { data: { session: existingSession } } = await supabase.auth.getSession();
+            if (existingSession && !isInitialCheckDoneRef.current) {
+                await settleSession(existingSession, 'init');
+            }
+        };
+        initAuth();
+
+        // 2. Auth Listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+            if (event === 'SIGNED_OUT') {
+                setUser(null);
+                setSession(null);
+                setProfile(null);
+                profileRef.current = null;
+                setLoading(false);
+                return;
+            }
+            settleSession(newSession, event);
         });
 
-        // 3. Global Safety Timeout (Hard unstick)
         const globalTimeout = setTimeout(() => {
             if (mounted && loading) {
-                console.warn("Global Auth timeout hit. Unsticking UI.");
+                console.warn("[Auth] Global timeout hit. Unsticking UI.");
                 setLoading(false);
             }
-        }, 8000);
+        }, 30000);
 
         return () => {
             mounted = false;
@@ -128,133 +145,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     }, []);
 
+    const value = React.useMemo(() => {
+        const rawRole = user?.app_metadata?.role || user?.user_metadata?.role || profile?.role;
+        const role = (user ? (rawRole || 'user') : null) as 'user' | 'therapist' | 'admin' | null;
 
-
-    const claimGuestBookings = async (userId: string, email: string, visitorId: string) => {
-        try {
-
-            const { error } = await supabase
-                .from('bookings')
-                .update({
-                    user_id: userId,
-                    user_email: email
-                })
-                .eq('visitor_id', visitorId)
-                .is('user_id', null);
-
-            if (error) throw error;
-
-        } catch (err) {
-            console.warn("Failed to claim guest bookings:", err);
-        }
-    };
-
-    const fetchProfile = async (userId: string) => {
-        try {
-
-
-            // Add a sub-timeout specifically for the database query
-            const profilePromise = supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .single();
-
-            // Race the database query against a 8s timeout
-            const timeoutPromise = new Promise((resolve) =>
-                setTimeout(() => resolve({ data: null, error: { message: "Profile fetch timeout", code: "TIMEOUT" } }), 8000)
-            );
-
-            const result = await Promise.race([profilePromise, timeoutPromise]) as { data: Profile | null; error: { message: string; code?: string } | null };
-            const { data, error } = result;
-
-            if (error) {
-                console.warn('Profile fetch error:', error.message);
-                // IF it's a "Not Found" error, we assume it's a new user and create a basic profile or default
-                if (error.code === 'PGRST116') {
-                    const fallback: Profile = { id: userId, role: 'user' };
-                    setProfile(fallback);
-                    return fallback;
-                }
-                return null;
-            }
-
-            if (data) {
-
-                setProfile(data);
-                return data;
-            }
-            return null;
-        } catch (error: any) {
-            console.error('Unexpected error during profile fetch:', error);
-
-            import('../lib/errorLogger').then(({ logError }) => {
-                logError({
-                    message: `[GTS-102]: Profile fetch unexpected failure for user ${userId}. ${error.message || ''}`,
-                    severity: 'error',
-                    metadata: { userId, error }
-                });
-            });
-
-            return null;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const signIn = async (_email: string) => {
-        // Implementation for manual triggers if needed
-    };
-
-    const signOut = async () => {
-        setLoading(true);
-        try {
-
-
-            // 1. Clear profile state immediately
-            setUser(null);
-            setSession(null);
-            setProfile(null);
-
-            // 2. Clear Auth tokens AND the Guest Identity (to prevent cross-account pollution)
-            const storageKey = `sb-${new URL((supabase as unknown as { supabaseUrl: string }).supabaseUrl).hostname.split('.')[0]}-auth-token`;
-            localStorage.removeItem(storageKey);
-            localStorage.removeItem('gt_visitor_id'); // RESET guest identity on logout
-
-            // Also clear any other potential supabase keys
-            Object.keys(localStorage).forEach(key => {
-                if (key.includes('supabase.auth') || key.includes('-auth-token')) {
-                    localStorage.removeItem(key);
-                }
-            });
-
-            // 3. Supabase Sign Out (Attempt to notify server)
-            await supabase.auth.signOut();
-
-            // 4. Force a clean URL (Remove fragments/tokens)
-            if (window.location.hash || window.location.search.includes('access_token')) {
-                window.location.href = window.location.origin;
-            }
-
-
-        } catch (error) {
-            console.error('Error during sign out:', error);
-        } finally {
-            setLoading(false);
-            // One final kick to ensure the app re-renders from scratch
-            window.location.reload();
-        }
-    };
-
-    const value = {
-        user,
-        session,
-        profile,
-        role: (profile?.role as 'user' | 'therapist' | 'admin' | null) || null,
-        loading,
-        signIn,
-        signOut,
-    };
+        return {
+            user,
+            profile,
+            loading,
+            role,
+            signOut: async () => {
+                await supabase.auth.signOut();
+            },
+        };
+    }, [user, profile, loading]);
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
 };
