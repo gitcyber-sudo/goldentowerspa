@@ -7,6 +7,7 @@ import Logo from '../components/Logo';
 import TherapistGalleryModal from '../components/modals/TherapistGalleryModal';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import AuthModal from '../components/AuthModal';
 import { useSEO } from '../hooks/useSEO';
 import type { Therapist } from '../types';
 
@@ -21,6 +22,7 @@ const Availability: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
     const [galleryTherapist, setGalleryTherapist] = useState<Therapist | null>(null);
+    const [isAuthOpen, setIsAuthOpen] = useState(false);
 
     useEffect(() => {
         const fetchTherapists = async () => {
@@ -70,7 +72,7 @@ const Availability: React.FC = () => {
 
     return (
         <div className="bg-cream min-h-screen flex flex-col pt-24 font-sans">
-            <Header onBookClick={() => { }} onLoginClick={() => { }} />
+            <Header onBookClick={() => { }} onLoginClick={() => setIsAuthOpen(true)} />
 
             <main className="flex-1 py-12 md:py-20 px-6">
                 <div className="max-w-6xl mx-auto">
@@ -231,11 +233,11 @@ const Availability: React.FC = () => {
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-300">
                     <div className="absolute inset-0 bg-charcoal/80 backdrop-blur-md" onClick={() => setSelectedTherapist(null)} />
 
-                    <div className="relative bg-cream w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-gold/20 overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-10 duration-500">
+                    <div className="relative bg-cream w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-gold/20 overflow-hidden max-h-[90vh] overflow-y-auto animate-in zoom-in-95 slide-in-from-bottom-10 duration-500 custom-scrollbar">
                         {/* Modal Header */}
-                        <div className="relative h-48 md:h-56">
+                        <div className="relative h-72 md:h-[28rem]">
                             {selectedTherapist.image_url ? (
-                                <img src={selectedTherapist.image_url} alt={selectedTherapist.name} className="w-full h-full object-cover" />
+                                <img src={selectedTherapist.image_url} alt={selectedTherapist.name} className="w-full h-full object-cover" style={{ objectPosition: 'center 35%' }} />
                             ) : (
                                 <div className="w-full h-full bg-gold/10 flex items-center justify-center text-6xl font-serif text-gold">
                                     {selectedTherapist.name.charAt(0)}
@@ -251,7 +253,7 @@ const Availability: React.FC = () => {
                         </div>
 
                         {/* Modal Body */}
-                        <div className="p-8 md:p-10 -mt-8 relative bg-cream rounded-t-[2.5rem]">
+                        <div className="p-8 md:p-10 -mt-12 md:-mt-16 relative bg-cream rounded-t-[2.5rem] shadow-[0_-20px_40px_rgba(0,0,0,0.05)]">
                             <p className="text-gold font-bold tracking-[0.3em] uppercase text-[10px] mb-2">Specialist Schedule</p>
                             <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-6">{selectedTherapist.name}</h2>
 
@@ -309,6 +311,12 @@ const Availability: React.FC = () => {
                 onClose={() => setGalleryTherapist(null)}
                 therapistId={galleryTherapist?.id || ''}
                 therapistName={galleryTherapist?.name || ''}
+            />
+
+            <AuthModal
+                isOpen={isAuthOpen}
+                onClose={() => setIsAuthOpen(false)}
+                onSuccess={() => setIsAuthOpen(false)}
             />
 
             <Footer />
