@@ -11,7 +11,7 @@ import ClientIntelligence from './ClientIntelligence';
 import ManualBookingModal from './modals/ManualBookingModal';
 import EditBookingModal from './modals/EditBookingModal';
 import CompleteBookingModal from './modals/CompleteBookingModal';
-import { getBusinessDate } from '../lib/utils';
+import { formatTimeTo12h } from '../lib/utils';
 
 // Decomposed Components
 import AdminSidebar from './admin/AdminSidebar';
@@ -214,6 +214,56 @@ const AdminDashboard: React.FC = () => {
         }
     }, [fetchBookings, bookings]);
 
+    /**
+     * Checks if a therapist has an existing booking that overlaps with the
+     * requested time window (considering service duration).
+     * Returns a descriptive conflict message, or null if no conflict.
+     */
+    const checkTherapistTimeConflict = useCallback((
+        therapistId: string,
+        date: string,
+        time: string,
+        durationMinutes: number,
+        excludeBookingId: string | null
+    ): string | null => {
+        const toMinutes = (t: string) => {
+            const [h, m] = t.split(':').map(Number);
+            return h * 60 + (m || 0);
+        };
+
+        const newStart = toMinutes(time);
+        const newEnd = newStart + durationMinutes;
+
+        // Check all existing confirmed/pending bookings for this therapist on this date
+        const conflicts = bookings.filter(b => {
+            if (excludeBookingId && b.id === excludeBookingId) return false;
+            if (b.therapist_id !== therapistId) return false;
+            if (b.booking_date !== date) return false;
+            if (!['confirmed', 'pending'].includes(b.status)) return false;
+
+            const existingStart = toMinutes(b.booking_time || '00:00');
+            const existingDuration = b.services?.duration || 60;
+            const existingEnd = existingStart + existingDuration;
+
+            // Overlap: new booking starts before existing ends AND new booking ends after existing starts
+            return newStart < existingEnd && newEnd > existingStart;
+        });
+
+        if (conflicts.length === 0) return null;
+
+        const therapist = therapists.find(t => t.id === therapistId);
+        const conflictDetails = conflicts.map(c => {
+            const startLabel = formatTimeTo12h(c.booking_time || '00:00');
+            const endMin = toMinutes(c.booking_time || '00:00') + (c.services?.duration || 60);
+            const endH = Math.floor(endMin / 60) % 24;
+            const endM = endMin % 60;
+            const endLabel = formatTimeTo12h(`${endH.toString().padStart(2, '0')}:${endM.toString().padStart(2, '0')}`);
+            return `${c.services?.title || 'Session'} (${startLabel} – ${endLabel})`;
+        }).join('\n• ');
+
+        return `SCHEDULE CONFLICT: ${therapist?.name || 'This therapist'} already has overlapping booking(s) on ${date}:\n\n• ${conflictDetails}\n\nThe new ${durationMinutes}-minute session (${formatTimeTo12h(time)}) would overlap. Please choose a different time or therapist.`;
+    }, [bookings, therapists]);
+
     const handleManualBooking = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         if (!manualBookingData.service_id) {
@@ -222,6 +272,20 @@ const AdminDashboard: React.FC = () => {
         }
         if (!manualBookingData.therapist_id) {
             alert("SPECIALIST REQUIRED: Please assign an available therapist.");
+            return;
+        }
+
+        // Check for time overlap conflicts
+        const selectedService = services.find(s => s.id === manualBookingData.service_id);
+        const conflictMsg = checkTherapistTimeConflict(
+            manualBookingData.therapist_id,
+            manualBookingData.date,
+            manualBookingData.time,
+            selectedService?.duration || 60,
+            null // no booking to exclude (new booking)
+        );
+        if (conflictMsg) {
+            alert(conflictMsg);
             return;
         }
 
@@ -299,6 +363,20 @@ const AdminDashboard: React.FC = () => {
                     return;
                 }
             }
+
+            // Check for time overlap conflicts (exclude the booking being edited)
+            const selectedService = services.find(s => s.id === editFormData.service_id);
+            const conflictMsg = checkTherapistTimeConflict(
+                editFormData.therapist_id,
+                editFormData.booking_date,
+                editFormData.booking_time,
+                selectedService?.duration || 60,
+                editingBooking.id
+            );
+            if (conflictMsg) {
+                alert(conflictMsg);
+                return;
+            }
         }
 
         setLoading(true);
@@ -368,7 +446,9 @@ const AdminDashboard: React.FC = () => {
     }), [bookings]);
 
     const revenueStats = useMemo(() => {
-        const businessToday = getBusinessDate(new Date());
+        // Today in Philippine time (UTC+8)
+        const phtOffset = 8 * 60 * 60 * 1000;
+        const todayPHT = new Date(Date.now() + phtOffset).toISOString().split('T')[0];
         return {
             totalRevenue: bookings
                 .filter(b => b.status === 'completed')
@@ -379,7 +459,9 @@ const AdminDashboard: React.FC = () => {
             todayRevenue: bookings
                 .filter(b => {
                     if (b.status !== 'completed' || !b.completed_at) return false;
-                    return getBusinessDate(new Date(b.completed_at)) === businessToday;
+                    // Compare against PHT calendar date of completion
+                    const completionPHT = new Date(new Date(b.completed_at).getTime() + phtOffset).toISOString().split('T')[0];
+                    return completionPHT === todayPHT;
                 })
                 .reduce((sum, b) => sum + (b.price_at_booking || b.services?.price || 0), 0),
         };

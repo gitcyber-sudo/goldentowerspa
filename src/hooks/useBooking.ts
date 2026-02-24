@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { validatePhoneNumber, formatPhoneNumber } from '../lib/utils';
+import { validatePhoneNumber, formatPhoneNumber, formatTimeTo12h } from '../lib/utils';
 
 export interface Service {
     id: string;
@@ -167,6 +167,47 @@ export const useBooking = (initialServiceId?: string, isOpen?: boolean) => {
                 setErrorMessage(`You already have ${pendingCount} pending booking${(pendingCount ?? 0) > 1 ? 's' : ''}. The limit for ${limitLabel} is ${maxPending}.`);
                 setLoading(false);
                 return;
+            }
+
+            // Therapist Time-Overlap Conflict Check
+            if (formData.therapist_id) {
+                const selectedService = services.find(s => s.id === formData.service_id);
+                const newDuration = selectedService?.duration || 60;
+
+                const { data: existingBookings } = await supabase
+                    .from('bookings')
+                    .select('id, booking_time, service_id, services(title, duration)')
+                    .eq('therapist_id', formData.therapist_id)
+                    .eq('booking_date', formData.date)
+                    .in('status', ['confirmed', 'pending'])
+                    .is('deleted_at', null);
+
+                if (existingBookings && existingBookings.length > 0) {
+                    const toMinutes = (t: string) => {
+                        const [h, m] = t.split(':').map(Number);
+                        return h * 60 + (m || 0);
+                    };
+                    const newStart = toMinutes(formData.time);
+                    const newEnd = newStart + newDuration;
+
+                    const conflict = existingBookings.find((b: any) => {
+                        const existStart = toMinutes(b.booking_time || '00:00');
+                        const existDuration = b.services?.duration || 60;
+                        const existEnd = existStart + existDuration;
+                        return newStart < existEnd && newEnd > existStart;
+                    });
+
+                    if (conflict) {
+                        const therapist = therapists.find(t => t.id === formData.therapist_id);
+                        const cStart = formatTimeTo12h((conflict as any).booking_time || '00:00');
+                        const cService = (conflict as any).services?.title || 'Session';
+                        setErrorMessage(
+                            `Schedule conflict: ${therapist?.name || 'This therapist'} already has a "${cService}" booking at ${cStart} on this date. Please choose a different time or therapist.`
+                        );
+                        setLoading(false);
+                        return;
+                    }
+                }
             }
 
             const { error } = await supabase.from('bookings').insert([{

@@ -12,6 +12,7 @@ import {
     XCircle,
     Clock3,
     ArrowLeft,
+    ArrowRight,
     History,
     DollarSign,
     Award,
@@ -22,7 +23,8 @@ import {
     Star,
     Shield,
     RotateCcw,
-    AlertTriangle
+    AlertTriangle,
+    CalendarDays
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from './LoadingScreen';
@@ -481,6 +483,23 @@ const UserDashboard: React.FC = () => {
 
                 {/* ─── Guest Banner ─── */}
                 {!user && <GuestRegistrationBanner />}
+
+                {/* ─── View Live Schedule CTA ─── */}
+                <button
+                    onClick={() => navigate('/availability')}
+                    className="w-full mb-6 bg-white rounded-2xl p-4 md:p-5 border border-gold/15 hover:border-gold/40 shadow-sm hover:shadow-lg transition-all group flex items-center justify-between gap-4 active:scale-[0.99]"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center group-hover:bg-gold/20 transition-colors">
+                            <CalendarDays size={18} className="text-gold" />
+                        </div>
+                        <div className="text-left">
+                            <p className="text-sm font-bold text-charcoal group-hover:text-gold transition-colors">View Today's Live Schedule</p>
+                            <p className="text-[10px] text-charcoal/40 uppercase tracking-widest font-bold">See therapist availability & booked slots</p>
+                        </div>
+                    </div>
+                    <ArrowRight size={16} className="text-gold/40 group-hover:text-gold group-hover:translate-x-1 transition-all" />
+                </button>
 
                 {/* ─── Stats Grid ─── */}
                 {bookings.length > 0 && (

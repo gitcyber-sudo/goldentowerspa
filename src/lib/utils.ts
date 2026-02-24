@@ -19,23 +19,27 @@ export const formatTimeTo12h = (time24: string): string => {
     }
 };
 /**
- * Determines the "Business Day" for a given timestamp.
- * A business day starts at 4:00 PM (16:00) and ends at 3:59 PM the next day.
- * Revenue items between 4:00 PM Feb 18 and 3:59 PM Feb 19 are assigned to "Feb 18".
- * @param date - The date to check
- * @returns YYYY-MM-DD string representing the business day
+ * Returns the current calendar date in Philippine Standard Time (UTC+8).
+ * This is the single source of truth for all analytics — business day is simply
+ * the calendar day in Philippine time (midnight to 11:59 PM PHT).
+ * The 4PM-4AM display on the homepage is for display only and does NOT affect analytics.
+ * @param date - The UTC date/timestamp to convert
+ * @returns YYYY-MM-DD string representing the Philippine calendar date
  */
 export const getBusinessDate = (date: Date): string => {
-    const d = new Date(date);
-    const hour = d.getHours();
+    // Convert to Philippine Standard Time (UTC+8) by adding 8 hours
+    const phtOffset = 8 * 60 * 60 * 1000;
+    const phtDate = new Date(date.getTime() + phtOffset);
+    // Return ISO date string in YYYY-MM-DD (always based on PHT midnight)
+    return phtDate.toISOString().split('T')[0];
+};
 
-    // If it's before 4 PM, it belongs to the previous calendar day's business cycle
-    if (hour < 16) {
-        d.setDate(d.getDate() - 1);
-    }
-
-    // Return in YYYY-MM-DD format (can use en-CA for simple ISO date)
-    return d.toLocaleDateString('en-CA');
+/**
+ * Returns today's Philippine Standard Time date string (YYYY-MM-DD).
+ * Convenience wrapper around getBusinessDate(new Date()).
+ */
+export const getPHTDateString = (date: Date = new Date()): string => {
+    return getBusinessDate(date);
 };
 
 /**

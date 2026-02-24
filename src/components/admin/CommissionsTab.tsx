@@ -8,12 +8,15 @@ import {
     ArrowRight,
     DollarSign,
     ChevronDown,
+    ChevronRight,
+    ChevronUp,
     Filter,
     CheckCircle2,
     Clock,
     History,
     FileText,
-    ArrowUpRight
+    ArrowUpRight,
+    LayoutList
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatTimeTo12h } from '../../lib/utils';
@@ -29,6 +32,7 @@ const CommissionsTab: React.FC<CommissionsTabProps> = ({ bookings, therapists, o
     const [loading, setLoading] = useState(false);
     const [selectedTherapistId, setSelectedTherapistId] = useState<string>('all');
     const [view, setView] = useState<'pending' | 'history'>('pending');
+    const [expandedPayoutId, setExpandedPayoutId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchPayouts();
@@ -271,34 +275,63 @@ const CommissionsTab: React.FC<CommissionsTabProps> = ({ bookings, therapists, o
                             <table className="w-full text-left">
                                 <thead className="bg-[#Fdfbf7] border-b border-gold/10">
                                     <tr className="text-[10px] uppercase font-black text-charcoal/40 tracking-[0.2em]">
-                                        <th className="px-6 py-4">Settlement ID</th>
+                                        <th className="px-6 py-4 w-10"></th>
+                                        <th className="px-6 py-4">Settled On</th>
                                         <th className="px-6 py-4">Specialist</th>
-                                        <th className="px-6 py-4">Period</th>
                                         <th className="px-6 py-4">Amount</th>
                                         <th className="px-6 py-4 text-right">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gold/5">
                                     {payouts.map(p => (
-                                        <tr key={p.id} className="hover:bg-cream/20 transition-colors group">
-                                            <td className="px-6 py-5 font-mono text-[10px] text-charcoal/30 font-bold uppercase tracking-tighter">
-                                                PAY-{p.id.slice(0, 8)}
-                                            </td>
-                                            <td className="px-6 py-5 font-bold text-charcoal">
-                                                {therapists.find(t => t.id === p.therapist_id)?.name}
-                                            </td>
-                                            <td className="px-6 py-5 text-charcoal/60">
-                                                {format(new Date(p.period_start), 'MMM d')} - {format(new Date(p.period_end), 'MMM d, yyyy')}
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <span className="font-serif text-charcoal font-bold text-lg">₱{p.amount.toLocaleString()}</span>
-                                            </td>
-                                            <td className="px-6 py-5 text-right">
-                                                <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-1.5">
-                                                    <CheckCircle2 size={12} /> {p.status}
-                                                </span>
-                                            </td>
-                                        </tr>
+                                        <React.Fragment key={p.id}>
+                                            <tr
+                                                className={`hover:bg-cream/20 transition-colors group cursor-pointer ${expandedPayoutId === p.id ? 'bg-cream/10' : ''}`}
+                                                onClick={() => setExpandedPayoutId(expandedPayoutId === p.id ? null : p.id)}
+                                            >
+                                                <td className="px-6 py-5">
+                                                    {expandedPayoutId === p.id ? <ChevronUp size={16} className="text-gold" /> : <ChevronDown size={16} className="text-charcoal/20" />}
+                                                </td>
+                                                <td className="px-6 py-5">
+                                                    <p className="font-bold text-charcoal">{format(new Date(p.created_at), 'MMM dd, yyyy')}</p>
+                                                    <p className="text-[9px] text-charcoal/30 font-mono uppercase">PAY-{p.id.slice(0, 8)}</p>
+                                                </td>
+                                                <td className="px-6 py-5 font-bold text-charcoal text-lg">
+                                                    {therapists.find(t => t.id === p.therapist_id)?.name}
+                                                </td>
+                                                <td className="px-6 py-5">
+                                                    <span className="font-serif text-charcoal font-bold text-xl">₱{p.amount.toLocaleString()}</span>
+                                                </td>
+                                                <td className="px-6 py-5 text-right">
+                                                    <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-1.5">
+                                                        <CheckCircle2 size={12} /> {p.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            {expandedPayoutId === p.id && (
+                                                <tr>
+                                                    <td colSpan={5} className="px-8 py-6 bg-[#Fdfbf7]/50 border-y border-gold/5">
+                                                        <div className="flex items-center gap-2 mb-4">
+                                                            <LayoutList size={14} className="text-gold" />
+                                                            <h5 className="text-[10px] uppercase tracking-widest font-black text-charcoal/60">Service Breakdown</h5>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                            {bookings.filter(b => b.payout_id === p.id).map(b => (
+                                                                <div key={b.id} className="bg-white p-4 rounded-xl border border-gold/5 shadow-sm flex justify-between items-center">
+                                                                    <div>
+                                                                        <p className="font-bold text-charcoal text-sm">{b.services?.title || 'Spa Service'}</p>
+                                                                        <p className="text-[10px] text-charcoal/40 uppercase font-medium">
+                                                                            {format(new Date(b.booking_date), 'MMM dd')} • {formatTimeTo12h(b.booking_time)}
+                                                                        </p>
+                                                                    </div>
+                                                                    <span className="font-serif text-gold font-bold">₱{(b.commission_amount || 0).toLocaleString()}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
                                     ))}
                                     {payouts.length === 0 && (
                                         <tr>
@@ -314,29 +347,50 @@ const CommissionsTab: React.FC<CommissionsTabProps> = ({ bookings, therapists, o
                             {payouts.map(p => (
                                 <div key={p.id} className="p-5 space-y-4">
                                     <div className="flex justify-between items-start">
-                                        <div>
-                                            <p className="font-mono text-[9px] text-charcoal/30 font-bold uppercase tracking-tighter mb-1">
-                                                PAY-{p.id.slice(0, 8)}
-                                            </p>
-                                            <h4 className="font-bold text-charcoal">
+                                        <div onClick={() => setExpandedPayoutId(expandedPayoutId === p.id ? null : p.id)} className="cursor-pointer">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <p className="font-mono text-[9px] text-charcoal/30 font-bold uppercase tracking-tighter">
+                                                    PAY-{p.id.slice(0, 8)}
+                                                </p>
+                                                {expandedPayoutId === p.id ? <ChevronUp size={12} className="text-gold" /> : <ChevronDown size={12} className="text-charcoal/20" />}
+                                            </div>
+                                            <h4 className="font-bold text-charcoal text-lg">
                                                 {therapists.find(t => t.id === p.therapist_id)?.name}
                                             </h4>
+                                            <p className="text-[10px] text-charcoal/50 font-bold uppercase">Settled on {format(new Date(p.created_at), 'MMM dd, yyyy')}</p>
                                         </div>
                                         <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[8px] font-black uppercase tracking-widest flex items-center gap-1">
                                             <CheckCircle2 size={10} /> {p.status}
                                         </span>
                                     </div>
 
-                                    <div className="flex justify-between items-end">
-                                        <div className="text-[10px] text-charcoal/60">
-                                            <p className="uppercase tracking-widest font-bold text-[8px] opacity-40 mb-1">Settlement Period</p>
-                                            {format(new Date(p.period_start), 'MMM d')} - {format(new Date(p.period_end), 'MMM d, yyyy')}
-                                        </div>
+                                    <div className="flex justify-between items-end pt-2 border-t border-gold/5">
+                                        <button
+                                            onClick={() => setExpandedPayoutId(expandedPayoutId === p.id ? null : p.id)}
+                                            className="text-[10px] text-gold font-bold uppercase tracking-widest flex items-center gap-1 active:scale-95 transition-transform"
+                                        >
+                                            <LayoutList size={12} /> {expandedPayoutId === p.id ? 'Hide Breakdown' : 'View Breakdown'}
+                                        </button>
                                         <div className="text-right">
-                                            <p className="uppercase tracking-widest font-bold text-[8px] opacity-40 mb-1">Amount Paid</p>
-                                            <span className="font-serif text-gold font-bold text-xl">₱{p.amount.toLocaleString()}</span>
+                                            <p className="uppercase tracking-widest font-bold text-[8px] opacity-40 mb-1 font-black">TOTAL SETTLEMENT</p>
+                                            <span className="font-serif text-gold font-bold text-2xl">₱{p.amount.toLocaleString()}</span>
                                         </div>
                                     </div>
+
+                                    {expandedPayoutId === p.id && (
+                                        <div className="bg-[#Fdfbf7] p-4 rounded-xl border border-gold/10 space-y-3 animate-in slide-in-from-top-2 duration-300">
+                                            <h5 className="text-[9px] uppercase tracking-widest font-black text-charcoal/40 border-b border-gold/5 pb-2">Included Sessions</h5>
+                                            {bookings.filter(b => b.payout_id === p.id).map(b => (
+                                                <div key={b.id} className="flex justify-between items-center text-xs">
+                                                    <div>
+                                                        <p className="font-bold text-charcoal">{b.services?.title || 'Spa Service'}</p>
+                                                        <p className="text-[9px] text-charcoal/40 uppercase font-medium">{format(new Date(b.booking_date), 'MMM dd')} • {formatTimeTo12h(b.booking_time)}</p>
+                                                    </div>
+                                                    <span className="font-serif text-charcoal font-bold">₱{(b.commission_amount || 0).toLocaleString()}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                             {payouts.length === 0 && (

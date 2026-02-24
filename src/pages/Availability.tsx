@@ -8,8 +8,10 @@ import TherapistGalleryModal from '../components/modals/TherapistGalleryModal';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AuthModal from '../components/AuthModal';
+import LiveTimeline from '../components/admin/LiveTimeline';
 import { useSEO } from '../hooks/useSEO';
-import type { Therapist } from '../types';
+import { getPHTDateString } from '../lib/utils';
+import type { Therapist, Booking } from '../types';
 
 const Availability: React.FC = () => {
     useSEO({
@@ -23,6 +25,7 @@ const Availability: React.FC = () => {
     const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
     const [galleryTherapist, setGalleryTherapist] = useState<Therapist | null>(null);
     const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [todaysBookings, setTodaysBookings] = useState<Booking[]>([]);
 
     useEffect(() => {
         const fetchTherapists = async () => {
@@ -38,6 +41,37 @@ const Availability: React.FC = () => {
         };
 
         fetchTherapists();
+    }, []);
+
+    // Fetch today's bookings for the public timeline
+    useEffect(() => {
+        const fetchTodaysBookings = async () => {
+            try {
+                const todayPHT = getPHTDateString(new Date());
+                // Also fetch tomorrow's early-AM bookings for the timeline tail
+                const phtOffset = 8 * 60 * 60 * 1000;
+                const tomorrowTs = new Date(`${todayPHT}T00:00:00+08:00`).getTime() + 24 * 60 * 60 * 1000;
+                const tomorrowPHT = new Date(tomorrowTs + phtOffset).toISOString().split('T')[0];
+
+                const { data, error } = await supabase
+                    .from('bookings')
+                    .select('*, services(title, price, duration), therapists(name)')
+                    .in('booking_date', [todayPHT, tomorrowPHT])
+                    .in('status', ['confirmed', 'pending', 'completed'])
+                    .is('deleted_at', null)
+                    .order('booking_time', { ascending: true });
+
+                if (error) throw error;
+                setTodaysBookings(data || []);
+            } catch (err) {
+                console.error('Failed to fetch today\'s bookings:', err);
+            }
+        };
+
+        fetchTodaysBookings();
+        // Refresh every 2 minutes
+        const interval = setInterval(fetchTodaysBookings, 2 * 60 * 1000);
+        return () => clearInterval(interval);
     }, []);
 
     const availableTherapists = therapists.filter(t => {
@@ -76,11 +110,21 @@ const Availability: React.FC = () => {
 
             <main className="flex-1 py-12 md:py-20 px-6">
                 <div className="max-w-6xl mx-auto">
-                    {/* Header Section */}
-                    <div className="text-center mb-12 md:mb-16 animate-fade-in-up">
+                    {/* Today's Live Timeline (Public Version) — TOP position */}
+                    <div className="mb-16 md:mb-24">
+                        <div className="text-center mb-8">
+                            <p className="text-gold font-bold tracking-widest uppercase text-xs mb-2">Live Schedule</p>
+                            <h2 className="text-3xl md:text-4xl font-serif text-charcoal">Today's Booked Sessions</h2>
+                            <p className="text-charcoal/50 text-sm mt-2 max-w-lg mx-auto">View the current schedule to find the best time to book your visit. Empty slots mean specialists are available.</p>
+                        </div>
+                        <LiveTimeline bookings={todaysBookings} therapists={therapists} isPublic={true} />
+                    </div>
+
+                    {/* Header Section — Now above the Calendar */}
+                    <div className="text-center mb-10 md:mb-12 animate-fade-in-up">
                         <p className="text-gold font-bold tracking-widest uppercase text-sm mb-4">Plan Your Visit</p>
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-charcoal mb-4">Specialist Schedules</h1>
-                        <p className="text-charcoal/60 max-w-2xl mx-auto text-lg leading-relaxed">Select a date to see available therapists, or click a therapist to see their full schedule.</p>
+                        <h1 className="text-4xl md:text-5xl font-serif text-charcoal mb-4">Specialist Schedules</h1>
+                        <p className="text-charcoal/60 max-w-2xl mx-auto text-lg leading-relaxed">Select a date to see available therapists, or check the live schedule above to plan your visit.</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">

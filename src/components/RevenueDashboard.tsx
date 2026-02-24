@@ -57,43 +57,66 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
-    const getTimeFilter = (): { start: Date | null; end: Date | null } => {
-        const now = new Date();
-        const bizDateStr = getBusinessDate(now);
-        const bizDate = new Date(bizDateStr);
+    // ─── PHT Date Helpers ──────────────────────────────────────────────────────
+    // All analytics use Philippine time (UTC+8), midnight-to-midnight calendar day.
+    // The 4AM–4PM display on the homepage is cosmetic only.
 
-        const businessTodayStart = new Date(bizDate);
-        businessTodayStart.setHours(16, 0, 0, 0);
+    /**
+     * Returns {startISO, endISO} UTC ISO strings for the selected time range,
+     * corresponding to PHT midnight boundaries.
+     */
+    const getTimeFilter = (): { startISO: string | null; endISO: string | null; startDate: string | null; endDate: string | null } => {
+        const phtOffset = 8 * 60 * 60 * 1000;
+        const nowPHT = new Date(Date.now() + phtOffset);
+        const todayPHT = nowPHT.toISOString().split('T')[0]; // YYYY-MM-DD in PHT
 
-        const businessTodayEnd = new Date(businessTodayStart);
-        businessTodayEnd.setDate(businessTodayEnd.getDate() + 1);
-        businessTodayEnd.setHours(15, 59, 59, 999);
+        // PHT midnight = UTC midnight minus 8h, i.e. previous day 16:00 UTC
+        const phtMidnightUTC = (phtDateStr: string): Date => {
+            // phtDateStr is YYYY-MM-DD in PHT. Midnight PHT = that date at 00:00 PHT = UTC-8h
+            return new Date(`${phtDateStr}T00:00:00+08:00`);
+        };
+        const phtEndOfDayUTC = (phtDateStr: string): Date => {
+            return new Date(`${phtDateStr}T23:59:59.999+08:00`);
+        };
+        const subtractDays = (dateStr: string, days: number): string => {
+            const d = new Date(`${dateStr}T00:00:00+08:00`);
+            d.setDate(d.getDate() - days);
+            const phtD = new Date(d.getTime() + phtOffset);
+            return phtD.toISOString().split('T')[0];
+        };
 
         switch (timeRange) {
-            case 'today':
-                return { start: businessTodayStart, end: businessTodayEnd };
-            case '7d':
-                return { start: new Date(businessTodayStart.getTime() - 6 * 24 * 60 * 60 * 1000), end: businessTodayEnd };
-            case '30d':
-                return { start: new Date(businessTodayStart.getTime() - 29 * 24 * 60 * 60 * 1000), end: businessTodayEnd };
-            case '90d':
-                return { start: new Date(businessTodayStart.getTime() - 89 * 24 * 60 * 60 * 1000), end: businessTodayEnd };
-            case 'custom':
-                const startM = new Date(customYear, customMonth, 1, 16, 0, 0);
-                const endM = new Date(customYear, customMonth + 1, 0, 15, 59, 59);
-                return { start: startM, end: endM };
-            case 'range':
-                const startR = new Date(startDate);
-                startR.setHours(16, 0, 0, 0);
-                const endR = new Date(endDate);
-                endR.setHours(15, 59, 59, 999);
-                return { start: startR, end: endR };
+            case 'today': {
+                const start = phtMidnightUTC(todayPHT);
+                const end = phtEndOfDayUTC(todayPHT);
+                return { startISO: start.toISOString(), endISO: end.toISOString(), startDate: todayPHT, endDate: todayPHT };
+            }
+            case '7d': {
+                const fromDate = subtractDays(todayPHT, 6);
+                return { startISO: phtMidnightUTC(fromDate).toISOString(), endISO: phtEndOfDayUTC(todayPHT).toISOString(), startDate: fromDate, endDate: todayPHT };
+            }
+            case '30d': {
+                const fromDate = subtractDays(todayPHT, 29);
+                return { startISO: phtMidnightUTC(fromDate).toISOString(), endISO: phtEndOfDayUTC(todayPHT).toISOString(), startDate: fromDate, endDate: todayPHT };
+            }
+            case '90d': {
+                const fromDate = subtractDays(todayPHT, 89);
+                return { startISO: phtMidnightUTC(fromDate).toISOString(), endISO: phtEndOfDayUTC(todayPHT).toISOString(), startDate: fromDate, endDate: todayPHT };
+            }
+            case 'custom': {
+                const fromDate = `${customYear}-${String(customMonth + 1).padStart(2, '0')}-01`;
+                const lastDay = new Date(customYear, customMonth + 1, 0).getDate();
+                const toDate = `${customYear}-${String(customMonth + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+                return { startISO: phtMidnightUTC(fromDate).toISOString(), endISO: phtEndOfDayUTC(toDate).toISOString(), startDate: fromDate, endDate: toDate };
+            }
+            case 'range': {
+                return { startISO: phtMidnightUTC(startDate).toISOString(), endISO: phtEndOfDayUTC(endDate).toISOString(), startDate: startDate, endDate: endDate };
+            }
             default:
-                return { start: null, end: null };
+                return { startISO: null, endISO: null, startDate: null, endDate: null };
         }
     };
 
-    // Helper to get the Business/Shift date (6 AM boundary)
     const formatTimeTo12h = (time24h: string) => {
         const [hours, minutes] = time24h.split(':');
         const h = parseInt(hours);
@@ -102,35 +125,47 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         return `${displayH}:${minutes} ${ampm}`;
     };
 
-    const getShiftDateLabel = (dateStr: string) => {
-        const date = new Date(dateStr);
-        const bizDate = getBusinessDate(date);
-        const [year, month, day] = bizDate.split('-');
+    // For bookings: group by their PHT calendar date (using booking_date directly
+    // since booking_date is stored as a PHT calendar date)
+    const getPHTDateLabel = (b: Booking): string => {
+        // completed bookings: use the PHT date of completion
+        if (b.completed_at) {
+            return new Date(new Date(b.completed_at).getTime() + 8 * 3600 * 1000).toISOString().split('T')[0];
+        }
+        return b.booking_date;
+    };
+
+    const getDateLabel = (phtDateStr: string): string => {
+        const [year, month, day] = phtDateStr.split('-');
         const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
 
     const filteredBookings = useMemo(() => {
-        const { start, end } = getTimeFilter();
-        if (!start || !end) return bookings;
+        const { startISO, endISO } = getTimeFilter();
+        if (!startISO || !endISO) return bookings;
         return bookings.filter(b => {
-            const date = new Date(b.completed_at || b.created_at);
-            return date >= start && date <= end;
+            // Use completed_at for completed bookings, booking_date + 00:00 PHT for others
+            const dateISO = b.completed_at
+                ? b.completed_at
+                : `${b.booking_date}T00:00:00+08:00`;
+            return dateISO >= startISO && dateISO <= endISO;
         });
     }, [bookings, timeRange, customMonth, customYear, startDate, endDate]);
 
-    // Fetch Expenses for the period
+    // Fetch Expenses for the period — use PHT local date strings to avoid UTC timezone shift
     useEffect(() => {
         const fetchExpenses = async () => {
             setLoadingExpenses(true);
             try {
-                const { start, end } = getTimeFilter();
+                const { startDate: sDate, endDate: eDate } = getTimeFilter();
                 let query = supabase.from('expenses').select('*').is('deleted_at', null);
 
-                if (start) query = query.gte('date', start.toISOString().split('T')[0]);
-                if (end) query = query.lte('date', end.toISOString().split('T')[0]);
+                // Use PHT-local date strings directly (expenses.date is a DATE column = no timezone)
+                if (sDate) query = query.gte('date', sDate);
+                if (eDate) query = query.lte('date', eDate);
 
-                const { data, error } = await query;
+                const { data, error } = await query.order('date', { ascending: false });
                 if (!error && data) setExpenses(data);
             } catch (err) {
                 console.error('Error fetching expenses for dashboard:', err);
@@ -188,10 +223,11 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         const inSpaRevenue = totalRevenue - homeRevenue;
         const homePercentage = totalRevenue > 0 ? (homeRevenue / totalRevenue) * 100 : 0;
 
-        // Calculate shift revenue (grouped by business day)
+        // Group revenue by PHT calendar day
         const dailyRevenue: Record<string, number> = {};
         completed.forEach(b => {
-            const dateLabel = getShiftDateLabel(b.completed_at || b.created_at);
+            const phtDateStr = getPHTDateLabel(b);
+            const dateLabel = getDateLabel(phtDateStr);
             const price = b.price_at_booking || b.services?.price || 0;
             const revenueAmt = b.revenue_amount || (price - Math.ceil(price * 0.30));
             const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
@@ -240,7 +276,8 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         const previousPeriodEnd = new Date(now.getTime() - periodLength * 24 * 60 * 60 * 1000);
 
         const previousPeriodBookings = bookings.filter(b => {
-            const date = new Date(b.completed_at || b.created_at);
+            const dateISO = b.completed_at ? b.completed_at : `${b.booking_date}T00:00:00+08:00`;
+            const date = new Date(dateISO);
             return date >= previousPeriodStart && date < previousPeriodEnd && b.status === 'completed';
         });
 
@@ -261,7 +298,8 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
 
             const weekBookings = completed.filter(b => {
-                const date = new Date(b.completed_at || b.created_at);
+                const dateISO = b.completed_at ? b.completed_at : `${b.booking_date}T00:00:00+08:00`;
+                const date = new Date(dateISO);
                 return date >= weekStart && date < weekEnd;
             });
 
@@ -278,11 +316,10 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             });
         }
 
-        // Peak booking hours (Based on when they occurred/finished)
+        // Peak booking hours — use booking_time (stored in PHT) for accurate display
         const hourCounts: Record<number, number> = {};
         completed.forEach(b => {
-            const date = new Date(b.completed_at || b.created_at);
-            const hour = date.getHours();
+            const hour = b.booking_time ? parseInt(b.booking_time.split(':')[0]) : 0;
             hourCounts[hour] = (hourCounts[hour] || 0) + 1;
         });
         const peakHours = Object.entries(hourCounts)
