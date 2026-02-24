@@ -160,3 +160,12 @@ export interface CommissionPayout {
     notes?: string;
     created_at: string;
 }
+
+export interface GalleryPhoto {
+    id: string;
+    therapist_id: string;
+    image_url: string;
+    caption?: string;
+    sort_order: number;
+    created_at: string;
+}

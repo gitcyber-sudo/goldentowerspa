@@ -28,6 +28,7 @@ import {
 import Logo from './Logo';
 import { getBusinessDate } from '../lib/utils';
 import { exportBookingsToExcel } from '../lib/excelExport';
+import CustomDatePicker from './ui/CustomDatePicker';
 
 import type { Booking, Expense } from '../types';
 
@@ -36,7 +37,7 @@ interface RevenueDashboardProps {
     bookings: Booking[];
 }
 
-type TimeRange = 'today' | '7d' | '30d' | '90d' | 'all' | 'custom';
+type TimeRange = 'today' | '7d' | '30d' | '90d' | 'all' | 'custom' | 'range';
 
 const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
     const [timeRange, setTimeRange] = useState<TimeRange>('7d');
@@ -44,6 +45,8 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
     const [customYear, setCustomYear] = useState(new Date().getFullYear());
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [loadingExpenses, setLoadingExpenses] = useState(false);
+    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+    const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
 
     const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -76,9 +79,15 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             case '90d':
                 return { start: new Date(businessTodayStart.getTime() - 89 * 24 * 60 * 60 * 1000), end: businessTodayEnd };
             case 'custom':
-                const start = new Date(customYear, customMonth, 1, 16, 0, 0);
-                const end = new Date(customYear, customMonth + 1, 0, 15, 59, 59);
-                return { start, end };
+                const startM = new Date(customYear, customMonth, 1, 16, 0, 0);
+                const endM = new Date(customYear, customMonth + 1, 0, 15, 59, 59);
+                return { start: startM, end: endM };
+            case 'range':
+                const startR = new Date(startDate);
+                startR.setHours(16, 0, 0, 0);
+                const endR = new Date(endDate);
+                endR.setHours(15, 59, 59, 999);
+                return { start: startR, end: endR };
             default:
                 return { start: null, end: null };
         }
@@ -108,7 +117,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             const date = new Date(b.completed_at || b.created_at);
             return date >= start && date <= end;
         });
-    }, [bookings, timeRange, customMonth, customYear]);
+    }, [bookings, timeRange, customMonth, customYear, startDate, endDate]);
 
     // Fetch Expenses for the period
     useEffect(() => {
@@ -131,7 +140,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         };
 
         fetchExpenses();
-    }, [timeRange, customMonth, customYear]);
+    }, [timeRange, customMonth, customYear, startDate, endDate]);
 
     // Animate empty states
     useEffect(() => {
@@ -331,7 +340,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             netProfit,
             profitMargin
         };
-    }, [filteredBookings, bookings, timeRange, customMonth, customYear]);
+    }, [filteredBookings, bookings, timeRange, customMonth, customYear, startDate, endDate]);
 
     const StatCard = ({ icon: Icon, label, value, subValue, trend, color, prefix = '' }: {
         icon: React.ElementType;
@@ -452,6 +461,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             case '7d': return 'last 7 days';
             case '30d': return 'last 30 days';
             case '90d': return 'last 90 days';
+            case 'range': return `${startDate} to ${endDate}`;
             default: return 'all time';
         }
     };
@@ -478,6 +488,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                             <option value="90d">Last 90 Days</option>
                             <option value="all">All Time</option>
                             <option value="custom">Custom Month</option>
+                            <option value="range">Custom Date Range</option>
                         </select>
                         <ChevronDown className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/40 pointer-events-none" />
                     </div>
@@ -512,20 +523,42 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                         </div>
                     )}
 
+                    {/* Custom Range Picker */}
+                    {timeRange === 'range' && (
+                        <div className="flex flex-col md:flex-row items-center gap-2">
+                            <div className="w-full md:w-40 flex items-center gap-2">
+                                <span className="text-[10px] font-bold text-charcoal/40 uppercase md:hidden">From:</span>
+                                <CustomDatePicker
+                                    value={startDate}
+                                    onChange={setStartDate}
+                                    direction="down"
+                                />
+                            </div>
+                            <span className="hidden md:inline text-charcoal/40 text-[10px] font-black uppercase tracking-widest px-1">to</span>
+                            <div className="w-full md:w-40 flex items-center gap-2">
+                                <span className="text-[10px] font-bold text-charcoal/40 uppercase md:hidden">To:</span>
+                                <CustomDatePicker
+                                    value={endDate}
+                                    onChange={setEndDate}
+                                    direction="down"
+                                />
+                            </div>
+                        </div>
+                    )}
+
                     {/* Export Button */}
                     <button
                         onClick={() => exportBookingsToExcel(filteredBookings, `Revenue-Report-${timeRange}`)}
                         className="flex items-center gap-2 bg-charcoal text-white px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-gold transition-colors ml-2"
                         title="Export current view to Excel"
                     >
-                        <DollarSign size={16} />
-                        Export
+                        Export to Excel
                     </button>
                 </div>
             </div>
 
             {/* Overview Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6" >
                 <StatCard
                     icon={DollarSign}
                     label="Total Revenue (70%)"
@@ -561,7 +594,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             </div>
 
             {/* Profit & Tips Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6" >
                 <StatCard
                     icon={TrendingUp}
                     label="Estimated Net Profit"
@@ -591,9 +624,9 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             </div>
 
             {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6" >
                 {/* Therapist Performance */}
-                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm" >
                     <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
                             <h3 className="font-semibold text-charcoal">Therapist Performance</h3>
@@ -601,30 +634,32 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                         </div>
                         <Users className="w-5 h-5 text-gold" />
                     </div>
-                    {stats.topTherapists.length > 0 ? (
-                        <div className="space-y-3">
-                            {stats.topTherapists.map(([id, data], index) => (
-                                <div key={id} className="flex items-center gap-3 p-2 md:p-3 bg-charcoal/5 rounded-xl">
-                                    <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-serif text-sm ${index === 0 ? 'bg-gold text-white' : 'bg-gold/10 text-gold'}`}>
-                                        {data.name.charAt(0)}
+                    {
+                        stats.topTherapists.length > 0 ? (
+                            <div className="space-y-3">
+                                {stats.topTherapists.map(([id, data], index) => (
+                                    <div key={id} className="flex items-center gap-3 p-2 md:p-3 bg-charcoal/5 rounded-xl">
+                                        <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-serif text-sm ${index === 0 ? 'bg-gold text-white' : 'bg-gold/10 text-gold'}`}>
+                                            {data.name.charAt(0)}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-charcoal truncate">{data.name}</p>
+                                            <p className="text-[10px] md:text-xs text-charcoal/50">{data.count} sessions</p>
+                                        </div>
+                                        <span className="text-sm font-semibold text-gold">₱{data.revenue.toLocaleString()}</span>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-charcoal truncate">{data.name}</p>
-                                        <p className="text-[10px] md:text-xs text-charcoal/50">{data.count} sessions</p>
-                                    </div>
-                                    <span className="text-sm font-semibold text-gold">₱{data.revenue.toLocaleString()}</span>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="h-40 flex items-center justify-center text-charcoal/40 text-sm">
-                            No therapist data
-                        </div>
-                    )}
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="h-40 flex items-center justify-center text-charcoal/40 text-sm">
+                                No therapist data
+                            </div>
+                        )
+                    }
                 </div>
 
                 {/* Top Services */}
-                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm" >
                     <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
                             <h3 className="font-semibold text-charcoal">Top Services</h3>
@@ -632,32 +667,34 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                         </div>
                         <Logo className="h-5 w-5" color="#997B3D" />
                     </div>
-                    {stats.topServices.length > 0 ? (
-                        <div className="space-y-1">
-                            {stats.topServices.map(([title, data], index) => (
-                                <ProgressBar
-                                    key={title}
-                                    label={title}
-                                    value={data.revenue}
-                                    total={stats.totalRevenue}
-                                    count={data.count}
-                                    color={index === 0 ? 'bg-gold' : 'bg-gold/60'}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="h-40 flex flex-col items-center justify-center text-charcoal/40 text-sm">
-                            <Users size={32} className="mb-2 opacity-30 animate-float" />
-                            No completed bookings yet
-                        </div>
-                    )}
+                    {
+                        stats.topServices.length > 0 ? (
+                            <div className="space-y-1">
+                                {stats.topServices.map(([title, data], index) => (
+                                    <ProgressBar
+                                        key={title}
+                                        label={title}
+                                        value={data.revenue}
+                                        total={stats.totalRevenue}
+                                        count={data.count}
+                                        color={index === 0 ? 'bg-gold' : 'bg-gold/60'}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="h-40 flex flex-col items-center justify-center text-charcoal/40 text-sm">
+                                <Users size={32} className="mb-2 opacity-30 animate-float" />
+                                No completed bookings yet
+                            </div>
+                        )
+                    }
                 </div>
             </div>
 
             {/* Secondary Analytics */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6" >
                 {/* Weekly Revenue Chart */}
-                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm" >
                     <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
                             <h3 className="font-semibold text-charcoal">Revenue Trend</h3>
@@ -665,18 +702,20 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                         </div>
                         <Activity className="w-5 h-5 text-gold" />
                     </div>
-                    {stats.weeklyRevenue.length > 0 ? (
-                        <LineChart data={stats.weeklyRevenue} />
-                    ) : (
-                        <div className="h-40 flex flex-col items-center justify-center text-charcoal/40 text-sm">
-                            <Activity size={32} className="mb-2 opacity-30 animate-float" />
-                            No data available
-                        </div>
-                    )}
+                    {
+                        stats.weeklyRevenue.length > 0 ? (
+                            <LineChart data={stats.weeklyRevenue} />
+                        ) : (
+                            <div className="h-40 flex flex-col items-center justify-center text-charcoal/40 text-sm">
+                                <Activity size={32} className="mb-2 opacity-30 animate-float" />
+                                No data available
+                            </div>
+                        )
+                    }
                 </div>
 
                 {/* Advanced Insights */}
-                <div className="bg-gradient-to-br from-charcoal to-charcoal/95 rounded-xl md:rounded-2xl p-6 md:p-8 text-white relative overflow-hidden">
+                <div className="bg-gradient-to-br from-charcoal to-charcoal/95 rounded-xl md:rounded-2xl p-6 md:p-8 text-white relative overflow-hidden" >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
                     <div className="flex items-center gap-3 mb-8 relative z-10">
@@ -749,7 +788,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             </div>
 
             {/* In-Spa vs Home Summary Overlay */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" >
                 <div className="bg-white p-6 rounded-2xl border border-gold/10 flex items-center justify-between">
                     <div>
                         <p className="text-[10px] uppercase tracking-widest font-black text-charcoal/30 mb-1">In-Spa Revenue</p>
@@ -771,7 +810,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             </div>
 
             {/* Footer Summary */}
-            <div className="bg-gradient-to-r from-gold/10 to-gold/5 rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/20">
+            <div className="bg-gradient-to-r from-gold/10 to-gold/5 rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/20" >
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2 md:p-3 bg-gold/20 rounded-xl">

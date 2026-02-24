@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { supabase } from '../lib/supabase';
-import { Calendar as CalendarIcon, User, Clock, CheckCircle2 } from 'lucide-react';
+import { Calendar as CalendarIcon, User, Clock, CheckCircle2, Camera } from 'lucide-react';
 import Logo from '../components/Logo';
+import TherapistGalleryModal from '../components/modals/TherapistGalleryModal';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useSEO } from '../hooks/useSEO';
@@ -19,6 +20,7 @@ const Availability: React.FC = () => {
     const [therapists, setTherapists] = useState<Therapist[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null);
+    const [galleryTherapist, setGalleryTherapist] = useState<Therapist | null>(null);
 
     useEffect(() => {
         const fetchTherapists = async () => {
@@ -205,8 +207,8 @@ const Availability: React.FC = () => {
                                                     <CheckCircle2 size={10} className="shrink-0" />
                                                     <span className="text-[9px] font-bold uppercase tracking-widest">Available Today</span>
                                                 </div>
-                                                <p className="text-[10px] text-gold font-bold uppercase tracking-tighter">
-                                                    Click for full schedule
+                                                <p className="text-[10px] text-gold font-bold uppercase tracking-tighter flex items-center gap-1">
+                                                    Click for schedule & gallery
                                                 </p>
                                             </div>
                                         </button>
@@ -253,6 +255,19 @@ const Availability: React.FC = () => {
                             <p className="text-gold font-bold tracking-[0.3em] uppercase text-[10px] mb-2">Specialist Schedule</p>
                             <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-6">{selectedTherapist.name}</h2>
 
+                            <div className="flex mb-8">
+                                <button
+                                    onClick={() => {
+                                        setGalleryTherapist(selectedTherapist);
+                                        setSelectedTherapist(null);
+                                    }}
+                                    className="flex items-center gap-2 px-6 py-3 bg-purple-50 text-purple-600 rounded-2xl text-xs font-bold hover:bg-purple-100 transition-all border border-purple-100 active:scale-95 shadow-sm"
+                                >
+                                    <Camera size={16} />
+                                    View Photo Gallery
+                                </button>
+                            </div>
+
                             <h4 className="text-charcoal/40 text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
                                 <Logo size={14} color="#997B3D" /> Available Dates
                             </h4>
@@ -288,6 +303,14 @@ const Availability: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            <TherapistGalleryModal
+                isOpen={!!galleryTherapist}
+                onClose={() => setGalleryTherapist(null)}
+                therapistId={galleryTherapist?.id || ''}
+                therapistName={galleryTherapist?.name || ''}
+            />
+
             <Footer />
         </div>
     );

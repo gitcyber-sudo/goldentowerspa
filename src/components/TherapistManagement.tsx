@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
-import { Plus, Search, Edit3, User, RefreshCw } from 'lucide-react';
+import { Plus, Search, Edit3, User, RefreshCw, Camera } from 'lucide-react';
 import AddTherapistModal from './modals/AddTherapistModal';
 import EditTherapistModal from './modals/EditTherapistModal';
 import ManageAvailabilityModal from './modals/ManageAvailabilityModal';
+import ManageGalleryModal from './modals/ManageGalleryModal';
 import { Calendar } from 'lucide-react';
 
 const TherapistManagement: React.FC = () => {
@@ -13,6 +14,7 @@ const TherapistManagement: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingTherapist, setEditingTherapist] = useState<any>(null);
     const [availabilityTherapist, setAvailabilityTherapist] = useState<any>(null);
+    const [galleryTherapist, setGalleryTherapist] = useState<any>(null);
 
     const fetchTherapists = useCallback(async () => {
         setLoading(true);
@@ -96,6 +98,13 @@ const TherapistManagement: React.FC = () => {
                                     >
                                         <Calendar size={18} />
                                     </button>
+                                    <button
+                                        onClick={() => setGalleryTherapist(therapist)}
+                                        className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                                        title="Manage Gallery"
+                                    >
+                                        <Camera size={18} />
+                                    </button>
                                 </div>
                             </div>
                             {therapist.bio && (
@@ -123,6 +132,11 @@ const TherapistManagement: React.FC = () => {
                 therapist={editingTherapist}
                 onClose={() => setEditingTherapist(null)}
                 onSuccess={fetchTherapists}
+                onManageGallery={() => {
+                    const t = editingTherapist;
+                    setEditingTherapist(null);
+                    setTimeout(() => setGalleryTherapist(t), 100);
+                }}
             />
 
             <ManageAvailabilityModal
@@ -130,6 +144,12 @@ const TherapistManagement: React.FC = () => {
                 therapist={availabilityTherapist}
                 onClose={() => setAvailabilityTherapist(null)}
                 onSuccess={fetchTherapists}
+            />
+
+            <ManageGalleryModal
+                isOpen={!!galleryTherapist}
+                therapist={galleryTherapist}
+                onClose={() => setGalleryTherapist(null)}
             />
         </div>
     );

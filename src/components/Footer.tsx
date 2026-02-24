@@ -29,7 +29,7 @@ const Footer: React.FC = () => {
         <div className="container mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12 border-b border-white/10 pb-12 md:pb-16">
 
-            <div className="md:col-span-4 space-y-5 md:space-y-6">
+            <div className="md:col-span-5 space-y-5 md:space-y-6">
               <h2 className="font-serif text-2xl md:text-4xl text-white">
                 Golden Tower <span className="text-gold italic">Spa</span>
               </h2>
@@ -47,19 +47,19 @@ const Footer: React.FC = () => {
             </div>
 
             {/* Quick Links Column */}
-            <div className="md:col-span-2 space-y-6">
+            <div className="md:col-span-3 space-y-6">
               <h3 className="text-sm font-bold uppercase tracking-widest text-white">Quick Links</h3>
               <ul className="space-y-3 font-light text-white/60 text-sm">
-                <li><button onClick={() => handleScroll('services')} className="hover:text-gold transition-colors text-left w-full">Services</button></li>
-                <li><button onClick={() => handleScroll('specialists')} className="hover:text-gold transition-colors text-left w-full">Our Team</button></li>
-                <li><button onClick={() => handleScroll('sanctuary')} className="hover:text-gold transition-colors text-left w-full">Locations</button></li>
-                <li><Link to="/availability" className="hover:text-gold transition-colors">Therapist Schedules</Link></li>
-                <li><Link to="/about" className="hover:text-gold transition-colors">About Us</Link></li>
+                <li><button onClick={() => handleScroll('services')} className="hover:text-gold transition-colors text-left w-full block">Services</button></li>
+                <li><button onClick={() => handleScroll('specialists')} className="hover:text-gold transition-colors text-left w-full block">Our Team</button></li>
+                <li><button onClick={() => handleScroll('sanctuary')} className="hover:text-gold transition-colors text-left w-full block">Locations</button></li>
+                <li><Link to="/availability" className="hover:text-gold transition-colors block w-full">Therapist Schedules</Link></li>
+                <li><Link to="/about" className="hover:text-gold transition-colors block w-full">About Us</Link></li>
               </ul>
             </div>
 
             {/* Contact Column */}
-            <div className="md:col-span-3 space-y-6">
+            <div className="md:col-span-4 space-y-6">
               <h3 className="text-sm font-bold uppercase tracking-widest text-white">Contact</h3>
               <ul className="space-y-4 font-light text-white/60 text-sm">
                 <li className="flex items-center gap-3">

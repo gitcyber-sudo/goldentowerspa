@@ -109,8 +109,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                             <CheckCircle2 className="text-gold" size={64} aria-hidden="true" />
                         </div>
                         <h2 id="booking-modal-title" className="font-serif text-3xl md:text-4xl text-charcoal mb-4">Reservation Confirmed</h2>
-                        <p className="text-charcoal-light mb-8 max-w-sm mx-auto text-sm md:text-base">
-                            Your ritual at Golden Tower Spa has been requested. {user?.email ? `We will send a confirmation to ${user.email} shortly.` : 'Please arrive on your selected time.'}
+                        <p className="text-charcoal-light mb-8 max-w-sm mx-auto text-sm md:text-base leading-relaxed">
+                            Your sanctuary awaits! We've received your request and one of our consultants <span className="text-gold font-bold">will call you shortly</span> to confirm your appointment and finalize the details.
                         </p>
                         <button
                             onClick={onClose}

@@ -3,7 +3,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Camera } from 'lucide-react';
+import TherapistGalleryModal from './modals/TherapistGalleryModal';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,6 +25,7 @@ const Therapists: React.FC<TherapistsProps> = React.memo(({ onBookClick }) => {
   const { loading: authLoading, user } = useAuth();
   const [team, setTeam] = useState<TherapistItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [galleryTherapist, setGalleryTherapist] = useState<TherapistItem | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -189,6 +191,18 @@ const Therapists: React.FC<TherapistsProps> = React.memo(({ onBookClick }) => {
                   </div>
                 </div>
 
+                {/* View Gallery Button */}
+                <button
+                  onClick={() => setGalleryTherapist(member)}
+                  className="absolute top-4 right-4 z-30 px-4 py-2 rounded-full bg-charcoal/40 backdrop-blur-md border border-gold/30 flex items-center gap-2 text-white shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 group-hover:bg-gold group-hover:border-gold md:opacity-0 md:group-hover:opacity-100"
+                  aria-label={`View ${member.name}'s gallery`}
+                >
+                  <Camera size={14} className="text-gold group-hover:text-white transition-colors" />
+                  <span className="text-[10px] font-bold tracking-[0.2em] uppercase">View Gallery</span>
+
+                  {/* Subtle Pulse for discovery on mobile */}
+                  <span className="absolute inset-0 rounded-full bg-gold/20 animate-ping md:hidden" />
+                </button>
 
               </div>
             ))}
@@ -197,6 +211,15 @@ const Therapists: React.FC<TherapistsProps> = React.memo(({ onBookClick }) => {
 
 
       </div>
+
+      {/* Gallery Modal */}
+      <TherapistGalleryModal
+        isOpen={!!galleryTherapist}
+        onClose={() => setGalleryTherapist(null)}
+        therapistId={galleryTherapist?.id || ''}
+        therapistName={galleryTherapist?.name || ''}
+        therapistSpecialty={galleryTherapist?.specialty}
+      />
     </section>
   );
 });

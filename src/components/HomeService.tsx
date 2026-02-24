@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Home, ArrowRight, Loader2, MapPin } from 'lucide-react';
 import Logo from './Logo';
 import { supabase } from '../lib/supabase';
+import { formatDuration } from '../lib/utils';
 
 interface ServiceItem {
     id: string;
@@ -102,7 +103,7 @@ const HomeService: React.FC<HomeServiceProps> = ({ onBookClick }) => {
                                         P {service.price}
                                     </div>
                                     <div className="text-sm font-medium tracking-wide uppercase opacity-90 border-l border-white/30 pl-4">
-                                        {service.duration} Session
+                                        {formatDuration(parseInt(service.duration))}
                                     </div>
                                 </div>
                             </div>

@@ -9,9 +9,10 @@ interface EditTherapistModalProps {
     onClose: () => void;
     onSuccess: () => void;
     therapist: Therapist;
+    onManageGallery?: () => void;
 }
 
-const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose, onSuccess, therapist }) => {
+const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose, onSuccess, therapist, onManageGallery }) => {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -213,6 +214,22 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
                             </label>
                         </div>
                     </div>
+
+                    {onManageGallery && (
+                        <div className="flex justify-center mb-4">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    onManageGallery();
+                                    onClose();
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-xl text-xs font-bold hover:bg-purple-100 transition-colors border border-purple-100"
+                            >
+                                <Camera size={14} />
+                                Manage Photo Gallery
+                            </button>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
