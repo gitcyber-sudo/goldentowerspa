@@ -3,6 +3,7 @@ import { MoveRight, ArrowRight, ChevronRight } from 'lucide-react';
 import Logo from './Logo';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { formatDuration } from '../lib/utils';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,7 +12,7 @@ interface ServiceItem {
     title: string;
     description: string;
     image_url: string;
-    duration: string;
+    duration: number;
     price: number;
     category?: string;
 }
@@ -143,7 +144,7 @@ const ExpressSection: React.FC<ExpressSectionProps> = ({ expressMassages, onBook
                                             P {service.price}
                                         </div>
                                         <div className="absolute top-6 left-6 bg-charcoal/80 backdrop-blur-md px-3 py-1.5 text-[10px] text-gold uppercase font-black tracking-[0.2em] rounded-full border border-gold/20">
-                                            30 Mins Ritual
+                                            {formatDuration(service.duration)} Ritual
                                         </div>
                                     </div>
                                     <div className="space-y-4 mb-8">

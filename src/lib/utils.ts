@@ -87,3 +87,25 @@ export const validatePhoneNumber = (phone: string, isOptional: boolean = false):
     if (phone.length > 11) return 'Invalid number';
     return null;
 };
+
+/**
+ * Formats duration in minutes to a human-readable string.
+ * @param minutes - Duration in minutes
+ * @returns Formatted string (e.g., "1 hour and 30 minutes")
+ */
+export const formatDuration = (minutes: number): string => {
+    if (!minutes) return '';
+    if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+
+    const hourLabel = hours === 1 ? 'hour' : 'hours';
+    const minuteLabel = remainingMinutes === 1 ? 'minute' : 'minutes';
+
+    if (remainingMinutes === 0) {
+        return `${hours} ${hourLabel}`;
+    }
+
+    return `${hours} ${hourLabel} and ${remainingMinutes} ${minuteLabel}`;
+};

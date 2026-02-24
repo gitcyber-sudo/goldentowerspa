@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import gsap from 'gsap';
 import {
     TrendingUp,
@@ -28,7 +29,7 @@ import Logo from './Logo';
 import { getBusinessDate } from '../lib/utils';
 import { exportBookingsToExcel } from '../lib/excelExport';
 
-import type { Booking } from '../types';
+import type { Booking, Expense } from '../types';
 
 
 interface RevenueDashboardProps {
@@ -38,9 +39,11 @@ interface RevenueDashboardProps {
 type TimeRange = 'today' | '7d' | '30d' | '90d' | 'all' | 'custom';
 
 const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
-    const [timeRange, setTimeRange] = useState<TimeRange>('30d');
+    const [timeRange, setTimeRange] = useState<TimeRange>('7d');
     const [customMonth, setCustomMonth] = useState(new Date().getMonth());
     const [customYear, setCustomYear] = useState(new Date().getFullYear());
+    const [expenses, setExpenses] = useState<Expense[]>([]);
+    const [loadingExpenses, setLoadingExpenses] = useState(false);
 
     const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -107,6 +110,29 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         });
     }, [bookings, timeRange, customMonth, customYear]);
 
+    // Fetch Expenses for the period
+    useEffect(() => {
+        const fetchExpenses = async () => {
+            setLoadingExpenses(true);
+            try {
+                const { start, end } = getTimeFilter();
+                let query = supabase.from('expenses').select('*').is('deleted_at', null);
+
+                if (start) query = query.gte('date', start.toISOString().split('T')[0]);
+                if (end) query = query.lte('date', end.toISOString().split('T')[0]);
+
+                const { data, error } = await query;
+                if (!error && data) setExpenses(data);
+            } catch (err) {
+                console.error('Error fetching expenses for dashboard:', err);
+            } finally {
+                setLoadingExpenses(false);
+            }
+        };
+
+        fetchExpenses();
+    }, [timeRange, customMonth, customYear]);
+
     // Animate empty states
     useEffect(() => {
         gsap.to('.animate-float', {
@@ -124,23 +150,32 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         const cancelled = filteredBookings.filter(b => b.status === 'cancelled');
 
         const totalRevenue = completed.reduce((sum, b) => {
-            const revenueAmt = b.revenue_amount || ((b.services?.price || 0) * 0.70);
+            const price = b.price_at_booking || b.services?.price || 0;
+            const revenueAmt = b.revenue_amount || (price - Math.ceil(price * 0.30));
             const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
             return sum + revenueAmt + managementTip;
         }, 0);
 
-        const pendingRevenue = pending.reduce((sum, b) => sum + (b.services?.price || 0), 0);
-        const lostRevenue = cancelled.reduce((sum, b) => sum + (b.services?.price || 0), 0);
+        const pendingRevenue = pending.reduce((sum, b) => sum + (b.price_at_booking || b.services?.price || 0), 0);
+        const totalCommissions = completed.reduce((sum, b) => {
+            const price = b.price_at_booking || b.services?.price || 0;
+            const commission = b.commission_amount || Math.ceil(price * 0.30);
+            return sum + commission;
+        }, 0);
 
         // Calculate specific tip metrics
         const managementTips = completed.reduce((sum, b) => b.tip_recipient === 'management' ? sum + (b.tip_amount || 0) : sum, 0);
         const therapistTips = completed.reduce((sum, b) => b.tip_recipient === 'therapist' ? sum + (b.tip_amount || 0) : sum, 0);
 
+        const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+        const netProfit = totalRevenue - totalExpenses;
+        const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
         // In-Spa vs Home Service Breakdown
         const homeServiceBookings = completed.filter(b =>
             (b.services?.title || '').toLowerCase().includes('home')
         );
-        const homeRevenue = homeServiceBookings.reduce((sum, b) => sum + (b.services?.price || 0), 0);
+        const homeRevenue = homeServiceBookings.reduce((sum, b) => sum + (b.price_at_booking || b.services?.price || 0), 0);
         const inSpaRevenue = totalRevenue - homeRevenue;
         const homePercentage = totalRevenue > 0 ? (homeRevenue / totalRevenue) * 100 : 0;
 
@@ -148,7 +183,8 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         const dailyRevenue: Record<string, number> = {};
         completed.forEach(b => {
             const dateLabel = getShiftDateLabel(b.completed_at || b.created_at);
-            const revenueAmt = b.revenue_amount || ((b.services?.price || 0) * 0.70);
+            const price = b.price_at_booking || b.services?.price || 0;
+            const revenueAmt = b.revenue_amount || (price - Math.ceil(price * 0.30));
             const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
             dailyRevenue[dateLabel] = (dailyRevenue[dateLabel] || 0) + revenueAmt + managementTip;
         });
@@ -161,7 +197,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                 serviceRevenue[title] = { count: 0, revenue: 0 };
             }
             serviceRevenue[title].count += 1;
-            serviceRevenue[title].revenue += b.services?.price || 0;
+            serviceRevenue[title].revenue += b.price_at_booking || b.services?.price || 0;
         });
 
         // Top services by revenue
@@ -178,7 +214,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                 therapistRevenue[therapistId] = { name: therapistName, count: 0, revenue: 0 };
             }
             therapistRevenue[therapistId].count += 1;
-            therapistRevenue[therapistId].revenue += b.services?.price || 0;
+            therapistRevenue[therapistId].revenue += b.price_at_booking || b.services?.price || 0;
         });
 
         const topTherapists = Object.entries(therapistRevenue)
@@ -200,7 +236,8 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         });
 
         const previousRevenue = previousPeriodBookings.reduce((sum, b) => {
-            const revenueAmt = b.revenue_amount || ((b.services?.price || 0) * 0.70);
+            const price = b.price_at_booking || b.services?.price || 0;
+            const revenueAmt = b.revenue_amount || (price - Math.ceil(price * 0.30));
             const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
             return sum + revenueAmt + managementTip;
         }, 0);
@@ -220,7 +257,8 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             });
 
             const weekRev = weekBookings.reduce((sum, b) => {
-                const revenueAmt = b.revenue_amount || ((b.services?.price || 0) * 0.70);
+                const price = b.price_at_booking || b.services?.price || 0;
+                const revenueAmt = b.revenue_amount || (price - Math.ceil(price * 0.30));
                 const managementTip = b.tip_recipient === 'management' ? (b.tip_amount || 0) : 0;
                 return sum + revenueAmt + managementTip;
             }, 0);
@@ -268,7 +306,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
         return {
             totalRevenue,
             pendingRevenue,
-            lostRevenue,
+            totalCommissions,
             homeRevenue,
             inSpaRevenue,
             homePercentage,
@@ -288,7 +326,10 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
             avgSessionsPerClient,
             avgLeadTime,
             managementTips,
-            therapistTips
+            therapistTips,
+            totalExpenses,
+            netProfit,
+            profitMargin
         };
     }, [filteredBookings, bookings, timeRange, customMonth, customYear]);
 
@@ -507,36 +548,46 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({ bookings }) => {
                     label="Avg. Booking Value"
                     value={Math.round(stats.avgBookingValue)}
                     prefix="₱"
-                    color="bg-purple-100 text-purple-600"
-                />
-                <StatCard
-                    icon={TrendingDown}
-                    label="Lost Revenue"
-                    value={stats.lostRevenue}
-                    prefix="₱"
-                    color="bg-rose-100 text-rose-600"
-                    subValue={`${stats.cancelledCount} cancelled`}
-                />
-            </div>
-
-            {/* Tip Analytics Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-                <StatCard
-                    icon={DollarSign}
-                    label="Management Tips"
-                    value={stats.managementTips}
-                    prefix="₱"
-                    color="bg-emerald-50 text-emerald-700"
-                    subValue="Included in Total Revenue"
+                    color="bg-amber-100 text-amber-600"
                 />
                 <StatCard
                     icon={Users}
-                    label="Therapist Tips"
-                    value={stats.therapistTips}
+                    label="Therapist Commissions"
+                    value={stats.totalCommissions}
                     prefix="₱"
-                    color="bg-charcoal/5 text-charcoal"
-                    subValue="Excluded from Spa Gross"
+                    color="bg-purple-100 text-purple-600"
+                    subValue={`${stats.completedCount} payouts`}
                 />
+            </div>
+
+            {/* Profit & Tips Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
+                <StatCard
+                    icon={TrendingUp}
+                    label="Estimated Net Profit"
+                    value={stats.netProfit}
+                    prefix="₱"
+                    color="bg-charcoal text-gold shadow-gold/10"
+                    subValue={`${stats.profitMargin.toFixed(1)}% Profit Margin`}
+                />
+                <StatCard
+                    icon={TrendingDown}
+                    label="Total Expenses"
+                    value={stats.totalExpenses}
+                    prefix="₱"
+                    color="bg-rose-50 text-rose-600"
+                    subValue={`${expenses.length} records logged`}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white rounded-xl p-4 border border-gold/10 flex flex-col justify-center">
+                        <p className="text-[10px] uppercase tracking-widest text-charcoal/40 font-bold mb-1">Mgt. Tips</p>
+                        <p className="text-xl font-serif text-emerald-600">₱{stats.managementTips.toLocaleString()}</p>
+                    </div>
+                    <div className="bg-white rounded-xl p-4 border border-gold/10 flex flex-col justify-center">
+                        <p className="text-[10px] uppercase tracking-widest text-charcoal/40 font-bold mb-1">Ther. Tips</p>
+                        <p className="text-xl font-serif text-charcoal/40">₱{stats.therapistTips.toLocaleString()}</p>
+                    </div>
+                </div>
             </div>
 
             {/* Charts Row */}

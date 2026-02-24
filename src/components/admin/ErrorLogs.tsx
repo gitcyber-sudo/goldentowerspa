@@ -151,7 +151,7 @@ const ErrorLogs: React.FC = () => {
                                 <div className="flex items-center gap-4 text-xs text-charcoal/50">
                                     <span className="flex items-center gap-1.5 bg-charcoal/5 px-2 py-1 rounded">
                                         <Clock size={12} />
-                                        {new Date(selectedLog.created_at).toLocaleString()}
+                                        {new Date(selectedLog.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}
                                     </span>
                                     <span className="flex items-center gap-1.5 bg-charcoal/5 px-2 py-1 rounded truncate max-w-[200px]" title={selectedLog.url}>
                                         <ExternalLink size={12} />

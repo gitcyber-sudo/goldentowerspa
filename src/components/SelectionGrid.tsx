@@ -1,5 +1,6 @@
 import React from 'react';
 import { Check } from 'lucide-react';
+import { formatDuration } from '../lib/utils';
 
 export interface SelectionOption {
     id: string;
@@ -51,7 +52,7 @@ const SelectionGrid: React.FC<SelectionGridProps> = ({ options, selectedId, onSe
                             {option.subtitle && <p className="text-xs text-gold font-semibold mt-0.5">{option.subtitle}</p>}
 
                             <div className="flex items-center gap-2 mt-1.5 text-[11px] text-charcoal/50 font-bold uppercase tracking-widest">
-                                {option.duration && <span>{option.duration}</span>}
+                                {option.duration && <span>{formatDuration(typeof option.duration === 'string' ? parseInt(option.duration) : option.duration)}</span>}
                                 {option.price && (
                                     <>
                                         <span className="text-gold/40">•</span>

@@ -3,6 +3,7 @@ import { ArrowRight, Star } from 'lucide-react';
 import Logo from './Logo';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { formatDuration } from '../lib/utils';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,7 +14,7 @@ interface SignatureMassageProps {
     title: string;
     description: string;
     price: number;
-    duration: string;
+    duration: number;
   };
 }
 
@@ -145,7 +146,7 @@ const SignatureMassage: React.FC<SignatureMassageProps> = ({ onBookClick, servic
             <div>
               <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Duration</p>
               <p className="text-lg font-light flex items-center gap-2">
-                {service.duration}
+                {formatDuration(service.duration)}
               </p>
             </div>
           </div>

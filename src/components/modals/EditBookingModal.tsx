@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import type { Service, Therapist, BookingStatus } from '../../types';
 import CustomDatePicker from '../ui/CustomDatePicker';
 import CustomTimePicker from '../ui/CustomTimePicker';
-import { formatPhoneNumber, validatePhoneNumber } from '../../lib/utils';
+import { formatPhoneNumber, validatePhoneNumber, formatDuration } from '../../lib/utils';
 
 interface EditBookingFormData {
     guest_name: string;
@@ -88,7 +88,7 @@ const EditBookingModal: React.FC<EditBookingModalProps> = React.memo(({
                     <div>
                         <label className="text-xs font-bold uppercase tracking-widest text-gold block mb-1">Service</label>
                         <select className="w-full border border-gold/20 rounded-lg p-3" value={data.service_id} onChange={e => setData({ ...data, service_id: e.target.value })}>
-                            {services.map(s => <option key={s.id} value={s.id}>{s.title} - ₱{s.price}</option>)}
+                            {services.map(s => <option key={s.id} value={s.id}>{s.title} - {formatDuration(s.duration)} - ₱{s.price}</option>)}
                         </select>
                     </div>
 

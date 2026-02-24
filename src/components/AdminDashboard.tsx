@@ -21,6 +21,9 @@ import BookingsTab from './admin/BookingsTab';
 import ErrorLogs from './admin/ErrorLogs';
 import LiveTimeline from './admin/LiveTimeline';
 import CommissionsTab from './admin/CommissionsTab';
+import ServicesPricingTab from './admin/ServicesPricingTab';
+import InventoryTab from './admin/InventoryTab';
+import ExpensesTab from './admin/ExpensesTab';
 
 import type { Booking, Therapist, Service } from '../types';
 
@@ -63,6 +66,7 @@ const AdminDashboard: React.FC = () => {
             const { data, error } = await supabase
                 .from('bookings')
                 .select(`*, services (title, price, duration), therapists (name)`)
+                .is('deleted_at', null)
                 .order('created_at', { ascending: false });
             if (error) throw error;
             if (data) setBookings(data as any);
@@ -89,7 +93,7 @@ const AdminDashboard: React.FC = () => {
     const fetchTherapists = useCallback(async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase.from('therapists').select('*');
+            const { data, error } = await supabase.from('therapists').select('*').is('deleted_at', null);
             if (error) throw error;
             if (data) setTherapists(data as any);
         } catch (err) {
@@ -100,24 +104,29 @@ const AdminDashboard: React.FC = () => {
     }, []);
 
     const fetchServices = useCallback(async () => {
-        const { data } = await supabase.from('services').select('*');
-        if (data) {
-            const sorted = [...data].sort((a, b) => {
-                const aTitle = a.title.toUpperCase();
-                const bTitle = b.title.toUpperCase();
-                const aIsSignature = a.category === 'signature' || aTitle.includes('SIGNATURE');
-                const bIsSignature = b.category === 'signature' || bTitle.includes('SIGNATURE');
-                const aIsPackage = aTitle.includes('PACKAGE');
-                const bIsPackage = bTitle.includes('PACKAGE');
+        try {
+            const { data, error } = await supabase.from('services').select('*').is('deleted_at', null);
+            if (error) throw error;
+            if (data) {
+                const sorted = [...data].sort((a, b) => {
+                    const aTitle = a.title.toUpperCase();
+                    const bTitle = b.title.toUpperCase();
+                    const aIsSignature = a.category === 'signature' || aTitle.includes('SIGNATURE');
+                    const bIsSignature = b.category === 'signature' || bTitle.includes('SIGNATURE');
+                    const aIsPackage = aTitle.includes('PACKAGE');
+                    const bIsPackage = bTitle.includes('PACKAGE');
 
-                if (aIsSignature && !bIsSignature) return -1;
-                if (!aIsSignature && bIsSignature) return 1;
-                if (aIsPackage && !bIsPackage) return 1;
-                if (!aIsPackage && bIsPackage) return -1;
-                if (aIsPackage && bIsPackage) return aTitle.localeCompare(bTitle, undefined, { numeric: true });
-                return aTitle.localeCompare(bTitle);
-            });
-            setServices(sorted as any);
+                    if (aIsSignature && !bIsSignature) return -1;
+                    if (!aIsSignature && bIsSignature) return 1;
+                    if (aIsPackage && !bIsPackage) return 1;
+                    if (!aIsPackage && bIsPackage) return -1;
+                    if (aIsPackage && bIsPackage) return aTitle.localeCompare(bTitle, undefined, { numeric: true });
+                    return aTitle.localeCompare(bTitle);
+                });
+                setServices(sorted as any);
+            }
+        } catch (err) {
+            console.error('Error fetching services:', err);
         }
     }, []);
 
@@ -133,10 +142,22 @@ const AdminDashboard: React.FC = () => {
             fetchBookings();
             // Need therapists for Live Timeline on dashboard and dropdown in bookings
             if (therapists.length === 0) fetchTherapists();
-        } else if (activeTab === 'therapists') {
-            fetchTherapists();
+        } else if (activeTab === 'services') {
+            fetchServices();
         }
+    }, [activeTab, fetchBookings, fetchTherapists, fetchServices]);
 
+    const handleRefresh = useCallback(async () => {
+        setLoading(true);
+        await Promise.all([
+            fetchBookings(),
+            fetchTherapists(),
+            fetchServices()
+        ]);
+        setLoading(false);
+    }, [fetchBookings, fetchTherapists, fetchServices]);
+
+    useEffect(() => {
         // Animate tab transition
         if (contentRef.current) {
             gsap.fromTo(contentRef.current,
@@ -177,10 +198,12 @@ const AdminDashboard: React.FC = () => {
                 updateData.tip_amount = tipAmount || 0;
                 updateData.tip_recipient = tipRecipient || null;
 
-                // Calculate Commission (30%) and Revenue (70%)
-                const servicePrice = booking.services?.price || 0;
-                updateData.commission_amount = servicePrice * 0.30;
-                updateData.revenue_amount = servicePrice * 0.70;
+                // Calculate Commission (30% rounded up) and Revenue (Remainder)
+                const servicePrice = booking.price_at_booking || booking.services?.price || 0;
+                updateData.price_at_booking = servicePrice;
+                const commission = Math.ceil(servicePrice * 0.30);
+                updateData.commission_amount = commission;
+                updateData.revenue_amount = servicePrice - commission;
             }
             const { error } = await supabase.from('bookings').update(updateData).eq('id', id);
             if (error) throw error;
@@ -224,6 +247,7 @@ const AdminDashboard: React.FC = () => {
                 therapist_id: manualBookingData.therapist_id || null,
                 booking_date: manualBookingData.date,
                 booking_time: manualBookingData.time,
+                price_at_booking: services.find(s => s.id === manualBookingData.service_id)?.price || 0,
                 status: 'pending'
             }]);
             if (error) throw error;
@@ -299,9 +323,16 @@ const AdminDashboard: React.FC = () => {
                 booking_date: editFormData.booking_date,
                 booking_time: editFormData.booking_time,
                 status: editFormData.status,
+                price_at_booking: editFormData.status === 'completed' && !editingBooking.price_at_booking
+                    ? (services.find(s => s.id === editFormData.service_id)?.price || editingBooking.price_at_booking || 0)
+                    : editingBooking.price_at_booking,
                 completed_at: editFormData.status === 'completed' ? (editingBooking.completed_at || new Date().toISOString()) : null,
-                commission_amount: editFormData.status === 'completed' ? ((services.find(s => s.id === editFormData.service_id)?.price || 0) * 0.30) : 0,
-                revenue_amount: editFormData.status === 'completed' ? ((services.find(s => s.id === editFormData.service_id)?.price || 0) * 0.70) : 0,
+                commission_amount: editFormData.status === 'completed'
+                    ? Math.ceil((services.find(s => s.id === editFormData.service_id)?.price || editingBooking.price_at_booking || 0) * 0.30)
+                    : 0,
+                revenue_amount: editFormData.status === 'completed'
+                    ? ((services.find(s => s.id === editFormData.service_id)?.price || editingBooking.price_at_booking || 0) - Math.ceil((services.find(s => s.id === editFormData.service_id)?.price || editingBooking.price_at_booking || 0) * 0.30))
+                    : 0,
                 user_email: editFormData.guest_email || editingBooking.user_email
             }).eq('id', editingBooking.id);
 
@@ -319,7 +350,7 @@ const AdminDashboard: React.FC = () => {
         if (!confirm("Are you sure you want to delete this booking? This action cannot be undone.")) return;
 
         try {
-            const { error } = await supabase.from('bookings').delete().eq('id', id);
+            const { error } = await supabase.from('bookings').update({ deleted_at: new Date().toISOString() }).eq('id', id);
             if (error) throw error;
             fetchBookings();
         } catch (err: unknown) {
@@ -344,13 +375,13 @@ const AdminDashboard: React.FC = () => {
                 .reduce((sum, b) => sum + (b.services?.price || 0), 0),
             pendingRevenue: bookings
                 .filter(b => b.status === 'confirmed' || b.status === 'pending')
-                .reduce((sum, b) => sum + (b.services?.price || 0), 0),
+                .reduce((sum, b) => sum + (b.price_at_booking || b.services?.price || 0), 0),
             todayRevenue: bookings
                 .filter(b => {
                     if (b.status !== 'completed' || !b.completed_at) return false;
                     return getBusinessDate(new Date(b.completed_at)) === businessToday;
                 })
-                .reduce((sum, b) => sum + (b.services?.price || 0), 0),
+                .reduce((sum, b) => sum + (b.price_at_booking || b.services?.price || 0), 0),
         };
     }, [bookings]);
 
@@ -362,13 +393,16 @@ const AdminDashboard: React.FC = () => {
             case 'website-analytics': return 'Website Analytics';
             case 'revenue': return 'Revenue Analytics';
             case 'clients': return 'Client Intelligence';
+            case 'inventory': return 'Inventory & Supplies';
+            case 'expenses': return 'Expense & Profit Hub';
             case 'errors': return 'System Error Logs';
+            case 'services': return 'Services & Pricing';
             default: return 'Admin Panel';
         }
     }, [activeTab]);
 
     return (
-        <div className="min-h-screen bg-[#F9F7F2] flex">
+        <div className="h-screen bg-[#F9F7F2] flex overflow-hidden">
             <AdminSidebar
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
@@ -378,13 +412,13 @@ const AdminDashboard: React.FC = () => {
             />
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto h-screen">
+            <main className="flex-1 overflow-y-auto h-screen relative">
                 <AdminHeader
                     title={getPageTitle()}
                     setSidebarOpen={setSidebarOpen}
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
-                    onRefresh={fetchBookings}
+                    onRefresh={handleRefresh}
                     onManualBooking={() => setShowManualBooking(true)}
                     showSearch={activeTab === 'bookings' || activeTab === 'dashboard'}
                 />
@@ -410,9 +444,12 @@ const AdminDashboard: React.FC = () => {
                     )}
                     {activeTab === 'website-analytics' && <AnalyticsDashboard />}
                     {activeTab === 'revenue' && <RevenueDashboard bookings={bookings} />}
-                    {activeTab === 'commissions' && <CommissionsTab bookings={bookings} therapists={therapists} />}
+                    {activeTab === 'commissions' && <CommissionsTab bookings={bookings} therapists={therapists} onRefresh={fetchBookings} />}
                     {activeTab === 'therapists' && <TherapistManagement />}
                     {activeTab === 'clients' && <ClientIntelligence />}
+                    {activeTab === 'inventory' && <InventoryTab />}
+                    {activeTab === 'expenses' && <ExpensesTab />}
+                    {activeTab === 'services' && <ServicesPricingTab services={services} onRefresh={fetchServices} />}
                     {activeTab === 'errors' && <ErrorLogs />}
                 </div>
 

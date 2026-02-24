@@ -5,6 +5,7 @@ import ExpressSection from './ExpressSection';
 import SignatureMassage from './SignatureMassage';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { formatDuration } from '../lib/utils';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,7 +14,7 @@ interface ServiceItem {
   title: string;
   description: string;
   image_url: string;
-  duration: string;
+  duration: number;
   price: number;
   category?: string;
 }
@@ -185,7 +186,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
                           className="w-full h-full object-cover glass-inner group-hover:scale-110 transition-transform duration-1000"
                         />
                         <div className="absolute bottom-4 right-4 bg-gold text-white px-3 py-1 text-sm font-bold shadow-md">₱{service.price}</div>
-                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] uppercase font-bold tracking-widest">{service.duration}</div>
+                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] uppercase font-bold tracking-widest">{formatDuration(service.duration)}</div>
                       </div>
                       <h3 className={`font-serif text-2xl text-charcoal mb-2 group-hover:text-gold transition-colors ${index % 2 === 0 ? 'slide-from-left' : 'slide-from-right'}`}>
                         {service.title}
@@ -252,7 +253,7 @@ const Services: React.FC<ServicesProps> = React.memo(({ onBookClick }) => {
                     </p>
                   </div>
                   <div className="flex items-center justify-between mt-auto pt-6 border-t border-gold/10 group-hover:border-gold/30">
-                    <span className="text-[10px] uppercase tracking-widest text-charcoal/50 font-bold">{pkg.duration} Total Duration</span>
+                    <span className="text-[10px] uppercase tracking-widest text-charcoal/50 font-bold">{formatDuration(pkg.duration)} Total Duration</span>
                     <button
                       onClick={() => onBookClick(pkg.id)}
                       className="text-gold text-xs font-bold uppercase tracking-widest flex items-center group-hover:translate-x-1 transition-transform cursor-pointer btn-tactile"

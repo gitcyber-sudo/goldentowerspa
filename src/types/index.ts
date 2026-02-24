@@ -20,6 +20,7 @@ export interface Service {
     image_url: string;
     price: number;
     duration: number;
+    deleted_at?: string;
 }
 
 export interface Therapist {
@@ -31,6 +32,7 @@ export interface Therapist {
     active: boolean;
     user_id?: string;
     unavailable_blockouts?: string[];
+    deleted_at?: string;
 }
 
 export interface Booking {
@@ -52,9 +54,21 @@ export interface Booking {
     tip_recipient?: 'management' | 'therapist' | null;
     commission_amount?: number;
     revenue_amount?: number;
+    price_at_booking?: number;
+    deleted_at?: string;
+    payout_id?: string;
     // Joined relations
     services?: { title: string; price: number; duration: number };
     therapists?: { name: string };
+}
+
+export interface ServicePriceHistory {
+    id: string;
+    service_id: string;
+    old_price: number;
+    new_price: number;
+    changed_at: string;
+    changed_by?: string;
 }
 
 export interface TherapistFeedback {
@@ -97,4 +111,51 @@ export interface EditBookingFormData {
     guest_email: string;
     guest_phone: string;
     status: BookingStatus;
+}
+
+export interface InventoryItem {
+    id: string;
+    name: string;
+    unit: string;
+    current_stock: number;
+    unit_price?: number;
+    alert_threshold: number;
+    category: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string;
+}
+
+export interface InventoryLog {
+    id: string;
+    item_id: string;
+    change_amount: number;
+    type: 'consumed' | 'restocked' | 'adjustment';
+    notes?: string;
+    created_at: string;
+    performed_by?: string;
+}
+
+export interface Expense {
+    id: string;
+    amount: number;
+    category: string;
+    description?: string;
+    date: string;
+    created_at: string;
+    created_by?: string;
+    deleted_at?: string;
+}
+
+export interface CommissionPayout {
+    id: string;
+    therapist_id: string;
+    amount: number;
+    period_start: string;
+    period_end: string;
+    status: 'pending' | 'processed' | 'cancelled';
+    paid_at: string;
+    processed_by?: string;
+    notes?: string;
+    created_at: string;
 }

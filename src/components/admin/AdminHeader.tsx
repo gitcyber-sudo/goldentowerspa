@@ -45,8 +45,19 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                             />
                         </div>
                     )}
-                    <button onClick={onRefresh} className="p-2 border rounded-xl hover:bg-gold/5 transition-colors" title="Refresh">
-                        <RefreshCcw size={18} className="text-charcoal/60" />
+                    <button
+                        onClick={() => {
+                            onRefresh();
+                            const btn = document.getElementById('refresh-icon');
+                            if (btn) {
+                                btn.classList.add('animate-spin');
+                                setTimeout(() => btn.classList.remove('animate-spin'), 1000);
+                            }
+                        }}
+                        className="p-2 border rounded-xl hover:bg-gold/5 transition-colors group"
+                        title="Refresh"
+                    >
+                        <RefreshCcw id="refresh-icon" size={18} className="text-charcoal/60 group-hover:text-gold transition-colors" />
                     </button>
                     <button onClick={onManualBooking} className="bg-gold text-white px-3 lg:px-4 py-2 rounded-xl text-xs lg:text-sm font-bold flex items-center gap-1 lg:gap-2">
                         <span>Manual Booking</span>
