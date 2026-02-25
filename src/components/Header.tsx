@@ -85,10 +85,6 @@ const Header: React.FC<HeaderProps> = ({ onBookClick, onLoginClick }) => {
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation">
 
-          <Link to="/services" className="text-gold hover:text-gold-dark text-xs font-bold uppercase tracking-widest transition-all duration-300">
-            Services
-          </Link>
-
           <Link to="/availability" className="text-gold hover:text-gold-dark text-xs font-bold uppercase tracking-widest transition-all duration-300">
             Therapist Schedules
           </Link>

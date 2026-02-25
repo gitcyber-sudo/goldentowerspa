@@ -51,7 +51,6 @@ const Footer: React.FC = () => {
               <h3 className="text-sm font-bold uppercase tracking-widest text-white">Quick Links</h3>
               <ul className="space-y-3 font-light text-white/60 text-sm">
                 <li><button onClick={() => handleScroll('services')} className="hover:text-gold transition-colors text-left w-full block">Services</button></li>
-                <li><Link to="/services" className="hover:text-gold transition-colors block w-full">All Services & Prices</Link></li>
                 <li><button onClick={() => handleScroll('specialists')} className="hover:text-gold transition-colors text-left w-full block">Our Team</button></li>
                 <li><button onClick={() => handleScroll('sanctuary')} className="hover:text-gold transition-colors text-left w-full block">Locations</button></li>
                 <li><Link to="/availability" className="hover:text-gold transition-colors block w-full">Therapist Schedules</Link></li>
