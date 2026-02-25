@@ -37,8 +37,10 @@ const MainLayout: React.FC<MainLayoutProps> = React.memo(({
   containerRef
 }) => {
   useSEO({
-    title: 'Luxury Wellness & Traditional Hilot',
-    description: 'The premier destination for traditional Hilot massage and luxury wellness treatments in Quezon City. Book your path to tranquility today.'
+    title: 'Best Spa in Quezon City — Hilot Massage, Wellness & Home Service',
+    description: 'Golden Tower Spa — Quezon City\'s premier spa for traditional Hilot massage, Swedish massage, deep tissue, Ventosa cupping, and home service massage. Affordable luxury wellness in Project 6, QC. Open daily 4 PM–4 AM.',
+    keywords: 'spa quezon city, best spa manila, hilot massage quezon city, home service massage manila, spa in quezon city, philippine spa, late night spa qc',
+    canonicalPath: '/'
   });
 
   const location = useLocation();

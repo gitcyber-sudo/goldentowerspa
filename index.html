@@ -4,15 +4,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Golden Tower Spa | Luxury Wellness & Traditional Hilot in Quezon City</title>
+  <title>Golden Tower Spa | Best Spa in Quezon City — Hilot Massage, Wellness & Home Service</title>
   <meta name="description"
-    content="Experience the golden touch at Golden Tower Spa. Luxury wellness treatments, traditional Hilot massage, and premium spa packages in Project 6, Quezon City. Open until 4 AM daily." />
+    content="Golden Tower Spa — Quezon City's premier spa for traditional Hilot massage, Swedish massage, deep tissue, Ventosa cupping, and home service massage. Affordable luxury wellness in Project 6, QC. Open daily 4 PM–4 AM. Book online now!" />
   <meta name="keywords"
-    content="spa quezon city, massage project 6 qc, traditional hilot massage, luxury wellness qc, home service massage quezon city, ventosa cupping therapy, golden tower spa" />
+    content="spa quezon city, spa in quezon city, best spa manila, best spa in quezon city, philippine spa, manila spa, massage quezon city, hilot massage quezon city, traditional hilot massage, luxury wellness qc, home service massage quezon city, home service massage manila, ventosa cupping therapy, deep tissue massage quezon city, shiatsu massage manila, swedish massage quezon city, affordable spa quezon city, spa near me quezon city, massage near me manila, late night spa quezon city, 24 hour spa manila, golden tower spa, body massage philippines, relaxation massage metro manila, spa project 6 qc, couple massage quezon city, back massage manila, foot massage quezon city" />
 
   <!-- Security Headers (Harden via Vercel headers, keeping minimal set here) -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+  <!-- Geo Tags for Local SEO -->
+  <meta name="geo.region" content="PH-00" />
+  <meta name="geo.placename" content="Quezon City" />
+  <meta name="geo.position" content="14.6658;121.0375" />
+  <meta name="ICBM" content="14.6658, 121.0375" />
 
   <!-- Canonical Link -->
   <link rel="canonical" href="https://goldentowerspa.vercel.app" />
@@ -20,17 +26,19 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://goldentowerspa.vercel.app" />
-  <meta property="og:title" content="Golden Tower Spa | Luxury Wellness & Hilot" />
+  <meta property="og:title" content="Golden Tower Spa | Best Spa in Quezon City — Hilot & Wellness" />
   <meta property="og:description"
-    content="Ascend to tranquility with premium wellness treatments and traditional Hilot massage at Golden Tower Spa." />
+    content="Quezon City's top-rated spa for traditional Hilot massage, Swedish massage, deep tissue, and home service. Affordable luxury wellness in Project 6, QC. Open daily until 4 AM." />
   <meta property="og:image" content="https://goldentowerspa.vercel.app/og-image.jpg" />
+  <meta property="og:locale" content="en_PH" />
+  <meta property="og:site_name" content="Golden Tower Spa" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:url" content="https://goldentowerspa.vercel.app" />
-  <meta name="twitter:title" content="Golden Tower Spa | Luxury Wellness & Hilot" />
+  <meta name="twitter:title" content="Golden Tower Spa | Best Spa in Quezon City" />
   <meta name="twitter:description"
-    content="Ascend to tranquility with premium wellness treatments and traditional Hilot massage." />
+    content="Traditional Hilot massage, Swedish massage, deep tissue & home service in Quezon City. Affordable luxury wellness. Open daily until 4 AM." />
   <meta name="twitter:image" content="https://goldentowerspa.vercel.app/og-image.jpg" />
 
   <!-- Preload LCP Image -->
@@ -52,20 +60,24 @@
 
   <!-- Custom Styling Essentials (Extracted for Security) -->
   <link rel="stylesheet" href="/critical.css">
+
+  <!-- Structured Data: DaySpa + Services -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "DaySpa",
       "name": "Golden Tower Spa",
-      "description": "Experience luxury and traditional healing at Golden Tower Spa, Quezon City's premier sanctuary for hilot massage and wellness treatments.",
+      "alternateName": "GoldenTower Spa",
+      "description": "Golden Tower Spa is Quezon City's premier sanctuary for traditional Filipino Hilot massage, Swedish massage, Shiatsu, deep tissue therapy, Ventosa cupping, and luxury home service massage. Affordable wellness treatments in Project 6, QC. Open daily 4 PM to 4 AM.",
       "image": "https://goldentowerspa.vercel.app/og-image.jpg",
       "logo": "https://goldentowerspa.vercel.app/logo.png",
       "@id": "https://goldentowerspa.vercel.app",
       "url": "https://goldentowerspa.vercel.app",
       "telephone": "+639228262336",
+      "email": "gtowerspa@gmail.com",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "Golden Tower, Project 6",
+        "streetAddress": "#1 C2 Road 9, Golden Tower, Project 6",
         "addressLocality": "Quezon City",
         "addressRegion": "Metro Manila",
         "postalCode": "1100",
@@ -76,6 +88,22 @@
         "latitude": "14.6658",
         "longitude": "121.0375"
       },
+      "areaServed": [
+        {
+          "@type": "City",
+          "name": "Quezon City",
+          "containedInPlace": { "@type": "AdministrativeArea", "name": "Metro Manila" }
+        },
+        {
+          "@type": "City",
+          "name": "Manila",
+          "containedInPlace": { "@type": "AdministrativeArea", "name": "Metro Manila" }
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Metro Manila"
+        }
+      ],
       "openingHoursSpecification": {
         "@type": "OpeningHoursSpecification",
         "dayOfWeek": [
@@ -84,34 +112,193 @@
         "opens": "16:00",
         "closes": "04:00"
       },
-      "priceRange": "$$",
-      "hasMenu": {
-        "@type": "Menu",
-        "name": "Spa Services",
-        "hasMenuItem": [
+      "priceRange": "₱₱",
+      "currenciesAccepted": "PHP",
+      "paymentAccepted": "Cash, GCash",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Spa Services & Massage Treatments",
+        "itemListElement": [
           {
-            "@type": "MenuItem",
-            "name": "Golden Tower Signature Massage",
-            "description": "The pinnacle of relaxation, combining multiple techniques.",
-            "offers": { "@type": "Offer", "price": "1500", "priceCurrency": "PHP" }
+            "@type": "OfferCatalog",
+            "name": "Signature Treatments",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Golden Tower Signature Massage",
+                  "description": "The pinnacle of relaxation — a luxury full-body massage combining Swedish, deep tissue, and aromatherapy techniques for total rejuvenation.",
+                  "provider": { "@type": "DaySpa", "name": "Golden Tower Spa" }
+                },
+                "price": "1500",
+                "priceCurrency": "PHP"
+              }
+            ]
           },
           {
-            "@type": "MenuItem",
-            "name": "Traditional Hilot",
-            "description": "Ancient Filipino healing art using banana leaves and virgin coconut oil.",
-            "offers": { "@type": "Offer", "price": "800", "priceCurrency": "PHP" }
+            "@type": "OfferCatalog",
+            "name": "Traditional Healing",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Traditional Hilot Massage",
+                  "description": "Ancient Filipino healing art using banana leaves and virgin coconut oil to diagnose and relieve muscle stress and restore energy flow.",
+                  "provider": { "@type": "DaySpa", "name": "Golden Tower Spa" }
+                },
+                "price": "800",
+                "priceCurrency": "PHP"
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Ventosa Cupping Therapy",
+                  "description": "Traditional cupping therapy to relieve deep muscle tension, improve blood circulation, and promote natural healing.",
+                  "provider": { "@type": "DaySpa", "name": "Golden Tower Spa" }
+                },
+                "price": "900",
+                "priceCurrency": "PHP"
+              }
+            ]
           },
           {
-            "@type": "MenuItem",
-            "name": "Ventosa Cupping Therapy",
-            "description": "Traditional therapy to relieve muscle tension and improve flow.",
-            "offers": { "@type": "Offer", "price": "900", "priceCurrency": "PHP" }
+            "@type": "OfferCatalog",
+            "name": "Classic Massages",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Swedish Massage",
+                  "description": "Classic relaxation massage with long flowing strokes to ease tension and improve circulation.",
+                  "provider": { "@type": "DaySpa", "name": "Golden Tower Spa" }
+                },
+                "price": "700",
+                "priceCurrency": "PHP"
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Shiatsu Massage",
+                  "description": "Japanese pressure-point therapy targeting meridian lines to restore energy balance and relieve chronic tension.",
+                  "provider": { "@type": "DaySpa", "name": "Golden Tower Spa" }
+                },
+                "price": "700",
+                "priceCurrency": "PHP"
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Deep Tissue Massage",
+                  "description": "Intensive therapeutic massage targeting deep muscle layers to release chronic knots and tension.",
+                  "provider": { "@type": "DaySpa", "name": "Golden Tower Spa" }
+                },
+                "price": "800",
+                "priceCurrency": "PHP"
+              }
+            ]
+          },
+          {
+            "@type": "OfferCatalog",
+            "name": "Home Service",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Home Service Massage",
+                  "description": "Luxury spa experience brought to your doorstep in Quezon City and Metro Manila. Full setup including oils, aromatherapy, and expert equipment.",
+                  "areaServed": { "@type": "City", "name": "Quezon City" },
+                  "provider": { "@type": "DaySpa", "name": "Golden Tower Spa" }
+                },
+                "price": "1200",
+                "priceCurrency": "PHP"
+              }
+            ]
           }
         ]
       },
       "sameAs": [
-        "https://www.facebook.com/goldentowerspa",
-        "https://www.instagram.com/goldentowerspa"
+        "https://www.facebook.com/profile.php?id=100063262268519"
+      ]
+    }
+  </script>
+
+  <!-- Structured Data: FAQ for "People Also Ask" -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What types of massage does Golden Tower Spa offer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Golden Tower Spa offers a wide range of massage services including our Signature Golden Massage, traditional Filipino Hilot, Swedish massage, Shiatsu, deep tissue massage, Ventosa cupping therapy, and luxury home service massage. We also offer express treatments and premium spa packages."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where is Golden Tower Spa located?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Golden Tower Spa is located at #1 C2 Road 9, Project 6, Quezon City, 1100 Philippines. We are easily accessible from major roads in Quezon City and Metro Manila."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are the operating hours of Golden Tower Spa?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Golden Tower Spa is open daily from 4:00 PM to 4:00 AM, seven days a week including holidays. We are one of the few late-night spas in Quezon City."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Golden Tower Spa offer home service massage in Quezon City?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Golden Tower Spa offers home service massage throughout Quezon City and Metro Manila. Our therapists bring the full luxury spa experience to your doorstep, complete with premium oils, aromatherapy, and professional equipment. You can book online or call us at 09228262336."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How much does a massage cost at Golden Tower Spa?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our massage prices start from ₱500 for express treatments. Regular massages like Swedish and Shiatsu start at ₱700, traditional Hilot at ₱800, and our premium Golden Tower Signature Massage is ₱1,500. Home service massage starts at ₱1,200. We offer affordable luxury wellness for everyone."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I book a spa appointment online?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Golden Tower Spa offers convenient online booking through our website at goldentowerspa.vercel.app. Simply click 'Book Now' to select your preferred service, date, and time. You can also call us at 09228262336 to book over the phone."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Hilot massage?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Hilot is a traditional Filipino healing art that dates back centuries. It uses banana leaves and virgin coconut oil to diagnose and treat muscle tension, body imbalances, and stress. At Golden Tower Spa, our therapists are trained masters of this ancient healing technique, providing an authentic Hilot experience in Quezon City."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Golden Tower Spa open late at night?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Golden Tower Spa is one of the few late-night spas in Quezon City. We are open daily from 4:00 PM until 4:00 AM, making us the perfect destination for after-work relaxation or late-night wellness."
+          }
+        }
       ]
     }
   </script>
@@ -119,19 +306,39 @@
 
 <body class="bg-cream text-charcoal font-sans antialiased">
   <noscript>
-    <h1>Golden Tower Spa - Luxury Massage in Quezon City</h1>
-    <p>Experience the ultimate relaxation at Golden Tower Spa. We offer premium Hilot, Swedish, and Shiatsu massages.
-    </p>
-    <h2>Our Services</h2>
+    <h1>Golden Tower Spa — Best Spa in Quezon City | Hilot Massage & Wellness</h1>
+    <p>Welcome to Golden Tower Spa, Quezon City's premier destination for luxury massage and wellness treatments. Experience traditional Filipino Hilot healing, Swedish massage, Shiatsu, deep tissue therapy, Ventosa cupping, and home service massage in Project 6, QC.</p>
+
+    <h2>Our Spa Services</h2>
     <ul>
-      <li>Signature Golden Massage</li>
-      <li>Traditional Hilot</li>
-      <li>Ventosa Cupping Therapy</li>
-      <li>Deep Tissue Massage</li>
+      <li><strong>Golden Tower Signature Massage</strong> — ₱1,500 | The pinnacle of relaxation combining multiple techniques for total rejuvenation.</li>
+      <li><strong>Traditional Hilot Massage</strong> — ₱800 | Ancient Filipino healing art using banana leaves and virgin coconut oil.</li>
+      <li><strong>Swedish Massage</strong> — ₱700 | Classic relaxation massage with long flowing strokes.</li>
+      <li><strong>Shiatsu Massage</strong> — ₱700 | Japanese pressure-point therapy for energy balance.</li>
+      <li><strong>Deep Tissue Massage</strong> — ₱800 | Intensive therapeutic massage targeting deep muscle layers.</li>
+      <li><strong>Ventosa Cupping Therapy</strong> — ₱900 | Traditional cupping therapy for muscle tension relief.</li>
+      <li><strong>Home Service Massage</strong> — ₱1,200 | Luxury spa experience brought to your doorstep in Quezon City.</li>
     </ul>
+
+    <h2>Frequently Asked Questions</h2>
+    <h3>Where is Golden Tower Spa located?</h3>
+    <p>#1 C2 Road 9, Project 6, Quezon City, 1100 Philippines. Easily accessible from major Metro Manila roads.</p>
+
+    <h3>What are the operating hours?</h3>
+    <p>Open daily from 4:00 PM to 4:00 AM, seven days a week. One of the few late-night spas in Quezon City.</p>
+
+    <h3>Do you offer home service massage?</h3>
+    <p>Yes! We offer home service massage throughout Quezon City and Metro Manila. Call 09228262336 to book.</p>
+
+    <h3>How can I book an appointment?</h3>
+    <p>Book online at goldentowerspa.vercel.app or call us at 09228262336. Walk-ins are also welcome!</p>
+
     <h2>Contact Us</h2>
-    <p>Located at Golden Tower, Quezon City. Call us at +639228262336.</p>
+    <p>Location: #1 C2 Road 9, Project 6, Quezon City, 1100 Philippines</p>
+    <p>Phone: 09228262336</p>
+    <p>Email: gtowerspa@gmail.com</p>
     <p>Open Daily: 4:00 PM - 4:00 AM</p>
+    <p><a href="https://www.facebook.com/profile.php?id=100063262268519">Visit us on Facebook</a></p>
   </noscript>
   <div id="root"></div>
   <!-- Vite Entry Point -->

@@ -5,10 +5,17 @@ import Logo from '../components/Logo';
 import { Crown, Heart, Shield } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useSEO } from '../hooks/useSEO';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const About: React.FC = () => {
+    useSEO({
+        title: 'About Us — Traditional Hilot Spa in Quezon City',
+        description: 'Learn about Golden Tower Spa, Quezon City\'s premier sanctuary for traditional Filipino Hilot massage and luxury wellness. Meet our master therapists in Project 6, QC.',
+        keywords: 'about golden tower spa, hilot spa quezon city, traditional filipino massage, spa history quezon city, wellness center manila, project 6 spa',
+        canonicalPath: '/about'
+    });
     const heroRef = useRef<HTMLDivElement>(null);
     const storyRef = useRef<HTMLDivElement>(null);
     const valuesRef = useRef<HTMLDivElement>(null);
