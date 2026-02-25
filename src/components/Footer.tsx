@@ -49,12 +49,12 @@ const Footer: React.FC = () => {
             {/* Quick Links Column */}
             <div className="md:col-span-3 space-y-6">
               <h3 className="text-sm font-bold uppercase tracking-widest text-white">Quick Links</h3>
-              <ul className="space-y-3 font-light text-white/60 text-sm">
-                <li><button onClick={() => handleScroll('services')} className="hover:text-gold transition-colors text-left w-full block">Services</button></li>
-                <li><button onClick={() => handleScroll('specialists')} className="hover:text-gold transition-colors text-left w-full block">Our Team</button></li>
-                <li><button onClick={() => handleScroll('sanctuary')} className="hover:text-gold transition-colors text-left w-full block">Locations</button></li>
-                <li><Link to="/availability" className="hover:text-gold transition-colors block w-full">Therapist Schedules</Link></li>
-                <li><Link to="/about" className="hover:text-gold transition-colors block w-full">About Us</Link></li>
+              <ul className="space-y-1 font-light text-white/60 text-sm">
+                <li><button onClick={() => handleScroll('services')} className="hover:text-gold transition-colors text-left w-full block py-1.5 p-0 bg-transparent border-none">Services</button></li>
+                <li><button onClick={() => handleScroll('specialists')} className="hover:text-gold transition-colors text-left w-full block py-1.5 p-0 bg-transparent border-none">Our Team</button></li>
+                <li><button onClick={() => handleScroll('sanctuary')} className="hover:text-gold transition-colors text-left w-full block py-1.5 p-0 bg-transparent border-none">Locations</button></li>
+                <li><Link to="/availability" className="hover:text-gold transition-colors block w-full py-1.5">Therapist Schedules</Link></li>
+                <li><Link to="/about" className="hover:text-gold transition-colors block w-full py-1.5">About Us</Link></li>
               </ul>
             </div>
 
