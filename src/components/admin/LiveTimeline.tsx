@@ -207,7 +207,7 @@ const LiveTimeline: React.FC<LiveTimelineProps> = ({ bookings, therapists, isPub
             {/* Timeline */}
             <div className="relative">
                 {/* Vertical line */}
-                <div className="absolute left-[52px] md:left-[72px] top-0 bottom-0 w-px bg-gradient-to-b from-gold/30 via-charcoal/10 to-charcoal/5" />
+                <div className="absolute left-[58px] md:left-[90px] top-0 bottom-0 w-px bg-gradient-to-b from-gold/30 via-charcoal/10 to-charcoal/5" />
 
                 <div className="space-y-0">
                     {TIMELINE_SLOTS.map((slot, index) => {
@@ -245,38 +245,21 @@ const LiveTimeline: React.FC<LiveTimelineProps> = ({ bookings, therapists, isPub
                                     </div>
                                 )}
 
-                                <div className={`group flex gap-3 md:gap-6 ${hasBookings ? 'pb-5' : 'pb-1.5'}`}>
+                                <div className={`group flex gap-3 md:gap-6 ${hasBookings ? 'pb-5' : 'pb-1.5'} relative min-h-[48px]`}>
                                     {/* Time Label */}
-                                    <div className="w-[40px] md:w-[60px] pt-0.5 flex-shrink-0 text-right">
-                                        <span className={`text-[10px] md:text-xs font-bold font-serif transition-colors whitespace-nowrap ${hasBookings ? 'text-charcoal/70' : 'text-charcoal/20'}`}>
+                                    <div className="w-[40px] md:w-[60px] flex-shrink-0 text-right pt-[3px]">
+                                        <span className={`text-[10px] md:text-xs font-bold font-serif transition-colors whitespace-nowrap leading-3 ${hasBookings ? 'text-charcoal/70' : 'text-charcoal/20'}`}>
                                             {getSlotLabel(slot)}
                                         </span>
                                     </div>
 
                                     {/* Node */}
-                                    <div className="relative flex-shrink-0 w-3 flex items-start pt-1">
+                                    <div className="relative flex-shrink-0 w-3 flex items-start pt-[3px]">
                                         <div className={`w-3 h-3 rounded-full border-2 bg-white z-10 transition-all ${hasBookings ? 'border-gold scale-110' : 'border-charcoal/10 scale-75 group-hover:border-gold/30'}`} />
                                     </div>
 
                                     {/* Content */}
                                     <div className="flex-1 min-w-0 relative">
-                                        {/* NOW indicator line — positioned proportionally within this slot */}
-                                        {isCurrentSlot && (
-                                            <div
-                                                className="absolute z-20 flex items-center gap-0 pointer-events-none"
-                                                style={{ top: `${nowLinePercent}%`, left: '-2.25rem', right: 0 }}
-                                            >
-                                                {/* Blinking circle at the left end, on the vertical rail */}
-                                                <div className="relative flex-shrink-0 w-3 h-3">
-                                                    <div className="absolute inset-0 rounded-full bg-gold animate-ping" />
-                                                    <div className="absolute inset-0 rounded-full bg-gold border-2 border-white shadow-md" />
-                                                </div>
-                                                <div className="h-0.5 flex-1 bg-gold/60" />
-                                                <span className="text-[8px] font-black uppercase tracking-widest text-gold bg-gold/10 px-1.5 py-0.5 rounded whitespace-nowrap ml-1">
-                                                    NOW {formatTimeTo12h(`${currentHourPHT.toString().padStart(2, '0')}:${currentMinPHT.toString().padStart(2, '0')}`)}
-                                                </span>
-                                            </div>
-                                        )}
                                         {hasBookings ? (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                 {slotData.map(b => (
@@ -287,6 +270,24 @@ const LiveTimeline: React.FC<LiveTimelineProps> = ({ bookings, therapists, isPub
                                             <div className="h-4" />
                                         )}
                                     </div>
+
+                                    {/* NOW indicator line — positioned at the row level so it aligns with the vertical rail */}
+                                    {isCurrentSlot && (
+                                        <div
+                                            className="absolute z-20 flex items-center pointer-events-none left-[52px] md:left-[84px] right-0"
+                                            style={{ top: `${nowLinePercent}%` }}
+                                        >
+                                            {/* Blinking circle centered on the vertical rail */}
+                                            <div className="relative flex-shrink-0 w-3 h-3">
+                                                <div className="absolute inset-0 rounded-full bg-gold animate-ping" />
+                                                <div className="absolute inset-0 rounded-full bg-gold border-2 border-white shadow-md" />
+                                            </div>
+                                            <div className="h-0.5 flex-1 bg-gold/60" />
+                                            <span className="text-[8px] font-black uppercase tracking-widest text-gold bg-gold/10 px-1.5 py-0.5 rounded whitespace-nowrap ml-1">
+                                                NOW {formatTimeTo12h(`${currentHourPHT.toString().padStart(2, '0')}:${currentMinPHT.toString().padStart(2, '0')}`)}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             </React.Fragment>
                         );
