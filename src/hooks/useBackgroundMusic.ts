@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 const STORAGE_KEY = 'gt_music_muted';
-const MUSIC_SRC = '/Endless Still Water.mp3';
+const MUSIC_SRC = '/endless-still-water.mp3';
 const DEFAULT_VOLUME = 0.3;
 const FADE_DURATION = 1500; // ms
 
