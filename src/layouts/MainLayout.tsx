@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
+import MusicToggle from '../components/MusicToggle';
+import { useBackgroundMusic } from '../hooks/useBackgroundMusic';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import Sanctuary from '../components/Sanctuary';
@@ -36,6 +38,8 @@ const MainLayout: React.FC<MainLayoutProps> = React.memo(({
   selectedServiceId,
   containerRef
 }) => {
+  const { isMuted, isPlaying, toggleMute } = useBackgroundMusic();
+
   useSEO({
     title: 'Best Spa in Quezon City — Hilot Massage, Wellness & Home Service',
     description: 'Golden Tower Spa — Quezon City\'s premier spa for traditional Hilot massage, Swedish massage, deep tissue, Ventosa cupping, and home service massage. Affordable luxury wellness in Project 6, QC. Open daily 4 PM–4 AM.',
@@ -134,6 +138,7 @@ const MainLayout: React.FC<MainLayoutProps> = React.memo(({
         }}
       />
 
+      <MusicToggle isMuted={isMuted} isPlaying={isPlaying} onToggle={toggleMute} />
       <PWAInstallPrompt />
     </div>
   );

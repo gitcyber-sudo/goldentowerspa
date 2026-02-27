@@ -421,3 +421,38 @@
 .legal-content a {
   @apply text-gold hover:text-gold-dark underline transition-colors;
 }
+
+/* ─── Music Toggle ─── */
+.music-toggle {
+  background: rgba(26, 26, 26, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(197, 160, 89, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.music-toggle:hover {
+  background: rgba(26, 26, 26, 0.7);
+  border-color: rgba(197, 160, 89, 0.5);
+  box-shadow: 0 8px 30px rgba(197, 160, 89, 0.2);
+}
+
+.music-toggle--playing {
+  animation: music-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes music-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 0 rgba(197, 160, 89, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 8px rgba(197, 160, 89, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-toggle--playing {
+    animation: none;
+  }
+}
