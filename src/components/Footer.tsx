@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Facebook, MapPin, Mail, Smartphone, ArrowUpRight } from 'lucide-react';
+import { Facebook, MapPin, Mail, Smartphone, ArrowUpRight, MessageCircle } from 'lucide-react';
 import Logo from './Logo';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import FeaturesModal from './modals/FeaturesModal';
@@ -39,6 +39,9 @@ const Footer: React.FC = () => {
               <div className="flex space-x-5">
                 <a href="https://www.facebook.com/profile.php?id=100063262268519" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-white/10 text-white/40 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all duration-300" aria-label="Follow us on Facebook">
                   <Facebook size={20} />
+                </a>
+                <a href="https://wa.me/639228262336" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-white/10 text-white/40 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all duration-300" aria-label="Message us on WhatsApp">
+                  <MessageCircle size={20} />
                 </a>
                 <a href="https://www.google.com/maps/dir/?api=1&destination=Golden+Tower+Spa+Project+6+Quezon+City" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-white/10 text-white/40 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all duration-300" aria-label="Find us on Maps">
                   <MapPin size={20} />

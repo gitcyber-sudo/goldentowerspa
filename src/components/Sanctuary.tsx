@@ -2,7 +2,7 @@
 import React, { useRef, useLayoutEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MapPin, Phone, Mail, Clock, ArrowUpRight, Smartphone, Facebook } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, ArrowUpRight, Smartphone, Facebook, MessageCircle } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -147,6 +147,10 @@ const Sanctuary: React.FC = () => {
                                         <a href="https://www.facebook.com/profile.php?id=100063262268519" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-charcoal-light hover:text-gold transition-colors font-medium border border-gold/20 px-4 py-2 rounded-full hover:bg-gold/5">
                                             <Facebook size={16} className="text-gold" />
                                             Facebook
+                                        </a>
+                                        <a href="https://wa.me/639228262336" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-charcoal-light hover:text-gold transition-colors font-medium border border-gold/20 px-4 py-2 rounded-full hover:bg-gold/5">
+                                            <MessageCircle size={16} className="text-gold" />
+                                            WhatsApp
                                         </a>
                                     </div>
                                 </div>
