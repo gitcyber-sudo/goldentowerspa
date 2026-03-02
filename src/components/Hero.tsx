@@ -114,12 +114,16 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
       {/* Mobile Background: Portrait Video */}
       <div className="md:hidden absolute inset-0 z-0 bg-black">
         <video
+          ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
+          poster="/images/hero-bg.jpg"
+          preload="auto"
           className="w-full h-full object-cover"
         >
+          <source src="/hero.webm" type="video/webm" />
           <source src="/hero.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-black/80 via-transparent to-black/30" />

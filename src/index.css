@@ -121,6 +121,18 @@
   animation: fadeIn 0.5s ease-out;
 }
 
+/* Lightweight card entrance — GPU-only (opacity + transform) */
+@keyframes fadeUpCard {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Custom Animations */
 .hero-text-shadow {
   text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);

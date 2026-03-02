@@ -103,7 +103,7 @@ const ExpressSection: React.FC<ExpressSectionProps> = ({ expressMassages, onBook
         <div
             id="express"
             ref={containerRef}
-            className="relative mt-24 mb-24 py-20 md:py-32 bg-[#1A1A1A] w-screen left-1/2 -ml-[50vw] px-0 md:px-12 overflow-hidden"
+            className="relative py-20 md:py-32 bg-[#1A1A1A] w-screen left-1/2 -ml-[50vw] px-0 md:px-12 overflow-hidden"
         >
             {/* Subtle Shimmer Background Layer */}
             <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_50%_50%,_rgba(197,160,89,0.15),transparent_70%)] animate-pulse"></div>
