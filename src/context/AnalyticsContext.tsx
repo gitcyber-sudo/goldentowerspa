@@ -179,6 +179,7 @@ const getPageTitle = (path: string): string => {
 const trackDevice = async (userId: string | null) => {
 
     if (typeof window === 'undefined') return;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
 
     // For debugging, we remove the session guard to ensure it fires
     // const sessionKey = 'gt_device_tracked';
@@ -221,6 +222,7 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     // Track page view
     const trackPageView = useCallback(async () => {
+        if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) return;
         const trackingKey = `${location.pathname}-${user?.id || 'guest'}`;
         if (trackingRef.current === trackingKey) return;
         trackingRef.current = trackingKey;
@@ -285,6 +287,7 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         eventCategory?: string,
         eventData?: Record<string, any>
     ) => {
+        if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) return;
         try {
             const sessionId = getSessionId();
             await supabase.from('analytics_events').insert({

@@ -16,7 +16,17 @@ import {
     ArrowDownRight,
     Activity,
     Target,
-    ChevronDown
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Cpu,
+    AppWindow,
+    UserCheck,
+    UserPlus,
+    LayoutGrid,
+    Edit2,
+    Check,
+    X
 } from 'lucide-react';
 
 interface PageView {
@@ -28,12 +38,25 @@ interface PageView {
     created_at: string;
 }
 
+interface ClientDevice {
+    device_model: string | null;
+    os_name: string | null;
+    os_version: string | null;
+    browser: string | null;
+    browser_version: string | null;
+    device_type: string | null;
+    screen_resolution: string | null;
+    app_context: string | null;
+}
+
 interface Visitor {
     id: string;
     visitor_id: string;
     visit_count: number;
     first_visit: string;
     last_visit: string;
+    custom_name?: string;
+    client_devices?: ClientDevice[];
 }
 
 interface AnalyticsEvent {
@@ -52,13 +75,72 @@ interface AnalyticsData {
 
 type TimeRange = 'today' | '24h' | '7d' | '30d' | 'all';
 
+// Format date/time in Philippine timezone
+const formatPHTime = (dateStr: string, options?: Intl.DateTimeFormatOptions): string => {
+    return new Date(dateStr).toLocaleString('en-PH', {
+        timeZone: 'Asia/Manila',
+        ...options
+    });
+};
+
+const formatPHDateTime = (dateStr: string): string => {
+    return formatPHTime(dateStr, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+};
+
+const formatPHTimeOnly = (dateStr: string): string => {
+    return formatPHTime(dateStr, {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+};
+
 const AnalyticsDashboard: React.FC = () => {
     const [data, setData] = useState<AnalyticsData>({ pageViews: [], visitors: [], events: [] });
     const [loading, setLoading] = useState(true);
     const [timeRange, setTimeRange] = useState<TimeRange>('7d');
+    const [visitorPage, setVisitorPage] = useState(0);
+    const [editingVisitorId, setEditingVisitorId] = useState<string | null>(null);
+    const [editingName, setEditingName] = useState('');
+    const VISITORS_PER_PAGE = 20;
+
+    const handleSaveAlias = async (visitorId: string) => {
+        try {
+            const { error } = await supabase
+                .from('visitors')
+                .update({ custom_name: editingName || null })
+                .eq('visitor_id', visitorId);
+
+            if (error) throw error;
+
+            setData(prev => ({
+                ...prev,
+                visitors: prev.visitors.map(v =>
+                    v.visitor_id === visitorId
+                        ? { ...v, custom_name: editingName || undefined }
+                        : v
+                )
+            }));
+            setEditingVisitorId(null);
+        } catch (err) {
+            console.error('Failed to save alias:', err);
+        }
+    };
 
     useEffect(() => {
         fetchAnalytics();
+    }, [timeRange]);
+
+    // Reset visitor page when time range changes
+    useEffect(() => {
+        setVisitorPage(0);
     }, [timeRange]);
 
     const getTimeFilter = () => {
@@ -80,51 +162,74 @@ const AnalyticsDashboard: React.FC = () => {
         }
     };
 
+    // Helper: fetch ALL rows from a table using pagination (bypasses Supabase 1000-row default)
+    const fetchAllRows = async <T,>(
+        table: string,
+        select: string,
+        orderCol: string,
+        timeFilter: string | null,
+        timeCol: string
+    ): Promise<T[]> => {
+        const PAGE_SIZE = 1000;
+        let allRows: T[] = [];
+        let from = 0;
+        let hasMore = true;
+
+        while (hasMore) {
+            let query = supabase
+                .from(table)
+                .select(select)
+                .order(orderCol, { ascending: false })
+                .range(from, from + PAGE_SIZE - 1);
+
+            if (timeFilter) {
+                query = query.gte(timeCol, timeFilter);
+            }
+
+            const { data, error } = await query;
+            if (error) throw error;
+
+            const rows = (data || []) as T[];
+            allRows = allRows.concat(rows);
+
+            if (rows.length < PAGE_SIZE) {
+                hasMore = false;
+            } else {
+                from += PAGE_SIZE;
+            }
+        }
+
+        return allRows;
+    };
+
     const fetchAnalytics = async () => {
         setLoading(true);
         try {
             const timeFilter = getTimeFilter();
 
-            // Fetch page views
-            let pageViewsQuery = supabase
-                .from('page_views')
-                .select('*')
-                .order('created_at', { ascending: false });
+            // Fetch ALL page views with pagination
+            const pageViews = await fetchAllRows<PageView>(
+                'page_views', '*', 'created_at', timeFilter, 'created_at'
+            );
 
-            if (timeFilter) {
-                pageViewsQuery = pageViewsQuery.gte('created_at', timeFilter);
-            }
+            // Fetch ALL visitors with device info (join client_devices)
+            const visitors = await fetchAllRows<Visitor>(
+                'visitors',
+                '*, client_devices(device_model, os_name, os_version, browser, browser_version, device_type, screen_resolution, app_context)',
+                'last_visit',
+                timeFilter,
+                'last_visit'
+            );
 
-            const { data: pageViews } = await pageViewsQuery;
-
-            // Fetch visitors
-            let visitorsQuery = supabase
-                .from('visitors')
-                .select('*')
-                .order('last_visit', { ascending: false });
-
-            if (timeFilter) {
-                visitorsQuery = visitorsQuery.gte('last_visit', timeFilter);
-            }
-
-            const { data: visitors } = await visitorsQuery;
-
-            // Fetch events
-            let eventsQuery = supabase
-                .from('analytics_events')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (timeFilter) {
-                eventsQuery = eventsQuery.gte('created_at', timeFilter);
-            }
-
-            const { data: events } = await eventsQuery;
+            // Fetch ALL events with pagination
+            const events = await fetchAllRows<AnalyticsEvent>(
+                'analytics_events', '*', 'created_at', timeFilter, 'created_at'
+            );
 
             setData({
-                pageViews: pageViews || [],
-                visitors: visitors || [],
-                events: events || []
+                pageViews,
+                visitors,
+                events
             });
         } catch (error) {
             console.error('Error fetching analytics:', error);
@@ -142,6 +247,7 @@ const AnalyticsDashboard: React.FC = () => {
 
         // Calculate returning visitors
         const returningVisitors = data.visitors.filter(v => v.visit_count > 1).length;
+        const newVisitors = uniqueVisitors - returningVisitors;
         const returnRate = uniqueVisitors > 0 ? ((returningVisitors / uniqueVisitors) * 100).toFixed(1) : '0';
 
         // Device breakdown
@@ -173,19 +279,37 @@ const AnalyticsDashboard: React.FC = () => {
             return acc;
         }, {} as Record<string, number>);
 
-        // Daily views for chart
-        const dailyViews = data.pageViews.reduce((acc, pv) => {
-            const date = new Date(pv.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            acc[date] = (acc[date] || 0) + 1;
+        // Daily views for chart — sorted chronologically
+        const dailyViewsMap = data.pageViews.reduce((acc, pv) => {
+            const d = new Date(pv.created_at);
+            // Use YYYY-MM-DD as key for proper sorting
+            const key = d.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' });
+            const label = d.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' });
+            if (!acc[key]) acc[key] = { label, count: 0 };
+            acc[key].count++;
             return acc;
-        }, {} as Record<string, number>);
+        }, {} as Record<string, { label: string; count: number }>);
 
-        // Hourly distribution
+        const dailyViews = Object.entries(dailyViewsMap)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([, v]) => ({ label: v.label, count: v.count }));
+
+        // Hourly distribution (in Philippine timezone)
         const hourlyViews = data.pageViews.reduce((acc, pv) => {
-            const hour = new Date(pv.created_at).getHours();
+            const hour = parseInt(new Date(pv.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila', hour: 'numeric', hour12: false }));
             acc[hour] = (acc[hour] || 0) + 1;
             return acc;
         }, {} as Record<number, number>);
+
+        // OS breakdown from client_devices
+        const osBreakdown = data.visitors.reduce((acc, v) => {
+            const device = v.client_devices?.[0];
+            if (device?.os_name) {
+                const osKey = device.os_name;
+                acc[osKey] = (acc[osKey] || 0) + 1;
+            }
+            return acc;
+        }, {} as Record<string, number>);
 
         return {
             totalPageViews,
@@ -193,15 +317,19 @@ const AnalyticsDashboard: React.FC = () => {
             totalEvents,
             avgPagesPerVisitor,
             returningVisitors,
+            newVisitors,
             returnRate,
             deviceBreakdown,
             browserBreakdown,
             topPages,
             eventBreakdown,
             dailyViews,
-            hourlyViews
+            hourlyViews,
+            osBreakdown
         };
     }, [data]);
+
+    /* ──────── Sub-components ──────── */
 
     const StatCard = ({ icon: Icon, label, value, subValue, trend, color }: {
         icon: React.ElementType;
@@ -219,11 +347,10 @@ const AnalyticsDashboard: React.FC = () => {
                 {trend && (
                     <div className={`flex items-center text-xs font-medium ${trend === 'up' ? 'text-emerald-600' : 'text-rose-600'}`}>
                         {trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                        12%
                     </div>
                 )}
             </div>
-            <p className="text-2xl md:text-3xl font-serif text-charcoal mb-1">{value}</p>
+            <p className="text-2xl md:text-3xl font-serif text-charcoal mb-1">{typeof value === 'number' ? value.toLocaleString() : value}</p>
             <p className="text-[10px] md:text-xs uppercase tracking-wider text-charcoal/50 font-medium">{label}</p>
             {subValue && <p className="text-xs text-gold mt-2">{subValue}</p>}
         </div>
@@ -235,7 +362,7 @@ const AnalyticsDashboard: React.FC = () => {
             <div className="mb-4">
                 <div className="flex justify-between text-sm mb-1">
                     <span className="text-charcoal/70">{label}</span>
-                    <span className="text-charcoal font-medium">{value} ({percentage.toFixed(1)}%)</span>
+                    <span className="text-charcoal font-medium">{value.toLocaleString()} ({percentage.toFixed(1)}%)</span>
                 </div>
                 <div className="h-2 bg-charcoal/5 rounded-full overflow-hidden">
                     <div
@@ -247,52 +374,153 @@ const AnalyticsDashboard: React.FC = () => {
         );
     };
 
-    const MiniBarChart = ({ data }: { data: Record<string, number> }) => {
-        const entries = Object.entries(data);
-        const max = Math.max(...entries.map(([, v]) => v), 1);
+    /* ──── Daily Page Views Bar Chart ──── */
+    const DailyBarChart = ({ data }: { data: { label: string; count: number }[] }) => {
+        const max = Math.max(...data.map(d => d.count), 1);
+        const chartHeight = 160;
+
+        if (data.length === 0) {
+            return <p className="text-sm text-charcoal/50 text-center py-8">No data available</p>;
+        }
 
         return (
-            <div className="overflow-x-auto no-scrollbar pb-2">
-                <div className="flex items-end gap-1 h-20 min-w-full" style={{ width: entries.length > 7 ? `${entries.length * 30}px` : '100%' }}>
-                    {entries.map(([date, value]) => (
-                        <div key={date} className="flex-1 min-w-[25px] flex flex-col items-center">
-                            <div
-                                className="w-full bg-gradient-to-t from-gold to-gold/60 rounded-t transition-all duration-300 hover:from-gold/80"
-                                style={{ height: `${(value / max) * 100}%`, minHeight: '4px' }}
-                            />
-                            <span className="text-[8px] text-charcoal/40 mt-1 truncate w-full text-center">{date.split(' ')[1]}</span>
-                        </div>
-                    ))}
+            <div className="overflow-x-auto no-scrollbar">
+                <div
+                    className="flex items-end gap-[3px] min-w-full"
+                    style={{ height: `${chartHeight}px`, width: data.length > 10 ? `${data.length * 40}px` : '100%' }}
+                >
+                    {data.map((item, i) => {
+                        const barH = (item.count / max) * chartHeight;
+                        return (
+                            <div key={i} className="flex-1 min-w-[28px] flex flex-col items-center relative group">
+                                {/* Tooltip */}
+                                <div className="absolute bottom-full mb-1 px-2 py-1 bg-charcoal text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                                    {item.label}: <strong>{item.count.toLocaleString()}</strong> views
+                                </div>
+                                {/* Bar */}
+                                <div
+                                    className="w-full bg-gradient-to-t from-gold to-gold/50 rounded-t-md transition-all duration-300 group-hover:from-gold/90 group-hover:to-gold/70 cursor-pointer"
+                                    style={{ height: `${Math.max(barH, 3)}px` }}
+                                />
+                                {/* Label */}
+                                <span className="text-[9px] text-charcoal/50 mt-1.5 truncate w-full text-center font-medium">
+                                    {item.label.replace(/,?\s*\d{4}/, '')}
+                                </span>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         );
     };
 
-    const HourlyHeatmap = ({ data }: { data: Record<number, number> }) => {
+    /* ──── Hourly Activity Bar Chart ──── */
+    const HourlyBarChart = ({ data }: { data: Record<number, number> }) => {
         const max = Math.max(...Object.values(data), 1);
+        const chartHeight = 140;
 
         return (
-            <div className="grid grid-cols-12 gap-1">
-                {Array.from({ length: 24 }, (_, hour) => {
-                    const value = data[hour] || 0;
-                    const intensity = value / max;
-                    return (
-                        <div
-                            key={hour}
-                            className="aspect-square rounded-sm relative group cursor-pointer"
-                            style={{
-                                backgroundColor: `rgba(202, 169, 105, ${0.1 + intensity * 0.9})`
-                            }}
-                        >
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-charcoal text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                {hour}:00 - {value} views
+            <div className="overflow-x-auto no-scrollbar">
+                <div className="flex items-end gap-[2px] min-w-full" style={{ height: `${chartHeight}px` }}>
+                    {Array.from({ length: 24 }, (_, hour) => {
+                        const value = data[hour] || 0;
+                        const barH = (value / max) * chartHeight;
+                        const isPeak = value === max && value > 0;
+                        return (
+                            <div key={hour} className="flex-1 min-w-[18px] flex flex-col items-center relative group">
+                                {/* Tooltip */}
+                                <div className="absolute bottom-full mb-1 px-2 py-1 bg-charcoal text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                                    {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}: <strong>{value.toLocaleString()}</strong> views
+                                </div>
+                                {/* Bar */}
+                                <div
+                                    className={`w-full rounded-t-sm transition-all duration-300 cursor-pointer ${isPeak
+                                        ? 'bg-gradient-to-t from-emerald-500 to-emerald-400 group-hover:from-emerald-600'
+                                        : 'bg-gradient-to-t from-gold/80 to-gold/40 group-hover:from-gold/90'
+                                        }`}
+                                    style={{ height: `${Math.max(barH, 2)}px` }}
+                                />
+                                {/* Label - show every 3rd hour */}
+                                {(hour % 3 === 0) && (
+                                    <span className="text-[8px] text-charcoal/40 mt-1 font-medium">
+                                        {hour === 0 ? '12a' : hour < 12 ? `${hour}a` : hour === 12 ? '12p' : `${hour - 12}p`}
+                                    </span>
+                                )}
                             </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })}
+                </div>
             </div>
         );
     };
+
+    /* ──── New vs Returning Donut ──── */
+    const VisitorTypeSplit = ({ newCount, returnCount }: { newCount: number; returnCount: number }) => {
+        const total = newCount + returnCount;
+        const newPct = total > 0 ? (newCount / total) * 100 : 0;
+        const retPct = total > 0 ? (returnCount / total) * 100 : 0;
+        // SVG donut
+        const radius = 40;
+        const circumference = 2 * Math.PI * radius;
+        const newStroke = (newPct / 100) * circumference;
+        const retStroke = (retPct / 100) * circumference;
+
+        return (
+            <div className="flex items-center gap-6">
+                <div className="relative w-28 h-28 flex-shrink-0">
+                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                        {/* Return segment */}
+                        <circle cx="50" cy="50" r={radius} fill="none" stroke="#10b981" strokeWidth="12"
+                            strokeDasharray={`${retStroke} ${circumference}`} strokeDashoffset="0"
+                            strokeLinecap="round" className="transition-all duration-700" />
+                        {/* New segment */}
+                        <circle cx="50" cy="50" r={radius} fill="none" stroke="#caa969" strokeWidth="12"
+                            strokeDasharray={`${newStroke} ${circumference}`} strokeDashoffset={`${-retStroke}`}
+                            strokeLinecap="round" className="transition-all duration-700" />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-lg font-serif text-charcoal">{total.toLocaleString()}</span>
+                        <span className="text-[9px] text-charcoal/40 uppercase tracking-wider">Total</span>
+                    </div>
+                </div>
+                <div className="space-y-3 flex-1">
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-gold" />
+                        <div className="flex-1">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-charcoal/70">New</span>
+                                <span className="font-medium text-charcoal">{newCount.toLocaleString()}</span>
+                            </div>
+                            <div className="h-1.5 bg-charcoal/5 rounded-full mt-1 overflow-hidden">
+                                <div className="h-full bg-gold rounded-full transition-all duration-500" style={{ width: `${newPct}%` }} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                        <div className="flex-1">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-charcoal/70">Returning</span>
+                                <span className="font-medium text-charcoal">{returnCount.toLocaleString()}</span>
+                            </div>
+                            <div className="h-1.5 bg-charcoal/5 rounded-full mt-1 overflow-hidden">
+                                <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${retPct}%` }} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    /* ──────── Pagination helpers ──────── */
+    const totalVisitorPages = Math.ceil(data.visitors.length / VISITORS_PER_PAGE);
+    const paginatedVisitors = data.visitors.slice(
+        visitorPage * VISITORS_PER_PAGE,
+        (visitorPage + 1) * VISITORS_PER_PAGE
+    );
+
+    /* ──────── RENDER ──────── */
 
     if (loading) {
         return (
@@ -375,27 +603,74 @@ const AnalyticsDashboard: React.FC = () => {
                     <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
                             <h3 className="font-semibold text-charcoal text-sm md:text-base">Daily Page Views</h3>
-                            <p className="text-[10px] md:text-xs text-charcoal/50">Views per day</p>
+                            <p className="text-[10px] md:text-xs text-charcoal/50">Views per day · Hover for details</p>
                         </div>
                         <BarChart3 className="w-4 h-4 md:w-5 md:h-5 text-gold" />
                     </div>
-                    <MiniBarChart data={stats.dailyViews} />
+                    <DailyBarChart data={stats.dailyViews} />
                 </div>
 
-                {/* Hourly Heatmap */}
+                {/* Hourly Activity Chart */}
                 <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
                     <div className="flex items-center justify-between mb-4 md:mb-6">
                         <div>
                             <h3 className="font-semibold text-charcoal text-sm md:text-base">Activity by Hour</h3>
-                            <p className="text-[10px] md:text-xs text-charcoal/50">Peak traffic times (0-23h)</p>
+                            <p className="text-[10px] md:text-xs text-charcoal/50">Peak traffic times (PHT) · <span className="text-emerald-500">■</span> Peak hour</p>
                         </div>
                         <Clock className="w-4 h-4 md:w-5 md:h-5 text-gold" />
                     </div>
-                    <HourlyHeatmap data={stats.hourlyViews} />
-                    <div className="flex justify-between text-[10px] md:text-xs text-charcoal/40 mt-2">
-                        <span>12 AM</span>
-                        <span>12 PM</span>
-                        <span>11 PM</span>
+                    <HourlyBarChart data={stats.hourlyViews} />
+                </div>
+            </div>
+
+            {/* New vs Returning + OS Breakdown Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                {/* New vs Returning Visitors */}
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 md:mb-6">
+                        <div>
+                            <h3 className="font-semibold text-charcoal text-sm md:text-base">Visitor Type</h3>
+                            <p className="text-[10px] md:text-xs text-charcoal/50">New vs returning visitors</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <UserPlus className="w-4 h-4 text-gold" />
+                            <UserCheck className="w-4 h-4 text-emerald-500" />
+                        </div>
+                    </div>
+                    <VisitorTypeSplit newCount={stats.newVisitors} returnCount={stats.returningVisitors} />
+                </div>
+
+                {/* OS Breakdown */}
+                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                    <div className="flex items-center justify-between mb-4 md:mb-6">
+                        <div>
+                            <h3 className="font-semibold text-charcoal text-sm md:text-base">Operating Systems</h3>
+                            <p className="text-[10px] md:text-xs text-charcoal/50">Visitor OS distribution</p>
+                        </div>
+                        <Cpu className="w-4 h-4 md:w-5 md:h-5 text-gold" />
+                    </div>
+                    <div className="space-y-3">
+                        {Object.entries(stats.osBreakdown).length > 0 ? (
+                            Object.entries(stats.osBreakdown)
+                                .sort(([, a], [, b]) => b - a)
+                                .map(([os, count]) => {
+                                    const osColors: Record<string, string> = {
+                                        'Android': 'bg-emerald-500', 'iOS': 'bg-blue-500', 'iPadOS': 'bg-blue-400',
+                                        'Windows': 'bg-sky-500', 'macOS': 'bg-gray-600', 'Linux': 'bg-orange-500', 'Other': 'bg-charcoal/30'
+                                    };
+                                    return (
+                                        <ProgressBar
+                                            key={os}
+                                            label={os}
+                                            value={count}
+                                            total={stats.uniqueVisitors}
+                                            color={osColors[os] || 'bg-gold'}
+                                        />
+                                    );
+                                })
+                        ) : (
+                            <p className="text-sm text-charcoal/50 text-center py-4">No OS data available</p>
+                        )}
                     </div>
                 </div>
             </div>
@@ -431,15 +706,15 @@ const AnalyticsDashboard: React.FC = () => {
                     <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gold/10">
                         <div className="flex items-center gap-2 text-sm">
                             <Monitor className="w-4 h-4 text-blue-500" />
-                            <span className="text-charcoal/60">{stats.deviceBreakdown.desktop || 0}</span>
+                            <span className="text-charcoal/60">{(stats.deviceBreakdown.desktop || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                             <Smartphone className="w-4 h-4 text-emerald-500" />
-                            <span className="text-charcoal/60">{stats.deviceBreakdown.mobile || 0}</span>
+                            <span className="text-charcoal/60">{(stats.deviceBreakdown.mobile || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                             <Tablet className="w-4 h-4 text-purple-500" />
-                            <span className="text-charcoal/60">{stats.deviceBreakdown.tablet || 0}</span>
+                            <span className="text-charcoal/60">{(stats.deviceBreakdown.tablet || 0).toLocaleString()}</span>
                         </div>
                     </div>
                 </div>
@@ -483,7 +758,7 @@ const AnalyticsDashboard: React.FC = () => {
                                         {path === '/' ? 'Home' : path}
                                     </p>
                                 </div>
-                                <span className="text-sm font-medium text-gold">{views}</span>
+                                <span className="text-sm font-medium text-gold">{views.toLocaleString()}</span>
                             </div>
                         ))}
                         {stats.topPages.length === 0 && (
@@ -493,77 +768,215 @@ const AnalyticsDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Events & Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                {/* Event Breakdown */}
-                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
-                    <div className="flex items-center justify-between mb-4 md:mb-6">
-                        <div>
-                            <h3 className="font-semibold text-charcoal text-sm md:text-base">Event Tracking</h3>
-                            <p className="text-[10px] md:text-xs text-charcoal/50">User interactions & conversions</p>
-                        </div>
-                        <MousePointerClick className="w-4 h-4 md:w-5 md:h-5 text-gold" />
+            {/* Events */}
+            <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                <div className="flex items-center justify-between mb-4 md:mb-6">
+                    <div>
+                        <h3 className="font-semibold text-charcoal text-sm md:text-base">Event Tracking</h3>
+                        <p className="text-[10px] md:text-xs text-charcoal/50">User interactions & conversions</p>
                     </div>
-                    {Object.keys(stats.eventBreakdown).length > 0 ? (
-                        <div className="space-y-3">
-                            {Object.entries(stats.eventBreakdown)
-                                .sort(([, a], [, b]) => b - a)
-                                .slice(0, 6)
-                                .map(([event, count]) => (
-                                    <div key={event} className="flex items-center justify-between p-3 bg-charcoal/5 rounded-xl">
-                                        <span className="text-sm text-charcoal capitalize">
-                                            {event.replace(/_/g, ' ')}
-                                        </span>
-                                        <span className="text-sm font-medium text-gold">{count}</span>
+                    <MousePointerClick className="w-4 h-4 md:w-5 md:h-5 text-gold" />
+                </div>
+                {Object.keys(stats.eventBreakdown).length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {Object.entries(stats.eventBreakdown)
+                            .sort(([, a], [, b]) => b - a)
+                            .slice(0, 9)
+                            .map(([event, count]) => (
+                                <div key={event} className="flex items-center justify-between p-3 bg-charcoal/5 rounded-xl">
+                                    <span className="text-sm text-charcoal capitalize">
+                                        {event.replace(/_/g, ' ')}
+                                    </span>
+                                    <span className="text-sm font-medium text-gold">{count.toLocaleString()}</span>
+                                </div>
+                            ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-8">
+                        <MousePointerClick className="w-12 h-12 text-charcoal/20 mx-auto mb-3" />
+                        <p className="text-sm text-charcoal/50">No events tracked yet</p>
+                    </div>
+                )}
+            </div>
+
+            {/* ── All Visitors (Paginated) ── */}
+            <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
+                <div className="flex items-center justify-between mb-4 md:mb-6">
+                    <div>
+                        <h3 className="font-semibold text-charcoal text-sm md:text-base">All Visitors</h3>
+                        <p className="text-[10px] md:text-xs text-charcoal/50">
+                            Showing {data.visitors.length > 0 ? visitorPage * VISITORS_PER_PAGE + 1 : 0}–{Math.min((visitorPage + 1) * VISITORS_PER_PAGE, data.visitors.length)} of {data.visitors.length.toLocaleString()} visitors · Times in Philippine Standard Time
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <LayoutGrid className="w-4 h-4 md:w-5 md:h-5 text-gold" />
+                    </div>
+                </div>
+
+                {/* Visitor Cards */}
+                <div className="space-y-3">
+                    {paginatedVisitors.map((visitor) => {
+                        const device = visitor.client_devices?.[0];
+                        const deviceIcon = device?.device_type === 'mobile' ? Smartphone
+                            : device?.device_type === 'tablet' ? Tablet : Monitor;
+                        const DeviceIcon = deviceIcon;
+
+                        return (
+                            <div key={visitor.id} className="p-3 md:p-4 bg-charcoal/5 rounded-xl hover:bg-charcoal/[0.08] transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-gold/60 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                        {visitor.visit_count}
                                     </div>
-                                ))}
-                        </div>
-                    ) : (
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            {editingVisitorId === visitor.visitor_id ? (
+                                                <div className="flex items-center gap-2 w-full max-w-[200px]">
+                                                    <input
+                                                        type="text"
+                                                        value={editingName}
+                                                        onChange={(e) => setEditingName(e.target.value)}
+                                                        className="text-sm border border-gold/30 rounded px-2 py-0.5 bg-white w-full focus:outline-none focus:border-gold"
+                                                        placeholder="Name (e.g., My iPhone)"
+                                                        autoFocus
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleSaveAlias(visitor.visitor_id)}
+                                                    />
+                                                    <button onClick={() => handleSaveAlias(visitor.visitor_id)} className="p-1 text-emerald-600 hover:bg-emerald-50 rounded">
+                                                        <Check size={14} />
+                                                    </button>
+                                                    <button onClick={() => setEditingVisitorId(null)} className="p-1 text-red-600 hover:bg-red-50 rounded">
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-2 group">
+                                                    <p className="text-sm font-medium text-charcoal truncate flex items-center gap-2">
+                                                        {visitor.custom_name ? (
+                                                            <>
+                                                                <span>{visitor.custom_name}</span>
+                                                                <span className="text-[10px] text-charcoal/40 font-normal">({visitor.visitor_id.slice(0, 8)}...)</span>
+                                                            </>
+                                                        ) : (
+                                                            visitor.visitor_id.slice(0, 16) + '...'
+                                                        )}
+                                                    </p>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingVisitorId(visitor.visitor_id);
+                                                            setEditingName(visitor.custom_name || '');
+                                                        }}
+                                                        className="opacity-0 group-hover:opacity-100 p-1 text-charcoal/40 hover:text-gold transition-all"
+                                                        title="Add nickname"
+                                                    >
+                                                        <Edit2 size={12} />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-charcoal/50">
+                                            <span className="flex items-center gap-1">
+                                                <Clock size={10} />
+                                                Last: {formatPHDateTime(visitor.last_visit)}
+                                            </span>
+                                            <span className="text-charcoal/30">·</span>
+                                            <span>First: {formatPHDateTime(visitor.first_visit)}</span>
+                                        </div>
+                                    </div>
+                                    {visitor.visit_count > 1 ? (
+                                        <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full font-medium flex-shrink-0">
+                                            Returning
+                                        </span>
+                                    ) : (
+                                        <span className="text-xs px-2 py-1 bg-gold/10 text-gold rounded-full font-medium flex-shrink-0">
+                                            New
+                                        </span>
+                                    )}
+                                </div>
+                                {/* Device Info */}
+                                {device && (
+                                    <div className="mt-2 pt-2 border-t border-charcoal/5 flex flex-wrap items-center gap-x-4 gap-y-1">
+                                        <div className="flex items-center gap-1.5 text-[11px] text-charcoal/55">
+                                            <DeviceIcon size={12} className="text-charcoal/40" />
+                                            <span>{device.device_model || device.device_type || 'Unknown'}</span>
+                                        </div>
+                                        {device.os_name && (
+                                            <div className="flex items-center gap-1.5 text-[11px] text-charcoal/55">
+                                                <Cpu size={12} className="text-charcoal/40" />
+                                                <span>{device.os_name}{device.os_version ? ` ${device.os_version}` : ''}</span>
+                                            </div>
+                                        )}
+                                        {device.browser && (
+                                            <div className="flex items-center gap-1.5 text-[11px] text-charcoal/55">
+                                                <Globe size={12} className="text-charcoal/40" />
+                                                <span>{device.browser}{device.browser_version ? ` v${device.browser_version}` : ''}</span>
+                                            </div>
+                                        )}
+                                        {device.app_context && device.app_context !== 'Direct Browser' && (
+                                            <div className="flex items-center gap-1.5 text-[11px] text-charcoal/55">
+                                                <AppWindow size={12} className="text-charcoal/40" />
+                                                <span>via {device.app_context}</span>
+                                            </div>
+                                        )}
+                                        {device.screen_resolution && (
+                                            <span className="text-[11px] text-charcoal/40">{device.screen_resolution}</span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                    {data.visitors.length === 0 && (
                         <div className="text-center py-8">
-                            <MousePointerClick className="w-12 h-12 text-charcoal/20 mx-auto mb-3" />
-                            <p className="text-sm text-charcoal/50">No events tracked yet</p>
+                            <Users className="w-12 h-12 text-charcoal/20 mx-auto mb-3" />
+                            <p className="text-sm text-charcoal/50">No visitors yet</p>
                         </div>
                     )}
                 </div>
 
-                {/* Recent Visitors */}
-                <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-gold/10 shadow-sm">
-                    <div className="flex items-center justify-between mb-4 md:mb-6">
-                        <div>
-                            <h3 className="font-semibold text-charcoal text-sm md:text-base">Recent Visitors</h3>
-                            <p className="text-[10px] md:text-xs text-charcoal/50">Latest visitor activity</p>
+                {/* Pagination Controls */}
+                {totalVisitorPages > 1 && (
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-gold/10">
+                        <button
+                            onClick={() => setVisitorPage(p => Math.max(0, p - 1))}
+                            disabled={visitorPage === 0}
+                            className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-charcoal/60 hover:text-charcoal disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft size={16} /> Previous
+                        </button>
+                        <div className="flex items-center gap-1">
+                            {Array.from({ length: Math.min(totalVisitorPages, 7) }, (_, i) => {
+                                let pageNum: number;
+                                if (totalVisitorPages <= 7) {
+                                    pageNum = i;
+                                } else if (visitorPage < 3) {
+                                    pageNum = i;
+                                } else if (visitorPage > totalVisitorPages - 4) {
+                                    pageNum = totalVisitorPages - 7 + i;
+                                } else {
+                                    pageNum = visitorPage - 3 + i;
+                                }
+                                return (
+                                    <button
+                                        key={pageNum}
+                                        onClick={() => setVisitorPage(pageNum)}
+                                        className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${visitorPage === pageNum
+                                            ? 'bg-gold text-white shadow-sm'
+                                            : 'text-charcoal/50 hover:bg-charcoal/5'
+                                            }`}
+                                    >
+                                        {pageNum + 1}
+                                    </button>
+                                );
+                            })}
                         </div>
-                        <Calendar className="w-4 h-4 md:w-5 md:h-5 text-gold" />
+                        <button
+                            onClick={() => setVisitorPage(p => Math.min(totalVisitorPages - 1, p + 1))}
+                            disabled={visitorPage >= totalVisitorPages - 1}
+                            className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-charcoal/60 hover:text-charcoal disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                            Next <ChevronRight size={16} />
+                        </button>
                     </div>
-                    <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                        {data.visitors.slice(0, 10).map((visitor) => (
-                            <div key={visitor.id} className="flex items-center gap-3 p-3 bg-charcoal/5 rounded-xl">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-gold/60 flex items-center justify-center text-white font-bold text-sm">
-                                    {visitor.visit_count}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-charcoal truncate">
-                                        {visitor.visitor_id.slice(0, 12)}...
-                                    </p>
-                                    <p className="text-xs text-charcoal/50">
-                                        Last visit: {new Date(visitor.last_visit).toLocaleDateString()}
-                                    </p>
-                                </div>
-                                {visitor.visit_count > 1 && (
-                                    <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full font-medium">
-                                        Returning
-                                    </span>
-                                )}
-                            </div>
-                        ))}
-                        {data.visitors.length === 0 && (
-                            <div className="text-center py-8">
-                                <Users className="w-12 h-12 text-charcoal/20 mx-auto mb-3" />
-                                <p className="text-sm text-charcoal/50">No visitors yet</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* Footer Stats */}
@@ -576,19 +989,20 @@ const AnalyticsDashboard: React.FC = () => {
                         <div>
                             <p className="font-serif text-base md:text-lg">Analytics Summary</p>
                             <p className="text-[10px] md:text-xs text-white/60">
-                                Data from {timeRange === '24h' ? 'last 24 hours' :
-                                    timeRange === '7d' ? 'last 7 days' :
-                                        timeRange === '30d' ? 'last 30 days' : 'all time'}
+                                Data from {timeRange === 'today' ? 'today' :
+                                    timeRange === '24h' ? 'last 24 hours' :
+                                        timeRange === '7d' ? 'last 7 days' :
+                                            timeRange === '30d' ? 'last 30 days' : 'all time'}
                             </p>
                         </div>
                     </div>
                     <div className="flex gap-6 md:gap-8">
                         <div className="text-center">
-                            <p className="text-xl md:text-2xl font-serif text-gold">{stats.totalPageViews}</p>
+                            <p className="text-xl md:text-2xl font-serif text-gold">{stats.totalPageViews.toLocaleString()}</p>
                             <p className="text-[10px] md:text-xs text-white/60">Total Views</p>
                         </div>
                         <div className="text-center">
-                            <p className="text-xl md:text-2xl font-serif text-gold">{stats.uniqueVisitors}</p>
+                            <p className="text-xl md:text-2xl font-serif text-gold">{stats.uniqueVisitors.toLocaleString()}</p>
                             <p className="text-[10px] md:text-xs text-white/60">Unique Visitors</p>
                         </div>
                         <div className="text-center">
