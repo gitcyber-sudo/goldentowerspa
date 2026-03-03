@@ -1,48 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import {
     Receipt,
     Plus,
     Trash2,
-    Filter,
     TrendingDown,
-    Calendar,
-    ArrowUpRight,
-    ArrowDownRight,
-    DollarSign,
-    PieChart
+    PieChart,
+    Pencil,
+    Check,
+    X,
+    Tag
 } from 'lucide-react';
 import type { Expense } from '../../types';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 
-const CATEGORIES = [
-    { id: 'utility', label: 'Utilities (Elec/Water)', color: 'bg-blue-100 text-blue-600' },
-    { id: 'rent', label: 'Rent & Lease', color: 'bg-purple-100 text-purple-600' },
-    { id: 'supplies', label: 'Supplies & Inventory', color: 'bg-amber-100 text-amber-600' },
-    { id: 'marketing', label: 'Marketing & Ads', color: 'bg-emerald-100 text-emerald-600' },
-    { id: 'maintenance', label: 'Maintenance & Repairs', color: 'bg-rose-100 text-rose-600' },
-    { id: 'laundry', label: 'Laundry Services', color: 'bg-indigo-100 text-indigo-600' },
-    { id: 'other', label: 'Other Expenses', color: 'bg-slate-100 text-slate-600' }
+// Color palette cycling by index
+const COLOR_PALETTE = [
+    'bg-blue-100 text-blue-600',
+    'bg-purple-100 text-purple-600',
+    'bg-amber-100 text-amber-600',
+    'bg-emerald-100 text-emerald-600',
+    'bg-rose-100 text-rose-600',
+    'bg-indigo-100 text-indigo-600',
+    'bg-slate-100 text-slate-600',
+    'bg-teal-100 text-teal-600',
 ];
+
+interface ExpenseCategory {
+    id: string;
+    label: string;
+    sort_order: number;
+}
 
 const ExpensesTab: React.FC = () => {
     const [expenses, setExpenses] = useState<Expense[]>([]);
+    const [categories, setCategories] = useState<ExpenseCategory[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
     const [filterMonth, setFilterMonth] = useState(format(new Date(), 'yyyy-MM'));
 
+    // Category management state
+    const [editingCatId, setEditingCatId] = useState<string | null>(null);
+    const [editingLabel, setEditingLabel] = useState('');
+    const [newCatLabel, setNewCatLabel] = useState('');
+    const [catLoading, setCatLoading] = useState(false);
+
     const [newExpense, setNewExpense] = useState({
         amount: '',
-        category: 'utility',
+        category: '',
         description: '',
         date: format(new Date(), 'yyyy-MM-dd')
     });
 
-    useEffect(() => {
-        fetchExpenses();
-    }, [filterMonth]);
+    const fetchCategories = useCallback(async () => {
+        const { data } = await supabase
+            .from('expense_categories')
+            .select('*')
+            .order('sort_order', { ascending: true });
+        if (data) {
+            setCategories(data);
+            // Set default category for new expense if not yet set
+            setNewExpense(prev => ({ ...prev, category: prev.category || data[0]?.id || '' }));
+        }
+    }, []);
 
-    const fetchExpenses = async () => {
+    const fetchExpenses = useCallback(async () => {
         setLoading(true);
         try {
             const start = startOfMonth(new Date(filterMonth));
@@ -63,16 +85,25 @@ const ExpensesTab: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filterMonth]);
+
+    useEffect(() => {
+        fetchCategories();
+    }, [fetchCategories]);
+
+    useEffect(() => {
+        fetchExpenses();
+    }, [fetchExpenses]);
 
     const handleAddExpense = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const catLabel = categories.find(c => c.id === newExpense.category)?.label || newExpense.category;
             const { error } = await supabase
                 .from('expenses')
                 .insert([{
                     amount: parseFloat(newExpense.amount),
-                    category: newExpense.category,
+                    category: catLabel,
                     description: newExpense.description,
                     date: newExpense.date
                 }]);
@@ -81,7 +112,7 @@ const ExpensesTab: React.FC = () => {
             setIsAdding(false);
             setNewExpense({
                 amount: '',
-                category: 'utility',
+                category: categories[0]?.id || '',
                 description: '',
                 date: format(new Date(), 'yyyy-MM-dd')
             });
@@ -107,7 +138,72 @@ const ExpensesTab: React.FC = () => {
         }
     };
 
+    // ── Category Management ──────────────────────────────────
+
+    const handleAddCategory = async () => {
+        if (!newCatLabel.trim()) return;
+        setCatLoading(true);
+        try {
+            const { error } = await supabase
+                .from('expense_categories')
+                .insert([{ label: newCatLabel.trim(), sort_order: categories.length }]);
+            if (error) throw error;
+            setNewCatLabel('');
+            await fetchCategories();
+        } catch (err) {
+            console.error('Error adding category:', err);
+        } finally {
+            setCatLoading(false);
+        }
+    };
+
+    const handleRenameCategory = async (id: string) => {
+        if (!editingLabel.trim()) return;
+        setCatLoading(true);
+        try {
+            const { error } = await supabase
+                .from('expense_categories')
+                .update({ label: editingLabel.trim() })
+                .eq('id', id);
+            if (error) throw error;
+            setEditingCatId(null);
+            setEditingLabel('');
+            await fetchCategories();
+        } catch (err) {
+            console.error('Error renaming category:', err);
+        } finally {
+            setCatLoading(false);
+        }
+    };
+
+    const handleDeleteCategory = async (id: string) => {
+        if (!confirm('Remove this category? Existing expenses using it will still show the label.')) return;
+        setCatLoading(true);
+        try {
+            const { error } = await supabase
+                .from('expense_categories')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+            await fetchCategories();
+        } catch (err) {
+            console.error('Error deleting category:', err);
+        } finally {
+            setCatLoading(false);
+        }
+    };
+
+    // ────────────────────────────────────────────────────────
+
     const totalMonthly = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+    const getCatColor = (index: number) => COLOR_PALETTE[index % COLOR_PALETTE.length];
+
+    // Match expense category by label (stored as text in the expenses table)
+    const getCatByLabel = (label: string) => {
+        const idx = categories.findIndex(c => c.label === label);
+        return { label: label || 'Unknown', color: getCatColor(idx >= 0 ? idx : 0) };
+    };
 
     return (
         <div className="p-4 md:p-6 lg:p-8">
@@ -175,50 +271,53 @@ const ExpensesTab: React.FC = () => {
                                     <tr><td colSpan={4} className="p-10 text-center italic text-charcoal/30">Reviewing ledgers...</td></tr>
                                 ) : expenses.length === 0 ? (
                                     <tr><td colSpan={4} className="p-10 text-center italic text-charcoal/30">No expenses recorded for this period.</td></tr>
-                                ) : expenses.map(expense => (
-                                    <tr key={expense.id} className="hover:bg-cream/20 transition-colors group">
-                                        <td className="px-5 py-5">
-                                            <div>
-                                                <p className="text-xs font-bold text-charcoal/40 uppercase tracking-tighter mb-0.5">
-                                                    {format(new Date(expense.date), 'MMM dd, yyyy')}
-                                                </p>
-                                                <p className="font-semibold text-charcoal">{expense.description || 'No description provided'}</p>
-                                            </div>
-                                        </td>
-                                        <td className="px-5 py-5">
-                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${CATEGORIES.find(c => c.id === expense.category)?.color || 'bg-slate-100 text-slate-600'
-                                                }`}>
-                                                {CATEGORIES.find(c => c.id === expense.category)?.label || expense.category}
-                                            </span>
-                                        </td>
-                                        <td className="px-5 py-5">
-                                            <span className="text-lg font-serif text-charcoal">₱{expense.amount.toLocaleString()}</span>
-                                        </td>
-                                        <td className="px-5 py-5 text-right">
-                                            <button
-                                                onClick={() => handleDelete(expense.id)}
-                                                className="p-2 text-charcoal/20 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                ) : expenses.map(expense => {
+                                    const { label, color } = getCatByLabel(expense.category);
+                                    return (
+                                        <tr key={expense.id} className="hover:bg-cream/20 transition-colors group">
+                                            <td className="px-5 py-5">
+                                                <div>
+                                                    <p className="text-xs font-bold text-charcoal/40 uppercase tracking-tighter mb-0.5">
+                                                        {format(new Date(expense.date), 'MMM dd, yyyy')}
+                                                    </p>
+                                                    <p className="font-semibold text-charcoal">{expense.description || 'No description provided'}</p>
+                                                </div>
+                                            </td>
+                                            <td className="px-5 py-5">
+                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${color}`}>
+                                                    {label}
+                                                </span>
+                                            </td>
+                                            <td className="px-5 py-5">
+                                                <span className="text-lg font-serif text-charcoal">₱{expense.amount.toLocaleString()}</span>
+                                            </td>
+                                            <td className="px-5 py-5 text-right">
+                                                <button
+                                                    onClick={() => handleDelete(expense.id)}
+                                                    className="p-2 text-charcoal/20 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                {/* Sidebar Breakdown */}
+                {/* Sidebar */}
                 <div className="space-y-6">
+                    {/* Category Breakdown */}
                     <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm">
                         <h3 className="font-serif text-lg text-charcoal mb-4">Category Breakdown</h3>
                         <div className="space-y-4">
-                            {CATEGORIES.map(cat => {
-                                const catTotal = expenses.filter(e => e.category === cat.id).reduce((sum, e) => sum + e.amount, 0);
+                            {categories.map((cat, i) => {
+                                const catTotal = expenses.filter(e => e.category === cat.label).reduce((sum, e) => sum + e.amount, 0);
                                 const percentage = totalMonthly > 0 ? (catTotal / totalMonthly) * 100 : 0;
                                 if (catTotal === 0) return null;
-
+                                const color = getCatColor(i);
                                 return (
                                     <div key={cat.id}>
                                         <div className="flex justify-between items-end mb-1.5">
@@ -227,30 +326,104 @@ const ExpensesTab: React.FC = () => {
                                         </div>
                                         <div className="w-full h-1.5 bg-charcoal/5 rounded-full overflow-hidden">
                                             <div
-                                                className={`h-full ${cat.color.split(' ')[1]} transition-all duration-1000`}
+                                                className={`h-full ${color.split(' ')[1]} transition-all duration-1000`}
                                                 style={{ width: `${percentage}%` }}
                                             />
                                         </div>
                                     </div>
                                 );
                             })}
+                            {expenses.length === 0 && <p className="text-xs text-charcoal/30 italic">No data for this period.</p>}
                         </div>
                     </div>
 
+                    {/* Manage Categories */}
+                    <div className="bg-white rounded-2xl p-6 border border-gold/10 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Tag size={16} className="text-gold" />
+                            <h3 className="font-serif text-lg text-charcoal">Manage Categories</h3>
+                        </div>
+
+                        <div className="space-y-1 mb-4">
+                            {categories.map(cat => (
+                                <div key={cat.id} className="flex items-center gap-2 group py-1.5 px-2 rounded-xl hover:bg-cream/30 transition-colors">
+                                    {editingCatId === cat.id ? (
+                                        <>
+                                            <input
+                                                autoFocus
+                                                value={editingLabel}
+                                                onChange={e => setEditingLabel(e.target.value)}
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') handleRenameCategory(cat.id);
+                                                    if (e.key === 'Escape') setEditingCatId(null);
+                                                }}
+                                                className="flex-1 text-xs bg-cream/50 border border-gold/20 rounded-lg px-2 py-1.5 focus:outline-none focus:border-gold"
+                                            />
+                                            <button onClick={() => handleRenameCategory(cat.id)} disabled={catLoading} className="p-1 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors">
+                                                <Check size={14} />
+                                            </button>
+                                            <button onClick={() => setEditingCatId(null)} className="p-1 text-charcoal/30 hover:bg-charcoal/5 rounded-lg transition-colors">
+                                                <X size={14} />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="flex-1 text-xs text-charcoal font-medium">{cat.label}</span>
+                                            <button
+                                                onClick={() => { setEditingCatId(cat.id); setEditingLabel(cat.label); }}
+                                                className="p-1 opacity-0 group-hover:opacity-100 text-gold hover:bg-gold/10 rounded-lg transition-all"
+                                                title="Rename"
+                                            >
+                                                <Pencil size={12} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteCategory(cat.id)}
+                                                disabled={catLoading}
+                                                className="p-1 opacity-0 group-hover:opacity-100 text-charcoal/30 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                                                title="Delete"
+                                            >
+                                                <Trash2 size={12} />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Add new category */}
+                        <div className="flex items-center gap-2 pt-3 border-t border-gold/10">
+                            <input
+                                type="text"
+                                value={newCatLabel}
+                                onChange={e => setNewCatLabel(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter') handleAddCategory(); }}
+                                placeholder="New category name..."
+                                className="flex-1 text-xs bg-cream/30 border border-gold/10 rounded-xl px-3 py-2 focus:outline-none focus:border-gold"
+                            />
+                            <button
+                                onClick={handleAddCategory}
+                                disabled={catLoading || !newCatLabel.trim()}
+                                className="p-2 bg-gold text-white rounded-xl hover:bg-gold/80 transition-colors disabled:opacity-40"
+                            >
+                                <Plus size={14} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Savings Strategy */}
                     <div className="bg-gold/5 border border-gold/10 rounded-2xl p-6">
                         <div className="flex items-center gap-2 text-gold mb-3">
                             <TrendingDown size={20} />
                             <h4 className="font-serif text-charcoal">Savings Strategy</h4>
                         </div>
-                        <p className="text-xs text-charcoal/60 leading-relaxed mb-4">
-                            Based on your spending, your highest cost factor is <span className="font-bold text-charcoal">
-                                {CATEGORIES.find(c => c.id === [...CATEGORIES].sort((a, b) => {
-                                    const sumA = expenses.filter(e => e.category === a.id).reduce((s, e) => s + e.amount, 0);
-                                    const sumB = expenses.filter(e => e.category === b.id).reduce((s, e) => s + e.amount, 0);
-                                    return sumB - sumA;
-                                })[0].id)?.label}
-                            </span>. Reducing this by 10% would save you ₱{Math.round(totalMonthly * 0.1).toLocaleString()} next month.
-                        </p>
+                        {expenses.length > 0 ? (
+                            <p className="text-xs text-charcoal/60 leading-relaxed">
+                                Reducing your highest cost category by 10% would save you{' '}
+                                <span className="font-bold text-charcoal">₱{Math.round(totalMonthly * 0.1).toLocaleString()}</span> next month.
+                            </p>
+                        ) : (
+                            <p className="text-xs text-charcoal/40 italic">Log expenses to see insights.</p>
+                        )}
                     </div>
                 </div>
             </div>
@@ -284,7 +457,7 @@ const ExpensesTab: React.FC = () => {
                                     value={newExpense.category}
                                     onChange={e => setNewExpense({ ...newExpense, category: e.target.value })}
                                 >
-                                    {CATEGORIES.map(c => (
+                                    {categories.map(c => (
                                         <option key={c.id} value={c.id}>{c.label}</option>
                                     ))}
                                 </select>
