@@ -8,7 +8,7 @@ import CustomTimePicker from '../ui/CustomTimePicker';
 interface CompleteBookingModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (completionTime: string, tipAmount: number, tipRecipient: 'management' | 'therapist' | null) => void;
+    onConfirm: (completionTime: string, tipAmount: number, tipRecipient: 'management' | 'therapist' | null, paymentMethod: 'cash' | 'gcash') => void;
     bookingDate: string;
     bookingTime?: string;
     duration?: number;
@@ -57,6 +57,7 @@ const CompleteBookingModal: React.FC<CompleteBookingModalProps> = ({ isOpen, onC
     const [time, setTime] = useState(initialState.time);
     const [tipAmount, setTipAmount] = useState<number | ''>('');
     const [tipRecipient, setTipRecipient] = useState<'management' | 'therapist'>('management');
+    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'gcash'>('cash');
 
     const totalAmount = useMemo(() => {
         const tip = typeof tipAmount === 'number' ? tipAmount : 0;
@@ -70,6 +71,7 @@ const CompleteBookingModal: React.FC<CompleteBookingModalProps> = ({ isOpen, onC
             setTime(initialState.time);
             setTipAmount('');
             setTipRecipient('management');
+            setPaymentMethod('cash');
         }
     }, [isOpen, initialState]);
 
@@ -111,6 +113,17 @@ const CompleteBookingModal: React.FC<CompleteBookingModalProps> = ({ isOpen, onC
                             <span className="font-serif text-lg">{formatCurrency(servicePrice)}</span>
                         </div>
 
+                        <div className="bg-gold/5 rounded-xl p-3 space-y-2 border border-gold/10">
+                            <div className="flex justify-between items-center text-xs">
+                                <span className="text-charcoal/60 font-medium">Spa Share (70%)</span>
+                                <span className="text-charcoal font-bold">{formatCurrency(Math.floor(servicePrice * 0.70))}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-xs">
+                                <span className="text-charcoal/60 font-medium">Therapist Share (30%)</span>
+                                <span className="text-charcoal font-bold">{formatCurrency(Math.ceil(servicePrice * 0.30))}</span>
+                            </div>
+                        </div>
+
                         <div className="space-y-2">
                             <label className="block text-sm font-bold text-charcoal/80">
                                 Additional Tip
@@ -139,6 +152,26 @@ const CompleteBookingModal: React.FC<CompleteBookingModalProps> = ({ isOpen, onC
                             </div>
                         </div>
 
+                        <div className="space-y-3">
+                            <label className="block text-sm font-bold text-charcoal/80">
+                                Payment Method
+                            </label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    onClick={() => setPaymentMethod('cash')}
+                                    className={`py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${paymentMethod === 'cash' ? 'bg-charcoal text-white shadow-lg scale-[1.02]' : 'bg-charcoal/5 text-charcoal/40 hover:bg-charcoal/10'}`}
+                                >
+                                    Cash
+                                </button>
+                                <button
+                                    onClick={() => setPaymentMethod('gcash')}
+                                    className={`py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${paymentMethod === 'gcash' ? 'bg-blue-600 text-white shadow-lg scale-[1.02]' : 'bg-charcoal/5 text-charcoal/40 hover:bg-charcoal/10'}`}
+                                >
+                                    GCash
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="flex justify-between items-center pt-4 border-t border-charcoal/10">
                             <span className="font-bold text-charcoal">Total Received</span>
                             <span className="font-serif text-2xl text-gold">{formatCurrency(totalAmount)}</span>
@@ -154,7 +187,7 @@ const CompleteBookingModal: React.FC<CompleteBookingModalProps> = ({ isOpen, onC
                         Cancel
                     </button>
                     <button
-                        onClick={() => onConfirm(`${date}T${time}:00`, typeof tipAmount === 'number' ? tipAmount : 0, typeof tipAmount === 'number' && tipAmount > 0 ? tipRecipient : null)}
+                        onClick={() => onConfirm(`${date}T${time}:00`, typeof tipAmount === 'number' ? tipAmount : 0, typeof tipAmount === 'number' && tipAmount > 0 ? tipRecipient : null, paymentMethod)}
                         className="flex-1 py-3 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
                     >
                         <Check size={18} /> Finish

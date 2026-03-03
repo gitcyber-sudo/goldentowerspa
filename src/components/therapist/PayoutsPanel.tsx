@@ -54,7 +54,7 @@ const PayoutsPanel: React.FC<PayoutsPanelProps> = ({ payouts, bookings }) => {
                                         </span>
                                     </div>
                                     <p className="text-xs text-charcoal/40">
-                                        Period: {new Date(payout.period_start).toLocaleDateString()} - {new Date(payout.period_end).toLocaleDateString()}
+                                        {payout.status === 'processed' ? 'Paid on' : 'Date'}: {new Date(payout.paid_at || payout.created_at).toLocaleDateString()}
                                     </p>
                                 </div>
                             </div>

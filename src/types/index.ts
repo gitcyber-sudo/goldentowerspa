@@ -57,6 +57,7 @@ export interface Booking {
     price_at_booking?: number;
     deleted_at?: string;
     payout_id?: string;
+    payment_method?: 'cash' | 'gcash' | null;
     // Joined relations
     services?: { title: string; price: number; duration: number };
     therapists?: { name: string };

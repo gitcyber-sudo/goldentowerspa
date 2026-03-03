@@ -167,7 +167,7 @@ const AdminDashboard: React.FC = () => {
         }
     }, [activeTab, fetchBookings, fetchTherapists]);
 
-    const updateStatus = useCallback(async (id: string, newStatus: string, therapistId?: string, completionTime?: string, tipAmount?: number, tipRecipient?: 'management' | 'therapist' | null) => {
+    const updateStatus = useCallback(async (id: string, newStatus: string, therapistId?: string, completionTime?: string, tipAmount?: number, tipRecipient?: 'management' | 'therapist' | null, paymentMethod?: 'cash' | 'gcash') => {
         const booking = bookings.find(b => b.id === id);
         if (!booking) return;
 
@@ -197,6 +197,7 @@ const AdminDashboard: React.FC = () => {
                 updateData.completed_at = completionTime || new Date().toISOString();
                 updateData.tip_amount = tipAmount || 0;
                 updateData.tip_recipient = tipRecipient || null;
+                updateData.payment_method = paymentMethod || null;
 
                 // Calculate Commission (30% rounded up) and Revenue (Remainder)
                 const servicePrice = booking.price_at_booking || booking.services?.price || 0;
@@ -562,7 +563,7 @@ const AdminDashboard: React.FC = () => {
                 <CompleteBookingModal
                     isOpen={!!completingBooking}
                     onClose={() => setCompletingBooking(null)}
-                    onConfirm={(time, tipAmount, tipRecipient) => updateStatus(completingBooking!.id, 'completed', undefined, time, tipAmount, tipRecipient)}
+                    onConfirm={(time, tipAmount, tipRecipient, paymentMethod) => updateStatus(completingBooking!.id, 'completed', undefined, time, tipAmount, tipRecipient, paymentMethod)}
                     bookingDate={completingBooking?.booking_date || ''}
                     bookingTime={completingBooking?.booking_time}
                     duration={completingBooking?.services?.duration}

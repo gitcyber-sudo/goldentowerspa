@@ -67,7 +67,8 @@ const CommissionsTab: React.FC<CommissionsTabProps> = ({ bookings, therapists, o
                     amount: amount,
                     period_start: new Date(Math.min(...bookings.map(b => new Date(b.booking_date).getTime()))).toISOString().split('T')[0],
                     period_end: new Date().toISOString().split('T')[0],
-                    status: 'processed'
+                    status: 'processed',
+                    paid_at: new Date().toISOString()
                 }])
                 .select()
                 .single();

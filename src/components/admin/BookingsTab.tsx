@@ -229,6 +229,23 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
                                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusColor(b.status)}`}>
                                             {b.status}
                                         </span>
+                                        {b.status === 'completed' && (
+                                            <div className="mt-2 space-y-1 text-[9px] font-bold uppercase tracking-tighter">
+                                                <div className="flex justify-between text-charcoal/40">
+                                                    <span>Spa (70%)</span>
+                                                    <span>₱{(b.revenue_amount || 0).toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between text-gold">
+                                                    <span>Therapist (30%)</span>
+                                                    <span>₱{(b.commission_amount || 0).toLocaleString()}</span>
+                                                </div>
+                                                {b.payment_method && (
+                                                    <div className={`mt-2 py-0.5 px-2 rounded w-fit text-[8px] font-black uppercase tracking-[0.2em] ${b.payment_method === 'gcash' ? 'bg-blue-50 text-blue-600' : 'bg-charcoal/5 text-charcoal/60'}`}>
+                                                        {b.payment_method}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">
@@ -339,9 +356,17 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
                                     <p className="font-semibold text-charcoal">{b.guest_name || b.user_email}</p>
                                     <p className="text-xs text-charcoal/50">{b.services?.title}</p>
                                 </div>
-                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusColor(b.status)}`}>
-                                    {b.status}
-                                </span>
+                                <div className="flex flex-col items-end gap-2">
+                                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusColor(b.status)}`}>
+                                        {b.status}
+                                    </span>
+                                    {b.status === 'completed' && (
+                                        <div className="text-[9px] font-bold text-right space-y-0.5 uppercase tracking-tighter">
+                                            <p className="text-charcoal/40">Spa (70%): ₱{(b.revenue_amount || 0).toLocaleString()}</p>
+                                            <p className="text-gold">Therapist (30%): ₱{(b.commission_amount || 0).toLocaleString()}</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className="flex items-center gap-4 text-xs text-charcoal/60 mb-3">
                                 <span className="flex items-center gap-1"><Calendar size={12} /> {b.booking_date}</span>
