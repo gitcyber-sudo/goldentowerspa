@@ -143,12 +143,6 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-transparent via-black/10 to-black/40" aria-hidden="true" />
       </div>
 
-      {/* --- DECORATIVE ELEMENTS --- */}
-      <div className="absolute inset-0 z-[1] opacity-30 pointer-events-none" aria-hidden="true">
-        <div className="absolute top-1/4 left-1/4 animate-pulse"><Logo className="h-4 w-4" color="#DFBD69" /></div>
-        <div className="absolute top-1/3 right-1/3 animate-pulse delay-700"><Logo className="h-6 w-6" color="#DFBD69" /></div>
-        <div className="hidden md:block absolute bottom-1/3 left-1/3 animate-pulse delay-1000"><Logo className="h-3 w-3" color="#DFBD69" /></div>
-      </div>
 
       {/* --- CONTENT (Centered for BOTH) --- */}
       <div className="relative z-10 text-center px-4 max-w-5xl mx-auto flex flex-col items-center">
@@ -191,12 +185,7 @@ const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
 
       </div>
 
-      {/* Particles/Sparkles (Static CSS animation) */}
-      <div className="absolute inset-0 z-[1] opacity-30 pointer-events-none" aria-hidden="true">
-        <div className="absolute top-1/4 left-1/4 animate-pulse"><Logo className="h-4 w-4" color="#DFBD69" /></div>
-        <div className="absolute top-1/3 right-1/3 animate-pulse delay-700"><Logo className="h-6 w-6" color="#DFBD69" /></div>
-        <div className="hidden md:block absolute bottom-1/3 left-1/3 animate-pulse delay-1000"><Logo className="h-3 w-3" color="#DFBD69" /></div>
-      </div>
+
     </section>
   );
 };

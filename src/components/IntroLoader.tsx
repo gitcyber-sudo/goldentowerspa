@@ -30,9 +30,7 @@ const IntroLoader: React.FC<IntroLoaderProps> = ({ onComplete }) => {
     useEffect(() => {
         document.body.style.overflow = 'hidden';
 
-        // Set initial state for text spans
         const spans = textRef.current?.querySelectorAll('span') || [];
-        gsap.set(spans, { opacity: 0, y: 25 });
 
         const mainTl = gsap.timeline({
             onComplete: () => setAnimationSequenceDone(true)
@@ -135,12 +133,12 @@ const IntroLoader: React.FC<IntroLoaderProps> = ({ onComplete }) => {
                 <div ref={textRef} className="flex flex-col items-center relative z-10">
                     <div className="overflow-hidden mb-2">
                         <h1 className="font-serif text-5xl md:text-7xl text-charcoal tracking-tight flex gap-4">
-                            <span>Golden</span>
-                            <span>Tower</span>
+                            <span style={{ opacity: 0, transform: 'translateY(25px)' }}>Golden</span>
+                            <span style={{ opacity: 0, transform: 'translateY(25px)' }}>Tower</span>
                         </h1>
                     </div>
                     <div className="overflow-hidden">
-                        <span className="text-gold italic font-serif text-3xl md:text-4xl tracking-widest block">Spa</span>
+                        <span className="text-gold italic font-serif text-3xl md:text-4xl tracking-widest block" style={{ opacity: 0, transform: 'translateY(25px)' }}>Spa</span>
                     </div>
 
                     {/* Progress Section */}
