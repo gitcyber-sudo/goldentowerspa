@@ -65,7 +65,7 @@ const TermsOfService: React.FC = () => {
 
                     <h2>4. Home Service Terms</h2>
                     <p>
-                        Our home service massage is available within our service area in Quezon City and surrounding areas during our operating hours (4:00 PM – 4:00 AM daily). Additional terms for home service include:
+                        Our home service massage is available within our service area in Quezon City and surrounding areas during our operating hours (Open 24/7 daily). Additional terms for home service include:
                     </p>
                     <ul>
                         <li>A suitable, clean, and safe space must be provided for the treatment.</li>

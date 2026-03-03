@@ -32,6 +32,10 @@ const App: React.FC = () => {
     return window.location.pathname === '/' || window.location.pathname === '/index.html';
   });
 
+  const handleIntroComplete = useCallback(() => {
+    setShowIntro(false);
+  }, []);
+
   const openBooking = useCallback((serviceId?: string) => {
     setSelectedServiceId(serviceId);
     setIsBookingOpen(true);
@@ -54,7 +58,7 @@ const App: React.FC = () => {
         <Suspense fallback={<LoadingScreen message="Loading" />}>
           {showIntro && (
             <IntroLoader
-              onComplete={() => setShowIntro(false)}
+              onComplete={handleIntroComplete}
             />
           )}
           <ScrollToTop />

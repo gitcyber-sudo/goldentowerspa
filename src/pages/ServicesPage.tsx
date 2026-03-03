@@ -37,7 +37,7 @@ const faqs: FAQItem[] = [
     },
     {
         question: "Is Golden Tower Spa open late at night?",
-        answer: "Yes! We are one of the few late-night spas in Quezon City. Golden Tower Spa is open daily from 4:00 PM until 4:00 AM, seven days a week including holidays. Perfect for after-work relaxation or late-night wellness."
+        answer: "Yes! We are one of the few 24/7 spas in Quezon City. Golden Tower Spa is open daily, 24 hours a day, seven days a week including holidays. Perfect for after-work relaxation or late-night wellness."
     },
     {
         question: "Where exactly is Golden Tower Spa located?",
@@ -187,7 +187,7 @@ const ServicesPage: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-2">
                         <Clock size={16} className="text-gold" />
-                        <span>Open Daily 4 PM – 4 AM</span>
+                        <span>Open 24/7 — Round the Clock</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <Phone size={16} className="text-gold" />
@@ -298,7 +298,7 @@ const ServicesPage: React.FC = () => {
                         <div className="flex justify-center gap-8 mt-8 text-white/40 text-xs">
                             <span>✓ Online Booking</span>
                             <span>✓ Home Service</span>
-                            <span>✓ Open Until 4 AM</span>
+                            <span>✓ Open 24/7</span>
                         </div>
                     </div>
                 </section>

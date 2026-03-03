@@ -122,9 +122,9 @@ const Sanctuary: React.FC = () => {
                                 <div className="pl-9 space-y-2 text-charcoal-light font-light">
                                     <div className="flex justify-between border-b border-gold/10 pb-1">
                                         <span>Monday - Sunday</span>
-                                        <span className="font-medium text-charcoal">4:00 PM - 4:00 AM</span>
+                                        <span className="font-medium text-charcoal uppercase tracking-wider">Open 24/7</span>
                                     </div>
-                                    <p className="text-xs italic text-gold/60 mt-2">Available for home services within the same hours.</p>
+                                    <p className="text-xs italic text-gold/60 mt-2">Round-the-clock wellness, available 24/7 for both in-spa and home services.</p>
                                 </div>
                             </div>
 

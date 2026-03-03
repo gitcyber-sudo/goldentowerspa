@@ -42,7 +42,7 @@ const MainLayout: React.FC<MainLayoutProps> = React.memo(({
 
   useSEO({
     title: 'Best Spa in Quezon City — Hilot Massage, Wellness & Home Service',
-    description: 'Golden Tower Spa — Quezon City\'s premier spa for traditional Hilot massage, Swedish massage, deep tissue, Ventosa cupping, and home service massage. Affordable luxury wellness in Project 6, QC. Open daily 4 PM–4 AM.',
+    description: 'Golden Tower Spa — Quezon City\'s premier spa for traditional Hilot massage, Swedish massage, deep tissue, Ventosa cupping, and home service massage. Affordable luxury wellness in Project 6, QC. Open 24/7.',
     keywords: 'spa quezon city, best spa manila, hilot massage quezon city, home service massage manila, spa in quezon city, philippine spa, late night spa qc',
     canonicalPath: '/'
   });

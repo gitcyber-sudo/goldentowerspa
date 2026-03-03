@@ -86,37 +86,77 @@ if (container) {
     </React.StrictMode>
   );
 
-  // Global Error Handlers for Reliability
+  // ── Global Error Handlers ──
+  // Suppress ALL popup alerts in development; in production only alert for
+  // genuine JS crashes, never for resource/network issues.
+  const isDev = import.meta.env.DEV || currentVersion === 'dev';
+
+  // Helper: silently log to Supabase (fire-and-forget, never throws)
+  const silentLog = (payload: Record<string, unknown>) => {
+    import('./lib/errorLogger')
+      .then(({ logError }) => logError(payload as any))
+      .catch(() => { /* swallow – logging failure should never cascade */ });
+  };
+
   window.addEventListener('error', (event) => {
-    // Prevent infinite loops if logging itself fails
-    if (event.filename && event.filename.includes('errorLogger')) return;
+    // Prevent infinite loops
+    if (event.filename?.includes('errorLogger')) return;
 
-    // Notify user visually
-    alert("An unexpected error occurred. Our team has been notified. Please refresh the page if the application becomes unresponsive.");
+    // Resource-loading errors (images, video, audio, scripts from CDNs)
+    // come through as Events on the element, NOT ErrorEvents with a message.
+    // They have no `message` or `filename`. Ignore them entirely.
+    if (!event.message && !event.filename) return;
 
-    import('./lib/errorLogger').then(({ logError }) => {
-      logError({
-        message: event.message,
-        stack: event.error?.stack,
-        url: window.location.href,
-        severity: 'error',
-        metadata: { source: 'window.onerror', filename: event.filename, lineno: event.lineno }
-      });
+    // Ignore Vite / HMR noise during development
+    const msg = (event.message || '').toLowerCase();
+    if (msg.includes('vite') || msg.includes('hmr') || msg.includes('websocket')) return;
+
+    // In dev mode: console only, never alert
+    if (isDev) {
+      console.warn('[Dev Error]', event.message);
+    } else {
+      // Production: only alert for real JS crashes
+      alert("An unexpected error occurred. Please refresh if the app becomes unresponsive.");
+    }
+
+    silentLog({
+      message: event.message,
+      stack: event.error?.stack,
+      url: window.location.href,
+      severity: 'error',
+      metadata: { source: 'window.onerror', filename: event.filename, lineno: event.lineno }
     });
   });
 
   window.addEventListener('unhandledrejection', (event) => {
-    // Notify user visually for promise rejections
-    alert("An unexpected background error occurred. Our team has been notified.");
+    const msg = String(event.reason || '');
 
-    import('./lib/errorLogger').then(({ logError }) => {
-      logError({
-        message: `Unhandled Promise Rejection: ${event.reason}`,
-        stack: event.reason?.stack,
-        url: window.location.href,
-        severity: 'error',
-        metadata: { source: 'window.onunhandledrejection' }
-      });
+    // ── Suppress all known non-critical noise ──
+    const noise = [
+      'WebSocket',     // Vite HMR reconnect
+      'vite',          // Vite client internals
+      'HMR',           // Hot Module Replacement
+      'net::',         // Chrome network errors (ERR_FAILED, etc.)
+      'NetworkError',  // Firefox network errors
+      'Failed to fetch', // Generic fetch failures (SW, analytics, etc.)
+      'Load failed',   // Safari fetch failures
+      'AbortError',    // Aborted requests
+      'TypeError: cancelled', // Safari aborted fetch
+      'ServiceWorker',  // SW registration failures
+    ];
+    if (noise.some(n => msg.includes(n))) {
+      console.warn('[System] Suppressed background noise:', msg.slice(0, 120));
+      return;
+    }
+
+    // Everything else: log silently, never popup
+    console.error('[System] Unhandled Rejection:', event.reason);
+    silentLog({
+      message: `Unhandled Promise Rejection: ${msg}`,
+      stack: event.reason?.stack,
+      url: window.location.href,
+      severity: 'error',
+      metadata: { source: 'window.onunhandledrejection' }
     });
   });
 

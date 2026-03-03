@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Logo from '../components/Logo';
-import { Crown, Heart, Shield } from 'lucide-react';
+import { Crown, Heart, Shield, Sparkles, Feather, Users, Award, MoveDown } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useSEO } from '../hooks/useSEO';
@@ -11,146 +11,275 @@ gsap.registerPlugin(ScrollTrigger);
 
 const About: React.FC = () => {
     useSEO({
-        title: 'About Us — Traditional Hilot Spa in Quezon City',
-        description: 'Learn about Golden Tower Spa, Quezon City\'s premier sanctuary for traditional Filipino Hilot massage and luxury wellness. Meet our master therapists in Project 6, QC.',
-        keywords: 'about golden tower spa, hilot spa quezon city, traditional filipino massage, spa history quezon city, wellness center manila, project 6 spa',
+        title: 'Our Story & Philosophy — Golden Tower Spa Quezon City',
+        description: 'Discover the legacy of Golden Tower Spa. A sanctuary where traditional Filipino Hilot meets modern luxury. Experience the touch of mastery in the heart of Quezon City.',
+        keywords: 'about golden tower spa, hilot tradition, wellness philosophy, luxury spa qc, master therapists philippines, project 6 wellness',
         canonicalPath: '/about'
     });
-    const heroRef = useRef<HTMLDivElement>(null);
-    const storyRef = useRef<HTMLDivElement>(null);
-    const valuesRef = useRef<HTMLDivElement>(null);
+
+    const rootRef = useRef<HTMLDivElement>(null);
+    const heroImageRef = useRef<HTMLImageElement>(null);
 
     useLayoutEffect(() => {
         const ctx = gsap.context(() => {
-            // Hero Animation
-            gsap.from(".hero-text", {
-                opacity: 0,
-                y: 50,
-                duration: 1.5,
-                ease: "power3.out",
-                stagger: 0.2
+            // Hero Image Ken Burns Effect
+            gsap.to(heroImageRef.current, {
+                scale: 1.1,
+                duration: 20,
+                repeat: -1,
+                yoyo: true,
+                ease: "none"
             });
 
-            // Story Section Animation
-            gsap.from(".story-reveal", {
+            // Hero Text Reveal
+            const tl = gsap.timeline();
+            tl.from(".hero-reveal", {
+                opacity: 0,
+                y: 60,
+                duration: 1.2,
+                stagger: 0.15,
+                ease: "expo.out"
+            }).from(".scroll-indicator", {
+                opacity: 0,
+                y: -20,
+                duration: 1,
+                ease: "power2.out"
+            }, "-=0.5");
+
+            // Section Reveals
+            const reveals = gsap.utils.toArray('.reveal');
+            reveals.forEach((reveal: any) => {
+                gsap.from(reveal, {
+                    opacity: 0,
+                    y: 40,
+                    duration: 1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: reveal,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse"
+                    }
+                });
+            });
+
+            // Image Parallax/Reveal
+            gsap.from(".image-reveal", {
+                scale: 1.1,
+                opacity: 0,
+                duration: 1.5,
+                ease: "expo.out",
+                scrollTrigger: {
+                    trigger: ".image-reveal",
+                    start: "top 80%"
+                }
+            });
+
+            // Value Cards Grid Animation
+            gsap.from(".value-card", {
+                scale: 0.9,
                 opacity: 0,
                 y: 30,
-                duration: 1,
-                stagger: 0.2,
-                scrollTrigger: {
-                    trigger: storyRef.current,
-                    start: "top 70%",
-                }
-            });
-
-            // Values Animation
-            // Values Animation - Robust Pattern
-            const cards = gsap.utils.toArray(".value-card");
-
-            // Set initial state
-            gsap.set(cards, {
-                autoAlpha: 0,
-                y: 50
-            });
-
-            // Animate to final state
-            gsap.to(cards, {
-                autoAlpha: 1,
-                y: 0,
                 duration: 0.8,
-                stagger: 0.15,
-                ease: "back.out(1.7)",
+                stagger: 0.1,
+                ease: "back.out(1.4)",
                 scrollTrigger: {
-                    trigger: valuesRef.current,
-                    start: "top 90%", // Start earlier (when top of section hits bottom 10% of viewport)
-                    end: "bottom 20%",
-                    toggleActions: "play none none reverse"
+                    trigger: ".values-grid",
+                    start: "top 85%"
                 }
             });
 
-        });
+        }, rootRef);
         return () => ctx.revert();
     }, []);
 
     return (
-        <div className="bg-cream min-h-screen">
+        <div ref={rootRef} className="bg-cream min-h-screen selection:bg-gold selection:text-white overflow-x-hidden">
             <Header onBookClick={() => window.location.href = '/#book'} onLoginClick={() => { }} />
 
-            {/* --- HERO SECTION --- */}
-            <section ref={heroRef} className="relative h-[70vh] flex items-center justify-center overflow-hidden">
+            {/* --- CINEMATIC HERO --- */}
+            <section className="relative h-screen flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?q=80&w=2070&auto=format&fit=crop"
-                        alt="Golden Tower Spa Interior"
-                        className="w-full h-full object-cover brightness-[0.4]"
+                        ref={heroImageRef}
+                        src="https://images.unsplash.com/photo-1544161515-4af6b1d4640b?q=80&w=2070&auto=format&fit=crop"
+                        alt="Golden Tower Spa Sanctuary"
+                        className="w-full h-full object-cover brightness-[0.45]"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-charcoal/60 via-charcoal/40 to-cream/90"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-charcoal/40 via-transparent to-cream"></div>
                 </div>
 
-                <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-                    <div className="hero-text mb-6 flex justify-center">
-                        <Logo color="white" className="w-16 h-16 md:w-24 md:h-24 opacity-90" />
-                    </div>
-                    <span className="hero-text block text-gold text-sm md:text-base font-bold uppercase tracking-[0.4em] mb-4">The Legacy</span>
-                    <h1 className="hero-text font-serif text-5xl md:text-7xl lg:text-8xl text-white mb-8 leading-tight">
-                        Our <span className="text-gold italic">Story</span>
-                    </h1>
-                    <p className="hero-text text-white/80 text-lg md:text-xl font-light max-w-2xl mx-auto leading-relaxed">
-                        Where ancient healing traditions meet modern architectural elegance in the heart of Quezon City.
-                    </p>
-                </div>
-            </section>
-
-            {/* --- THE NARRATIVE --- */}
-            <section ref={storyRef} className="py-20 md:py-32 px-6">
-                <div className="container mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-                    <div className="space-y-8 story-reveal">
-                        <h2 className="font-serif text-4xl md:text-5xl text-charcoal leading-tight">
-                            More than just a <span className="italic text-gold">Spa</span>.
-                        </h2>
-                        <div className="w-24 h-1 bg-gold opacity-50"></div>
-                        <p className="text-charcoal-light text-lg leading-relaxed font-light">
-                            Golden Tower Spa was born from a singular vision: to create a sanctuary where time stands still. Located in the bustling Project 6 district of Quezon City, we stand as a beacon of tranquility amidst the urban chaos.
-                        </p>
-                        <p className="text-charcoal-light text-lg leading-relaxed font-light">
-                            We believe that true wellness lies in the harmony of space and touch. Our therapists are true artisans, masters of the traditional Hilot, trained to not just relieve tension, but to restore balance to your entire being.
-                        </p>
-                        <div className="pt-4">
-                            <img src="/signature.png" alt="Founder's Signature" className="h-16 opacity-60" />
+                <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
+                    <div className="hero-reveal mb-8 flex justify-center">
+                        <div className="p-4 rounded-full bg-white/5 backdrop-blur-md border border-white/10">
+                            <Logo color="white" className="w-12 h-12 md:w-16 md:h-16 opacity-90" />
                         </div>
                     </div>
-                    <div className="relative h-[600px] w-full story-reveal rounded-t-full rounded-b-2xl overflow-hidden shadow-2xl border-4 border-white">
-                        <img
-                            src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1920&auto=format&fit=crop"
-                            alt="Therapeutic Session"
-                            className="w-full h-full object-cover scale-105 hover:scale-100 transition-transform duration-1000"
-                        />
-                        <div className="absolute inset-0 border-[20px] border-white/10 rounded-t-full rounded-b-2xl pointer-events-none"></div>
+                    <h1 className="hero-reveal font-serif text-6xl md:text-8xl lg:text-9xl text-white mb-8 leading-[0.9] tracking-tighter">
+                        The touch of <span className="text-gold italic font-normal">Legacy.</span>
+                    </h1>
+                    <p className="hero-reveal text-white/70 text-lg md:text-xl font-light max-w-2xl mx-auto leading-relaxed uppercase tracking-widest">
+                        Crafting silence and rejuvenation in the heart of Quezon City since 2018.
+                    </p>
+                </div>
+
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 scroll-indicator">
+                    <div className="flex flex-col items-center gap-2">
+                        <span className="text-white/30 text-[10px] uppercase tracking-[0.3em] font-bold">Discover</span>
+                        <div className="w-[1px] h-12 bg-gradient-to-b from-gold to-transparent animate-bounce"></div>
                     </div>
                 </div>
             </section>
 
-            {/* --- CORE VALUES --- */}
-            <section ref={valuesRef} className="py-20 md:py-32 bg-white relative">
-                <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-cream to-transparent"></div>
+            {/* --- NARRATIVE SECTION: THE LEGACY --- */}
+            <section className="py-24 md:py-40 px-6 relative">
+                <div className="container mx-auto max-w-6xl">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+                        <div className="order-2 lg:order-1 relative h-[500px] md:h-[700px] group reveal">
+                            <div className="absolute -inset-4 bg-gold/5 rounded-[40px] translate-x-4 translate-y-4 -z-10 group-hover:translate-x-6 group-hover:translate-y-6 transition-transform duration-700"></div>
+                            <div className="w-full h-full overflow-hidden rounded-[40px] border border-gold/10 shadow-2xl">
+                                <img
+                                    src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1920&auto=format&fit=crop"
+                                    alt="Traditional Healing Service"
+                                    className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-1000"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="order-1 lg:order-2 space-y-8 reveal">
+                            <span className="text-gold font-bold uppercase tracking-[0.4em] text-xs block">Our Origins</span>
+                            <h2 className="font-serif text-5xl md:text-6xl text-charcoal leading-[1.1]">
+                                A Beacon of <span className="italic text-gold-dark">Tranquility.</span>
+                            </h2>
+                            <div className="w-24 h-1 bg-gold opacity-50"></div>
+                            <div className="space-y-6 text-charcoal-light text-lg md:text-xl font-light leading-relaxed">
+                                <p>
+                                    Golden Tower Spa was born from a singular vision: to create a sanctuary where time stands still. Located in the bustling Project 6 district, we provide an escape from the relentless pace of urban life.
+                                </p>
+                                <p>
+                                    We believe that true wellness is an architectural experience—one that begins with the silence of the space and ends with the transformative power of touch.
+                                </p>
+                            </div>
+                            <div className="pt-8 flex items-center gap-6 group cursor-default">
+                                <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center group-hover:bg-gold/20 transition-colors">
+                                    <Sparkles className="text-gold" size={24} />
+                                </div>
+                                <div>
+                                    <p className="font-serif text-xl text-charcoal italic">"Elegance is the only beauty that never fades."</p>
+                                    <p className="text-[10px] uppercase tracking-widest text-gold font-bold mt-1">— Our Founding Philosophy</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* --- PHILOSOPHY SECTION: THE ART OF HILOT --- */}
+            <section className="py-24 md:py-40 bg-charcoal text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gold via-transparent to-transparent pointer-events-none"></div>
+                <div className="container mx-auto px-6 max-w-4xl text-center relative z-10">
+                    <div className="reveal flex justify-center mb-6 text-gold/60">
+                        <Feather size={40} />
+                    </div>
+                    <h2 className="reveal font-serif text-4xl md:text-6xl mb-12 leading-tight">
+                        The Wisdom of <span className="text-gold italic font-normal underline decoration-gold/30 underline-offset-8">Ancestral</span> Healing
+                    </h2>
+                    <p className="reveal text-white/60 text-lg md:text-2xl font-light leading-relaxed mb-16 italic">
+                        "In every Hilot session, we don't just move muscles; we listen to the body's hidden narrative, diagnosing through the pulse and healing through the soul."
+                    </p>
+                    <div className="reveal grid grid-cols-1 md:grid-cols-3 gap-12 text-center border-t border-white/10 pt-16">
+                        <div className="space-y-4">
+                            <span className="text-gold font-bold text-4xl block font-serif italic">800+</span>
+                            <span className="text-white/40 uppercase tracking-widest text-[10px] font-bold">Years of Tradition</span>
+                        </div>
+                        <div className="space-y-4">
+                            <span className="text-gold font-bold text-4xl block font-serif italic">Pure</span>
+                            <span className="text-white/40 uppercase tracking-widest text-[10px] font-bold">Organic Ingredients</span>
+                        </div>
+                        <div className="space-y-4">
+                            <span className="text-gold font-bold text-4xl block font-serif italic">Master</span>
+                            <span className="text-white/40 uppercase tracking-widest text-[10px] font-bold">Trained Artisans</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* --- MASTERY SECTION: THE HANDS BEHIND THE GOLD --- */}
+            <section className="py-24 md:py-40 bg-white relative">
+                <div className="container mx-auto px-6 max-w-6xl">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+                        <div className="lg:col-span-1 hidden lg:block">
+                            <div className="vertical-text text-gold/20 font-serif text-8xl pointer-events-none select-none italic whitespace-nowrap -rotate-90">Mastery.</div>
+                        </div>
+
+                        <div className="lg:col-span-5 space-y-8 reveal">
+                            <span className="text-gold text-xs font-bold uppercase tracking-[0.4em] block">Our Workforce</span>
+                            <h2 className="font-serif text-4xl md:text-6xl text-charcoal leading-tight">
+                                Meet the <span className="italic text-gold-dark">Curators</span> of Calm.
+                            </h2>
+                            <p className="text-charcoal-light text-lg font-light leading-relaxed">
+                                At Golden Tower Spa, we don't just employ therapists; we cultivate artisans. Every member of our team undergoes rigorous training in both traditional Philippine Hilot and modern therapeutic sciences.
+                            </p>
+                            <ul className="space-y-4">
+                                {[
+                                    { icon: Award, text: "NCII Certified Practitioners" },
+                                    { icon: Users, text: "Specialized in Pre-natal & Sports Therapy" },
+                                    { icon: Shield, text: "Commitment to Ethical Wellness" }
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center gap-4 text-charcoal/80 font-medium">
+                                        <div className="bg-gold/10 p-2 rounded-lg text-gold"><item.icon size={18} /></div>
+                                        {item.text}
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className="pt-6">
+                                <button
+                                    onClick={() => window.location.href = '/#therapists'}
+                                    className="bg-charcoal text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:bg-gold transition-colors shadow-xl"
+                                >
+                                    Meet the Team
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="lg:col-span-6 relative reveal">
+                            <div className="aspect-[4/5] bg-cream rounded-[40px] overflow-hidden relative group shadow-2xl border border-gold/10">
+                                <img
+                                    src="https://images.unsplash.com/photo-1596178065887-1198b6148b2b?q=80&w=2070&auto=format&fit=crop"
+                                    alt="Master Therapist at Work"
+                                    className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-1000"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div className="absolute bottom-10 left-10 text-white translate-y-10 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                                    <p className="font-serif text-2xl italic">Precision & Grace.</p>
+                                    <p className="text-xs uppercase tracking-widest text-gold/80 mt-1">The Golden touch</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* --- CORE VALUES: THE PILLARS --- */}
+            <section className="py-24 md:py-40 bg-cream/50 relative">
                 <div className="container mx-auto px-6">
-                    <div className="text-center mb-20">
-                        <span className="text-gold text-xs font-bold uppercase tracking-[0.3em] block mb-4">Our Pillars</span>
-                        <h2 className="font-serif text-4xl md:text-5xl text-charcoal">The Golden Standard</h2>
+                    <div className="text-center mb-24 reveal">
+                        <span className="text-gold text-xs font-bold uppercase tracking-[0.4em] block mb-4">The Golden Standard</span>
+                        <h2 className="font-serif text-4xl md:text-6xl text-charcoal">Our Core Pillars</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 values-grid">
                         {[
-                            { icon: Crown, title: "Excellence", desc: "We refuse to settle for anything less than perfection in every treatment." },
-                            { icon: Heart, title: "Compassion", desc: "Every touch is guided by genuine care and a desire to heal." },
-                            { icon: Shield, title: "Integrity", desc: "We use only premium, organic oils and maintain the highest hygiene standards." },
-                            { icon: Logo, title: "Serenity", desc: "Our space is acoustically tuned to silence the noise of the outside world." }
+                            { icon: Crown, title: "Excellence", desc: "Crafting perfection in every stroke, ensuring an unmatched sanctuary experience." },
+                            { icon: Heart, title: "Compassion", desc: "Every session is a conversation of care, healing both the body and the spirit." },
+                            { icon: Shield, title: "Integrity", desc: "Using only nature's finest ingredients with the highest clinical standards." },
+                            { icon: Sparkles, title: "Serenity", desc: "Acoustically tuned spaces designed to whisper silence to your soul." }
                         ].map((item, i) => (
-                            <div key={i} className="value-card bg-cream p-8 rounded-2xl border border-gold/20 hover:border-gold/40 shadow-sm hover:shadow-gold transition-all duration-300 group text-center">
-                                <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-md group-hover:scale-110 transition-transform duration-300">
-                                    <item.icon className="text-gold" size={28} />
+                            <div key={i} className="value-card bg-white p-10 rounded-[32px] border border-gold/10 hover:border-gold/40 shadow-sm hover:shadow-2xl hover:shadow-gold/10 transition-all duration-500 group relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 group-hover:bg-gold/10 transition-colors"></div>
+                                <div className="bg-cream w-16 h-16 rounded-2xl flex items-center justify-center mb-8 shadow-inner group-hover:scale-110 group-hover:bg-gold transition-all duration-500">
+                                    <item.icon className="text-gold group-hover:text-white transition-colors" size={32} />
                                 </div>
-                                <h3 className="font-serif text-xl text-charcoal mb-4">{item.title}</h3>
+                                <h3 className="font-serif text-2xl text-charcoal mb-4">{item.title}</h3>
                                 <p className="text-charcoal-light text-sm font-light leading-relaxed">{item.desc}</p>
                             </div>
                         ))}
@@ -158,7 +287,32 @@ const About: React.FC = () => {
                 </div>
             </section>
 
+            {/* --- FINAL CTA --- */}
+            <section className="py-24 md:py-40 bg-white text-center flex items-center justify-center px-6">
+                <div className="max-w-3xl reveal">
+                    <h2 className="font-serif text-4xl md:text-6xl text-charcoal mb-8 leading-tight">
+                        Experience the <span className="italic text-gold">Rebirth.</span>
+                    </h2>
+                    <p className="text-charcoal-light text-lg md:text-xl font-light mb-12 leading-relaxed">
+                        Step into our sanctuary and discover that wellness is not just a destination—it's the journey of coming home to yourself.
+                    </p>
+                    <button
+                        onClick={() => window.location.href = '/#book'}
+                        className="bg-gold text-white px-12 py-5 rounded-full font-bold uppercase tracking-widest text-[12px] hover:bg-gold-dark transition-all shadow-2xl hover:shadow-gold/30 hover:-translate-y-1 active:scale-95"
+                    >
+                        Book Your Session
+                    </button>
+                </div>
+            </section>
+
             <Footer />
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .vertical-text {
+                    writing-mode: vertical-rl;
+                }
+            ` }} />
         </div>
     );
 };

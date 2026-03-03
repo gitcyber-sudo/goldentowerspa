@@ -1,18 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import Logo from './Logo';
-import { useAssetPreloader } from '../hooks/useAssetPreloader';
 
 interface IntroLoaderProps {
     onComplete: () => void;
 }
 
-const CRITICAL_ASSETS = [
-    '/hero.mp4',
-    '/hero.webm',
-    '/endless-still-water.mp3',
-    '/images/hero-bg.jpg'
-];
+// Minimum time (ms) the loader stays visible so the animation always plays
+const MIN_DISPLAY_TIME = 3000;
 
 const IntroLoader: React.FC<IntroLoaderProps> = ({ onComplete }) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -21,21 +16,29 @@ const IntroLoader: React.FC<IntroLoaderProps> = ({ onComplete }) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);
 
-    const { totalProgress, isReady } = useAssetPreloader(CRITICAL_ASSETS);
     const [animationSequenceDone, setAnimationSequenceDone] = useState(false);
+    const [minTimePassed, setMinTimePassed] = useState(false);
     const [visualProgress, setVisualProgress] = useState(0);
-    const [visualProgressDone, setVisualProgressDone] = useState(false);
 
+    // ── Minimum display timer ──
     useEffect(() => {
-        // Lock scroll while intro is playing
+        const timer = setTimeout(() => setMinTimePassed(true), MIN_DISPLAY_TIME);
+        return () => clearTimeout(timer);
+    }, []);
+
+    // ── Cinematic entrance animation ──
+    useEffect(() => {
         document.body.style.overflow = 'hidden';
 
-        // Cinematic sequence timeline
+        // Set initial state for text spans
+        const spans = textRef.current?.querySelectorAll('span') || [];
+        gsap.set(spans, { opacity: 0, y: 25 });
+
         const mainTl = gsap.timeline({
             onComplete: () => setAnimationSequenceDone(true)
         });
 
-        // 1. Content Fade In
+        // Logo fade in
         mainTl.to(logoRef.current, {
             scale: 1,
             opacity: 1,
@@ -44,8 +47,8 @@ const IntroLoader: React.FC<IntroLoaderProps> = ({ onComplete }) => {
             ease: "power4.out",
             delay: 0.3
         })
-            // 3. Text Reveal (Staggered)
-            .to(textRef.current?.children || [], {
+            // Text reveal (staggered)
+            .to([...spans], {
                 y: 0,
                 opacity: 1,
                 duration: 1,
@@ -59,32 +62,23 @@ const IntroLoader: React.FC<IntroLoaderProps> = ({ onComplete }) => {
         };
     }, []);
 
-    const totalProgressRef = useRef(totalProgress);
-    useEffect(() => {
-        totalProgressRef.current = totalProgress;
-    }, [totalProgress]);
-
-    // Sync Visual Progress: Smoothly animate to 100% over a 2.5s duration
+    // ── Smooth visual progress bar (purely cosmetic, independent of real assets) ──
     useEffect(() => {
         const proxy = { value: 0 };
 
         const anim = gsap.to(proxy, {
             value: 100,
-            duration: 2.5,
+            duration: 2.8,
             ease: "power2.inOut",
             onUpdate: () => {
-                // Set visual progress based on animated proxy, capped by real download progress
-                setVisualProgress(Math.min(Math.round(proxy.value), totalProgressRef.current));
+                setVisualProgress(Math.round(proxy.value));
             },
-            onComplete: () => setVisualProgressDone(true)
         });
 
-        return () => {
-            anim.kill();
-        };
-    }, []); // Run once on mount
+        return () => { anim.kill(); };
+    }, []);
 
-    // Sync Progress Bar Width
+    // ── Sync progress bar width ──
     useEffect(() => {
         if (progressBarRef.current) {
             gsap.to(progressBarRef.current, {
@@ -95,9 +89,9 @@ const IntroLoader: React.FC<IntroLoaderProps> = ({ onComplete }) => {
         }
     }, [visualProgress]);
 
-    // Final Transition Logic: Wait for ALL sequences to be ready
+    // ── Exit transition — waits for BOTH animation + minimum time ──
     useEffect(() => {
-        if (animationSequenceDone && isReady && visualProgressDone) {
+        if (animationSequenceDone && minTimePassed) {
             const exitTl = gsap.timeline({
                 onComplete: () => {
                     document.body.style.overflow = '';
@@ -122,7 +116,7 @@ const IntroLoader: React.FC<IntroLoaderProps> = ({ onComplete }) => {
                     ease: "expo.inOut"
                 }, "-=0.3");
         }
-    }, [animationSequenceDone, isReady, visualProgressDone, onComplete]);
+    }, [animationSequenceDone, minTimePassed, onComplete]);
 
     return (
         <div
@@ -141,12 +135,12 @@ const IntroLoader: React.FC<IntroLoaderProps> = ({ onComplete }) => {
                 <div ref={textRef} className="flex flex-col items-center relative z-10">
                     <div className="overflow-hidden mb-2">
                         <h1 className="font-serif text-5xl md:text-7xl text-charcoal tracking-tight flex gap-4">
-                            <span style={{ opacity: 0, transform: 'translateY(20px)' }}>Golden</span>
-                            <span style={{ opacity: 0, transform: 'translateY(20px)' }}>Tower</span>
+                            <span>Golden</span>
+                            <span>Tower</span>
                         </h1>
                     </div>
                     <div className="overflow-hidden">
-                        <span className="text-gold italic font-serif text-3xl md:text-4xl tracking-widest block" style={{ opacity: 0, transform: 'translateY(20px)' }}>Spa</span>
+                        <span className="text-gold italic font-serif text-3xl md:text-4xl tracking-widest block">Spa</span>
                     </div>
 
                     {/* Progress Section */}
