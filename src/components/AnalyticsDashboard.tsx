@@ -26,8 +26,19 @@ import {
     LayoutGrid,
     Edit2,
     Check,
-    X
+    X,
+    TrendingDown
 } from 'lucide-react';
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    Cell
+} from 'recharts';
 
 interface PageView {
     id: string;
@@ -376,80 +387,136 @@ const AnalyticsDashboard: React.FC = () => {
 
     /* ──── Daily Page Views Bar Chart ──── */
     const DailyBarChart = ({ data }: { data: { label: string; count: number }[] }) => {
-        const max = Math.max(...data.map(d => d.count), 1);
-        const chartHeight = 160;
-
         if (data.length === 0) {
             return <p className="text-sm text-charcoal/50 text-center py-8">No data available</p>;
         }
 
+        const CustomTooltip = ({ active, payload, label }: any) => {
+            if (active && payload && payload.length) {
+                return (
+                    <div className="bg-charcoal text-white text-[11px] px-3 py-2 rounded-xl border border-gold/20 shadow-xl">
+                        <p className="font-bold text-gold mb-0.5">{label}</p>
+                        <p className="text-sm font-serif">
+                            <span className="text-gold">●</span> {payload[0].value.toLocaleString()} views
+                        </p>
+                    </div>
+                );
+            }
+            return null;
+        };
+
         return (
-            <div className="overflow-x-auto no-scrollbar">
-                <div
-                    className="flex items-end gap-[3px] min-w-full"
-                    style={{ height: `${chartHeight}px`, width: data.length > 10 ? `${data.length * 40}px` : '100%' }}
-                >
-                    {data.map((item, i) => {
-                        const barH = (item.count / max) * chartHeight;
-                        return (
-                            <div key={i} className="flex-1 min-w-[28px] flex flex-col items-center relative group">
-                                {/* Tooltip */}
-                                <div className="absolute bottom-full mb-1 px-2 py-1 bg-charcoal text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
-                                    {item.label}: <strong>{item.count.toLocaleString()}</strong> views
-                                </div>
-                                {/* Bar */}
-                                <div
-                                    className="w-full bg-gradient-to-t from-gold to-gold/50 rounded-t-md transition-all duration-300 group-hover:from-gold/90 group-hover:to-gold/70 cursor-pointer"
-                                    style={{ height: `${Math.max(barH, 3)}px` }}
-                                />
-                                {/* Label */}
-                                <span className="text-[9px] text-charcoal/50 mt-1.5 truncate w-full text-center font-medium">
-                                    {item.label.replace(/,?\s*\d{4}/, '')}
-                                </span>
-                            </div>
-                        );
-                    })}
-                </div>
+            <div className="w-full h-[220px] md:h-[260px] -ml-4">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <defs>
+                            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#caa969" stopOpacity={1} />
+                                <stop offset="100%" stopColor="#997B3D" stopOpacity={0.8} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1A1A1A" strokeOpacity={0.05} />
+                        <XAxis
+                            dataKey="label"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#1A1A1A', opacity: 0.4, fontSize: 10, fontWeight: 500 }}
+                            tickFormatter={(val) => val.split(' ')[0]}
+                            dy={10}
+                        />
+                        <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#1A1A1A', opacity: 0.4, fontSize: 10, fontWeight: 600 }}
+                            width={35}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#caa969', opacity: 0.05 }} />
+                        <Bar
+                            dataKey="count"
+                            fill="url(#barGradient)"
+                            radius={[6, 6, 0, 0]}
+                            barSize={data.length > 20 ? 12 : 24}
+                            animationDuration={1500}
+                        />
+                    </BarChart>
+                </ResponsiveContainer>
             </div>
         );
     };
 
     /* ──── Hourly Activity Bar Chart ──── */
     const HourlyBarChart = ({ data }: { data: Record<number, number> }) => {
-        const max = Math.max(...Object.values(data), 1);
-        const chartHeight = 140;
+        // Ensure all 24 hours are present
+        const chartData = Array.from({ length: 24 }, (_, hour) => {
+            const label = hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`;
+            return {
+                hour,
+                label,
+                shortLabel: hour === 0 ? '12a' : hour < 12 ? `${hour}a` : hour === 12 ? '12p' : `${hour - 12}p`,
+                count: data[hour] || 0
+            };
+        });
+
+        const max = Math.max(...chartData.map(d => d.count), 1);
+
+        const CustomTooltip = ({ active, payload }: any) => {
+            if (active && payload && payload.length) {
+                const item = payload[0].payload;
+                return (
+                    <div className="bg-charcoal text-white text-[11px] px-3 py-2 rounded-xl border border-gold/20 shadow-xl">
+                        <p className="font-bold text-gold mb-0.5">{item.label}</p>
+                        <p className="text-sm font-serif">
+                            <span className={item.count === max ? "text-emerald-400" : "text-gold"}>●</span> {item.count.toLocaleString()} views
+                        </p>
+                    </div>
+                );
+            }
+            return null;
+        };
 
         return (
-            <div className="overflow-x-auto no-scrollbar">
-                <div className="flex items-end gap-[2px] min-w-full" style={{ height: `${chartHeight}px` }}>
-                    {Array.from({ length: 24 }, (_, hour) => {
-                        const value = data[hour] || 0;
-                        const barH = (value / max) * chartHeight;
-                        const isPeak = value === max && value > 0;
-                        return (
-                            <div key={hour} className="flex-1 min-w-[18px] flex flex-col items-center relative group">
-                                {/* Tooltip */}
-                                <div className="absolute bottom-full mb-1 px-2 py-1 bg-charcoal text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
-                                    {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}: <strong>{value.toLocaleString()}</strong> views
-                                </div>
-                                {/* Bar */}
-                                <div
-                                    className={`w-full rounded-t-sm transition-all duration-300 cursor-pointer ${isPeak
-                                        ? 'bg-gradient-to-t from-emerald-500 to-emerald-400 group-hover:from-emerald-600'
-                                        : 'bg-gradient-to-t from-gold/80 to-gold/40 group-hover:from-gold/90'
-                                        }`}
-                                    style={{ height: `${Math.max(barH, 2)}px` }}
+            <div className="w-full h-[220px] md:h-[260px] -ml-4">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1A1A1A" strokeOpacity={0.05} />
+                        <XAxis
+                            dataKey="shortLabel"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={(props) => {
+                                const { x, y, payload } = props;
+                                const index = chartData.findIndex(d => d.shortLabel === payload.value);
+                                if (index % 3 !== 0) return null;
+                                return (
+                                    <text x={x} y={y} dy={16} fill="#1A1A1A" opacity={0.4} fontSize={9} fontWeight={500} textAnchor="middle">
+                                        {payload.value}
+                                    </text>
+                                );
+                            }}
+                        />
+                        <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#1A1A1A', opacity: 0.4, fontSize: 10, fontWeight: 600 }}
+                            width={35}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#caa969', opacity: 0.05 }} />
+                        <Bar
+                            dataKey="count"
+                            radius={[4, 4, 0, 0]}
+                            barSize={18}
+                            animationDuration={1500}
+                        >
+                            {chartData.map((entry, index) => (
+                                <Cell
+                                    key={`cell-${index}`}
+                                    fill={entry.count === max && max > 0 ? '#10b981' : '#caa969'}
+                                    fillOpacity={entry.count === max && max > 0 ? 1 : 0.6}
                                 />
-                                {/* Label - show every 3rd hour */}
-                                {(hour % 3 === 0) && (
-                                    <span className="text-[8px] text-charcoal/40 mt-1 font-medium">
-                                        {hour === 0 ? '12a' : hour < 12 ? `${hour}a` : hour === 12 ? '12p' : `${hour - 12}p`}
-                                    </span>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
             </div>
         );
     };
