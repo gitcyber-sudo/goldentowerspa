@@ -8,6 +8,7 @@ import LoadingScreen from './components/LoadingScreen';
 import MainLayout from './layouts/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 import ScrollToTop from './components/ScrollToTop';
+import IntroLoader from './components/IntroLoader';
 
 // Lazy-loaded routes — each becomes a separate chunk
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
@@ -26,6 +27,10 @@ const App: React.FC = () => {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string | undefined>(undefined);
+  const [showIntro, setShowIntro] = useState(() => {
+    // Show every time on the home page
+    return window.location.pathname === '/' || window.location.pathname === '/index.html';
+  });
 
   const openBooking = useCallback((serviceId?: string) => {
     setSelectedServiceId(serviceId);
@@ -47,6 +52,11 @@ const App: React.FC = () => {
     <AnalyticsProvider>
       <ErrorBoundary>
         <Suspense fallback={<LoadingScreen message="Loading" />}>
+          {showIntro && (
+            <IntroLoader
+              onComplete={() => setShowIntro(false)}
+            />
+          )}
           <ScrollToTop />
           <Routes>
             <Route path="/" element={
