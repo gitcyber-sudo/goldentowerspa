@@ -58,9 +58,9 @@ const ManageAvailabilityModal: React.FC<ManageAvailabilityModalProps> = ({ isOpe
 
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col">
                 {/* Header */}
-                <div className="p-6 md:p-8 border-b border-gold/10 flex justify-between items-center bg-cream/30">
+                <div className="p-6 md:p-8 border-b border-gold/10 flex justify-between items-center bg-cream/30 flex-shrink-0">
                     <div>
                         <p className="text-gold font-bold tracking-[0.2em] uppercase text-[10px] mb-1">Manage Schedule</p>
                         <h2 className="text-2xl font-serif text-charcoal">{therapist.name}</h2>
@@ -71,7 +71,7 @@ const ManageAvailabilityModal: React.FC<ManageAvailabilityModalProps> = ({ isOpe
                 </div>
 
                 {/* Body */}
-                <div className="p-6 md:p-8">
+                <div className="p-6 md:p-8 overflow-y-auto">
                     <div className="mb-6 bg-gold/5 border border-gold/10 rounded-2xl p-4 flex gap-3 items-start">
                         <AlertCircle size={20} className="text-gold shrink-0 mt-0.5" />
                         <div>
@@ -127,7 +127,7 @@ const ManageAvailabilityModal: React.FC<ManageAvailabilityModalProps> = ({ isOpe
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 md:p-8 bg-charcoal/5 border-t border-gold/10 flex gap-4">
+                <div className="p-6 md:p-8 bg-charcoal/5 border-t border-gold/10 flex gap-4 flex-shrink-0">
                     <button
                         onClick={onClose}
                         className="flex-1 py-4 border border-charcoal/10 rounded-2xl font-bold text-charcoal/60 hover:bg-white transition-colors"

@@ -44,6 +44,12 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
     onDelete,
     onViewReview
 }) => {
+    const formatBookingDate = (dateStr: string) => {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+
     const [filter, setFilter] = useState('all');
     const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
     const [assigningBooking, setAssigningBooking] = useState<Booking | null>(null);
@@ -222,7 +228,7 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
                                         )}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <p className="text-sm">{b.booking_date}</p>
+                                        <p className="text-sm">{formatBookingDate(b.booking_date)}</p>
                                         <p className="text-xs text-charcoal/50">{formatTimeTo12h(b.booking_time)}</p>
                                     </td>
                                     <td className="px-6 py-4">
@@ -365,7 +371,7 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 text-xs text-charcoal/60 mb-3">
-                                <span className="flex items-center gap-1"><Calendar size={12} /> {b.booking_date}</span>
+                                <span className="flex items-center gap-1"><Calendar size={12} /> {formatBookingDate(b.booking_date)}</span>
                                 <span className="flex items-center gap-1"><Clock size={12} /> {formatTimeTo12h(b.booking_time)}</span>
                             </div>
                             <div className="flex items-center gap-2 mb-4">

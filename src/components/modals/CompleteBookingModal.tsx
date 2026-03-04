@@ -78,114 +78,116 @@ const CompleteBookingModal: React.FC<CompleteBookingModalProps> = ({ isOpen, onC
     if (!isOpen) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
-            <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex justify-between items-center mb-6">
+        <div className="fixed inset-0 z-[110] overflow-y-auto flex items-start md:items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
+            <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 my-auto max-h-[90vh] flex flex-col overflow-hidden">
+                <div className="flex justify-between items-center px-6 pt-6 pb-4 border-b border-charcoal/10 flex-shrink-0">
                     <h2 className="font-serif text-xl text-charcoal">Complete Booking</h2>
                     <button onClick={onClose} className="text-charcoal/40 hover:text-charcoal transition-colors">
                         <X size={20} />
                     </button>
                 </div>
 
-                <div className="space-y-4">
-                    <p className="text-sm text-charcoal/60 mb-4 pb-4 border-b border-charcoal/10">
-                        Confirm completion details and enter any additional gratuity below.
-                    </p>
-
+                <div className="overflow-y-auto flex-1 px-6 py-6">
                     <div className="space-y-4">
-                        <CustomDatePicker
-                            label="Completion Date"
-                            value={date}
-                            onChange={setDate}
-                            direction="down"
-                        />
-                        <CustomTimePicker
-                            label="Completion Time"
-                            value={time}
-                            onChange={setTime}
-                            direction="down"
-                        />
-                    </div>
+                        <p className="text-sm text-charcoal/60 mb-4 pb-4 border-b border-charcoal/10">
+                            Confirm completion details and enter any additional gratuity below.
+                        </p>
 
-                    <div className="pt-4 space-y-4">
-                        <div className="flex justify-between items-center text-charcoal/80">
-                            <span className="font-semibold">Service Fee</span>
-                            <span className="font-serif text-lg">{formatCurrency(servicePrice)}</span>
+                        <div className="space-y-4">
+                            <CustomDatePicker
+                                label="Completion Date"
+                                value={date}
+                                onChange={setDate}
+                                direction="down"
+                            />
+                            <CustomTimePicker
+                                label="Completion Time"
+                                value={time}
+                                onChange={setTime}
+                                direction="down"
+                            />
                         </div>
 
-                        <div className="bg-gold/5 rounded-xl p-3 space-y-2 border border-gold/10">
-                            <div className="flex justify-between items-center text-xs">
-                                <span className="text-charcoal/60 font-medium">Spa Share (70%)</span>
-                                <span className="text-charcoal font-bold">{formatCurrency(Math.floor(servicePrice * 0.70))}</span>
+                        <div className="pt-4 space-y-4">
+                            <div className="flex justify-between items-center text-charcoal/80">
+                                <span className="font-semibold">Service Fee</span>
+                                <span className="font-serif text-lg">{formatCurrency(servicePrice)}</span>
                             </div>
-                            <div className="flex justify-between items-center text-xs">
-                                <span className="text-charcoal/60 font-medium">Therapist Share (30%)</span>
-                                <span className="text-charcoal font-bold">{formatCurrency(Math.ceil(servicePrice * 0.30))}</span>
-                            </div>
-                        </div>
 
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-charcoal/80">
-                                Additional Tip
-                            </label>
-                            <div className="flex gap-2">
-                                <div className="relative flex-1">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/40 font-serif">₱</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        step="1"
-                                        value={tipAmount}
-                                        onChange={(e) => setTipAmount(e.target.value ? Number(e.target.value) : '')}
-                                        className="w-full h-12 bg-charcoal/5 pl-8 pr-4 rounded-xl border-none focus:ring-2 focus:ring-gold/50 font-serif text-charcoal"
-                                        placeholder="0.00"
-                                    />
+                            <div className="bg-gold/5 rounded-xl p-3 space-y-2 border border-gold/10">
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-charcoal/60 font-medium">Spa Share (70%)</span>
+                                    <span className="text-charcoal font-bold">{formatCurrency(Math.floor(servicePrice * 0.70))}</span>
                                 </div>
-                                <select
-                                    value={tipRecipient}
-                                    onChange={(e) => setTipRecipient(e.target.value as 'management' | 'therapist')}
-                                    className="h-12 bg-charcoal/5 px-4 rounded-xl border-none focus:ring-2 focus:ring-gold/50 outline-none text-charcoal text-sm font-medium"
-                                >
-                                    <option value="management">Management</option>
-                                    <option value="therapist">Therapist</option>
-                                </select>
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-charcoal/60 font-medium">Therapist Share (30%)</span>
+                                    <span className="text-charcoal font-bold">{formatCurrency(Math.ceil(servicePrice * 0.30))}</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="space-y-3">
-                            <label className="block text-sm font-bold text-charcoal/80">
-                                Payment Method
-                            </label>
-                            <div className="grid grid-cols-3 gap-3">
-                                <button
-                                    onClick={() => setPaymentMethod('cash')}
-                                    className={`py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${paymentMethod === 'cash' ? 'bg-charcoal text-white shadow-lg scale-[1.02]' : 'bg-charcoal/5 text-charcoal/40 hover:bg-charcoal/10'}`}
-                                >
-                                    Cash
-                                </button>
-                                <button
-                                    onClick={() => setPaymentMethod('gcash')}
-                                    className={`py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${paymentMethod === 'gcash' ? 'bg-blue-600 text-white shadow-lg scale-[1.02]' : 'bg-charcoal/5 text-charcoal/40 hover:bg-charcoal/10'}`}
-                                >
-                                    GCash
-                                </button>
-                                <button
-                                    onClick={() => setPaymentMethod('bank')}
-                                    className={`py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${paymentMethod === 'bank' ? 'bg-emerald-600 text-white shadow-lg scale-[1.02]' : 'bg-charcoal/5 text-charcoal/40 hover:bg-charcoal/10'}`}
-                                >
-                                    Bank
-                                </button>
+                            <div className="space-y-2">
+                                <label className="block text-sm font-bold text-charcoal/80">
+                                    Additional Tip
+                                </label>
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/40 font-serif">₱</span>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="1"
+                                            value={tipAmount}
+                                            onChange={(e) => setTipAmount(e.target.value ? Number(e.target.value) : '')}
+                                            className="w-full h-12 bg-charcoal/5 pl-8 pr-4 rounded-xl border-none focus:ring-2 focus:ring-gold/50 font-serif text-charcoal"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    <select
+                                        value={tipRecipient}
+                                        onChange={(e) => setTipRecipient(e.target.value as 'management' | 'therapist')}
+                                        className="h-12 bg-charcoal/5 px-4 rounded-xl border-none focus:ring-2 focus:ring-gold/50 outline-none text-charcoal text-sm font-medium"
+                                    >
+                                        <option value="management">Management</option>
+                                        <option value="therapist">Therapist</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="flex justify-between items-center pt-4 border-t border-charcoal/10">
-                            <span className="font-bold text-charcoal">Total Received</span>
-                            <span className="font-serif text-2xl text-gold">{formatCurrency(totalAmount)}</span>
+                            <div className="space-y-3">
+                                <label className="block text-sm font-bold text-charcoal/80">
+                                    Payment Method
+                                </label>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <button
+                                        onClick={() => setPaymentMethod('cash')}
+                                        className={`py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${paymentMethod === 'cash' ? 'bg-charcoal text-white shadow-lg scale-[1.02]' : 'bg-charcoal/5 text-charcoal/40 hover:bg-charcoal/10'}`}
+                                    >
+                                        Cash
+                                    </button>
+                                    <button
+                                        onClick={() => setPaymentMethod('gcash')}
+                                        className={`py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${paymentMethod === 'gcash' ? 'bg-blue-600 text-white shadow-lg scale-[1.02]' : 'bg-charcoal/5 text-charcoal/40 hover:bg-charcoal/10'}`}
+                                    >
+                                        GCash
+                                    </button>
+                                    <button
+                                        onClick={() => setPaymentMethod('bank')}
+                                        className={`py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${paymentMethod === 'bank' ? 'bg-emerald-600 text-white shadow-lg scale-[1.02]' : 'bg-charcoal/5 text-charcoal/40 hover:bg-charcoal/10'}`}
+                                    >
+                                        Bank
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-between items-center pt-4 border-t border-charcoal/10">
+                                <span className="font-bold text-charcoal">Total Received</span>
+                                <span className="font-serif text-2xl text-gold">{formatCurrency(totalAmount)}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-8 flex gap-3">
+                <div className="px-6 pb-6 pt-4 border-t border-charcoal/10 flex gap-3 flex-shrink-0">
                     <button
                         onClick={onClose}
                         className="flex-1 py-3 border border-charcoal/10 rounded-xl font-bold text-charcoal/60 hover:bg-charcoal/5 transition-colors"

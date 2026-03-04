@@ -414,12 +414,12 @@ const InventoryTab: React.FC = () => {
             {isAddingItem && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm" onClick={() => setIsAddingItem(false)} />
-                    <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-                        <div className="bg-charcoal p-8 text-white">
+                    <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] flex flex-col">
+                        <div className="bg-charcoal p-8 text-white flex-shrink-0">
                             <h3 className="font-serif text-2xl text-gold">Enroll New Asset</h3>
                             <p className="text-xs text-white/40 mt-1 uppercase tracking-widest font-bold">Logistics Onboarding</p>
                         </div>
-                        <form onSubmit={handleAddItem} className="p-8 space-y-5">
+                        <form onSubmit={handleAddItem} className="p-8 space-y-5 overflow-y-auto">
                             <div>
                                 <label className="block text-[10px] uppercase tracking-widest font-black text-charcoal/40 mb-2">Asset Identity</label>
                                 <input
@@ -499,12 +499,12 @@ const InventoryTab: React.FC = () => {
             {restockingItem && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm" onClick={() => setRestockingItem(null)} />
-                    <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-                        <div className="bg-emerald-600 p-8 text-white">
+                    <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] flex flex-col">
+                        <div className="bg-emerald-600 p-8 text-white flex-shrink-0">
                             <h3 className="font-serif text-2xl">Restock Operation</h3>
                             <p className="text-xs text-white/70 mt-1 uppercase tracking-widest font-bold">{restockingItem.name}</p>
                         </div>
-                        <form onSubmit={handleRestockSubmit} className="p-8 space-y-6">
+                        <form onSubmit={handleRestockSubmit} className="p-8 space-y-6 overflow-y-auto">
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-[10px] uppercase tracking-widest font-black text-charcoal/40 mb-2">Quantity ({restockingItem.unit})</label>
@@ -553,8 +553,8 @@ const InventoryTab: React.FC = () => {
             {showIntelligence && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-charcoal/80 backdrop-blur-md" onClick={() => setShowIntelligence(false)} />
-                    <div className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-                        <div className="bg-charcoal p-8 text-white relative">
+                    <div className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] flex flex-col">
+                        <div className="bg-charcoal p-8 text-white relative flex-shrink-0">
                             <div className="absolute top-0 right-0 p-8 opacity-10">
                                 <Package size={120} />
                             </div>
@@ -564,7 +564,7 @@ const InventoryTab: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="p-8 space-y-8">
+                        <div className="p-8 space-y-8 overflow-y-auto">
                             <div className="bg-cream/30 border border-gold/10 p-6 rounded-2xl flex justify-between items-center shadow-inner">
                                 <div>
                                     <p className="text-[10px] uppercase tracking-widest text-charcoal/40 font-black mb-1">Total On-Hand Value</p>

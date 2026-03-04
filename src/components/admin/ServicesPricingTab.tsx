@@ -247,8 +247,8 @@ const ServicesPricingTab: React.FC<ServicesPricingTabProps> = ({ services, onRef
             {/* Edit Modal */}
             {editingService && (
                 <div className="fixed inset-0 bg-charcoal/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-gold/20 overflow-hidden animate-in slide-in-from-bottom-8 duration-500">
-                        <div className="p-8 border-b border-gold/10 flex items-center justify-between bg-[#Fdfbf7]">
+                    <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-gold/20 overflow-hidden animate-in slide-in-from-bottom-8 duration-500 max-h-[90vh] flex flex-col my-auto">
+                        <div className="p-8 border-b border-gold/10 flex items-center justify-between bg-[#Fdfbf7] flex-shrink-0">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-gold/10 rounded-2xl text-gold">
                                     <Edit3 size={24} />
@@ -263,7 +263,7 @@ const ServicesPricingTab: React.FC<ServicesPricingTabProps> = ({ services, onRef
                             </button>
                         </div>
 
-                        <form onSubmit={handleUpdateService} className="p-8 space-y-6">
+                        <form onSubmit={handleUpdateService} className="p-8 space-y-6 overflow-y-auto">
                             <div className="space-y-4">
                                 <label className="block">
                                     <span className="text-[10px] uppercase tracking-widest font-black text-charcoal/40 px-2">Ritual Title</span>

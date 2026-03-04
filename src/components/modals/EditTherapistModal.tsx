@@ -188,196 +188,198 @@ const EditTherapistModal: React.FC<EditTherapistModalProps> = ({ isOpen, onClose
     if (!isOpen || !therapist) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
-            <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
-                <div className="flex justify-between items-center mb-6">
+        <div className="fixed inset-0 z-50 overflow-y-auto flex items-start md:items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
+            <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl my-auto max-h-[90vh] flex flex-col overflow-hidden">
+                <div className="flex justify-between items-center px-6 md:px-8 pt-6 md:pt-8 pb-4 border-b border-charcoal/10 flex-shrink-0 sticky top-0 bg-white z-10">
                     <h2 className="font-serif text-2xl text-charcoal">Edit Specialist</h2>
-                    <button onClick={onClose} className="text-charcoal/40 hover:text-charcoal transition-colors">
+                    <button onClick={onClose} className="text-charcoal/40 hover:text-charcoal transition-colors flex-shrink-0">
                         <X size={24} />
                     </button>
                 </div>
+                <div className="overflow-y-auto flex-1 px-6 md:px-8 py-6">
 
-                <form onSubmit={handleUpdate} className="space-y-4">
-                    {/* Photo Upload */}
-                    <div className="flex justify-center mb-6">
-                        <div className="relative group">
-                            <div className="w-24 h-24 rounded-full bg-gold/10 flex items-center justify-center overflow-hidden border-2 border-dashed border-gold/30">
-                                {imagePreview ? (
-                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                ) : (
-                                    <Camera className="text-gold/40" size={32} />
-                                )}
+                    <form onSubmit={handleUpdate} className="space-y-4">
+                        {/* Photo Upload */}
+                        <div className="flex justify-center mb-6">
+                            <div className="relative group">
+                                <div className="w-24 h-24 rounded-full bg-gold/10 flex items-center justify-center overflow-hidden border-2 border-dashed border-gold/30">
+                                    {imagePreview ? (
+                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <Camera className="text-gold/40" size={32} />
+                                    )}
+                                </div>
+                                <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer">
+                                    <Upload size={20} />
+                                    <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                                </label>
                             </div>
-                            <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer">
-                                <Upload size={20} />
-                                <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-                            </label>
                         </div>
-                    </div>
 
-                    {onManageGallery && (
-                        <div className="flex justify-center mb-4">
+                        {onManageGallery && (
+                            <div className="flex justify-center mb-4">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        onManageGallery();
+                                        onClose();
+                                    }}
+                                    className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-xl text-xs font-bold hover:bg-purple-100 transition-colors border border-purple-100"
+                                >
+                                    <Camera size={14} />
+                                    Manage Photo Gallery
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Name</label>
+                                <input
+                                    required
+                                    type="text"
+                                    className="w-full p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold"
+                                    value={formData.name}
+                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Specialty</label>
+                                <input
+                                    type="text"
+                                    className="w-full p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold"
+                                    value={formData.specialty}
+                                    onChange={e => setFormData({ ...formData, specialty: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Bio</label>
+                            <textarea
+                                className="w-full p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold h-20 resize-none"
+                                value={formData.bio}
+                                onChange={e => setFormData({ ...formData, bio: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="flex items-center gap-3 p-3 bg-gold/5 rounded-lg border border-gold/10">
+                            <div className={`w-10 h-6 rounded-full p-1 cursor-pointer transition-colors ${formData.active ? 'bg-emerald-500' : 'bg-charcoal/20'}`} onClick={() => setFormData({ ...formData, active: !formData.active })}>
+                                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${formData.active ? 'translate-x-4' : 'translate-x-0'}`} />
+                            </div>
+                            <span className="text-sm font-semibold text-charcoal">
+                                {formData.active ? 'Active Specialist' : 'Inactive (Hidden)'}
+                            </span>
+                        </div>
+
+                        {/* Account Management (Reset Password or Create Account) */}
+                        <div className="border-t border-gold/10 pt-4 mt-2">
+                            {!therapist.user_id ? (
+                                <div className="space-y-3">
+                                    <div className="bg-gold/5 p-4 rounded-lg border border-gold/10">
+                                        <h4 className="flex items-center gap-2 text-sm font-bold text-gold mb-1">
+                                            <User size={16} />
+                                            No Login Account
+                                        </h4>
+                                        <p className="text-xs text-charcoal/60 leading-relaxed">
+                                            This specialist doesn't have a login account yet. You can create one now.
+                                            They will sign in using their <strong>Name</strong> and an <strong>Access PIN</strong>.
+                                        </p>
+                                    </div>
+
+                                    {!showPasswordReset ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowPasswordReset(true);
+                                                // Pre-generate a PIN
+                                                setNewPassword(Math.floor(1000 + Math.random() * 9000).toString());
+                                            }}
+                                            className="text-sm bg-gold text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gold-dark transition-colors shadow-sm"
+                                        >
+                                            <Plus size={14} /> Create Login Account
+                                        </button>
+                                    ) : (
+                                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Generated Access PIN</label>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    maxLength={4}
+                                                    className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold font-mono font-bold tracking-widest text-center text-lg"
+                                                    value={newPassword}
+                                                    onChange={e => setNewPassword(e.target.value.replace(/[^0-9]/g, ''))}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setShowPasswordReset(false); setNewPassword(''); }}
+                                                    className="p-3 text-charcoal/40 hover:text-charcoal"
+                                                >
+                                                    <X size={20} />
+                                                </button>
+                                            </div>
+                                            <p className="text-[10px] text-charcoal/40 italic">Note: Make sure to share this PIN with the specialist after saving.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <>
+                                    {!showPasswordReset ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasswordReset(true)}
+                                            className="text-sm text-gold font-bold flex items-center gap-2 hover:underline"
+                                        >
+                                            <RefreshCw size={14} /> Reset Password
+                                        </button>
+                                    ) : (
+                                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">New Access PIN</label>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    maxLength={4}
+                                                    placeholder="Enter new access PIN"
+                                                    className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold font-mono font-bold tracking-widest text-center text-lg"
+                                                    value={newPassword}
+                                                    onChange={e => setNewPassword(e.target.value.replace(/[^0-9]/g, ''))}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setShowPasswordReset(false); setNewPassword(''); }}
+                                                    className="p-3 text-charcoal/40 hover:text-charcoal"
+                                                >
+                                                    <X size={20} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+
+                        <div className="pt-4 flex gap-3">
                             <button
                                 type="button"
-                                onClick={() => {
-                                    onManageGallery();
-                                    onClose();
-                                }}
-                                className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-xl text-xs font-bold hover:bg-purple-100 transition-colors border border-purple-100"
+                                onClick={onClose}
+                                className="flex-1 py-3 border border-charcoal/10 rounded-xl font-bold text-charcoal/60 hover:bg-charcoal/5 transition-colors"
                             >
-                                <Camera size={14} />
-                                Manage Photo Gallery
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="flex-1 py-3 bg-gold text-white rounded-xl font-bold hover:bg-gold-dark transition-colors disabled:opacity-50"
+                            >
+                                {loading ? 'Saving...' : 'Save Changes'}
                             </button>
                         </div>
-                    )}
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Name</label>
-                            <input
-                                required
-                                type="text"
-                                className="w-full p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold"
-                                value={formData.name}
-                                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Specialty</label>
-                            <input
-                                type="text"
-                                className="w-full p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold"
-                                value={formData.specialty}
-                                onChange={e => setFormData({ ...formData, specialty: e.target.value })}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Bio</label>
-                        <textarea
-                            className="w-full p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold h-20 resize-none"
-                            value={formData.bio}
-                            onChange={e => setFormData({ ...formData, bio: e.target.value })}
-                        />
-                    </div>
-
-                    <div className="flex items-center gap-3 p-3 bg-gold/5 rounded-lg border border-gold/10">
-                        <div className={`w-10 h-6 rounded-full p-1 cursor-pointer transition-colors ${formData.active ? 'bg-emerald-500' : 'bg-charcoal/20'}`} onClick={() => setFormData({ ...formData, active: !formData.active })}>
-                            <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${formData.active ? 'translate-x-4' : 'translate-x-0'}`} />
-                        </div>
-                        <span className="text-sm font-semibold text-charcoal">
-                            {formData.active ? 'Active Specialist' : 'Inactive (Hidden)'}
-                        </span>
-                    </div>
-
-                    {/* Account Management (Reset Password or Create Account) */}
-                    <div className="border-t border-gold/10 pt-4 mt-2">
-                        {!therapist.user_id ? (
-                            <div className="space-y-3">
-                                <div className="bg-gold/5 p-4 rounded-lg border border-gold/10">
-                                    <h4 className="flex items-center gap-2 text-sm font-bold text-gold mb-1">
-                                        <User size={16} />
-                                        No Login Account
-                                    </h4>
-                                    <p className="text-xs text-charcoal/60 leading-relaxed">
-                                        This specialist doesn't have a login account yet. You can create one now.
-                                        They will sign in using their <strong>Name</strong> and an <strong>Access PIN</strong>.
-                                    </p>
-                                </div>
-
-                                {!showPasswordReset ? (
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setShowPasswordReset(true);
-                                            // Pre-generate a PIN
-                                            setNewPassword(Math.floor(1000 + Math.random() * 9000).toString());
-                                        }}
-                                        className="text-sm bg-gold text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gold-dark transition-colors shadow-sm"
-                                    >
-                                        <Plus size={14} /> Create Login Account
-                                    </button>
-                                ) : (
-                                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                        <div className="flex justify-between items-center">
-                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">Generated Access PIN</label>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                maxLength={4}
-                                                className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold font-mono font-bold tracking-widest text-center text-lg"
-                                                value={newPassword}
-                                                onChange={e => setNewPassword(e.target.value.replace(/[^0-9]/g, ''))}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => { setShowPasswordReset(false); setNewPassword(''); }}
-                                                className="p-3 text-charcoal/40 hover:text-charcoal"
-                                            >
-                                                <X size={20} />
-                                            </button>
-                                        </div>
-                                        <p className="text-[10px] text-charcoal/40 italic">Note: Make sure to share this PIN with the specialist after saving.</p>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <>
-                                {!showPasswordReset ? (
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPasswordReset(true)}
-                                        className="text-sm text-gold font-bold flex items-center gap-2 hover:underline"
-                                    >
-                                        <RefreshCw size={14} /> Reset Password
-                                    </button>
-                                ) : (
-                                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                        <div className="flex justify-between items-center">
-                                            <label className="text-xs font-bold uppercase tracking-wider text-charcoal/60">New Access PIN</label>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                maxLength={4}
-                                                placeholder="Enter new access PIN"
-                                                className="flex-1 p-3 bg-cream/20 border border-gold/20 rounded-lg focus:outline-none focus:border-gold font-mono font-bold tracking-widest text-center text-lg"
-                                                value={newPassword}
-                                                onChange={e => setNewPassword(e.target.value.replace(/[^0-9]/g, ''))}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => { setShowPasswordReset(false); setNewPassword(''); }}
-                                                className="p-3 text-charcoal/40 hover:text-charcoal"
-                                            >
-                                                <X size={20} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-
-                    <div className="pt-4 flex gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 py-3 border border-charcoal/10 rounded-xl font-bold text-charcoal/60 hover:bg-charcoal/5 transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="flex-1 py-3 bg-gold text-white rounded-xl font-bold hover:bg-gold-dark transition-colors disabled:opacity-50"
-                        >
-                            {loading ? 'Saving...' : 'Save Changes'}
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>,
         document.body

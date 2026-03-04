@@ -432,12 +432,12 @@ const ExpensesTab: React.FC = () => {
             {isAdding && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm" onClick={() => setIsAdding(false)} />
-                    <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-                        <div className="bg-charcoal p-6 text-white">
+                    <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] flex flex-col">
+                        <div className="bg-charcoal p-6 text-white flex-shrink-0">
                             <h3 className="font-serif text-xl text-gold">Log Daily Expense</h3>
                             <p className="text-xs text-white/40 mt-1">Record a new operational cost for your ledger.</p>
                         </div>
-                        <form onSubmit={handleAddExpense} className="p-6 space-y-4">
+                        <form onSubmit={handleAddExpense} className="p-6 space-y-4 overflow-y-auto">
                             <div>
                                 <label className="block text-[10px] uppercase tracking-widest font-black text-charcoal/40 mb-1.5">Amount (₱)</label>
                                 <input

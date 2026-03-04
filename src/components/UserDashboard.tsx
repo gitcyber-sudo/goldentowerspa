@@ -622,12 +622,12 @@ const UserDashboard: React.FC = () => {
             {feedbackModalOpen && selectedBooking && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-charcoal/50 backdrop-blur-sm" onClick={() => setFeedbackModalOpen(false)} aria-hidden="true" />
-                    <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden" role="dialog" aria-modal="true" aria-label="Rate your experience">
-                        <div className="bg-gradient-to-r from-gold to-gold-dark p-6 text-white text-center">
+                    <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden max-h-[90vh] flex flex-col" role="dialog" aria-modal="true" aria-label="Rate your experience">
+                        <div className="bg-gradient-to-r from-gold to-gold-dark p-6 text-white text-center flex-shrink-0">
                             <h3 className="font-serif text-2xl mb-1">Rate Your Experience</h3>
                             <p className="text-white/80 text-xs uppercase tracking-widest font-bold">with {selectedBooking.therapists?.name}</p>
                         </div>
-                        <div className="p-6 md:p-8">
+                        <div className="p-6 md:p-8 overflow-y-auto">
                             {isEditMode && (
                                 <div className="mb-6 p-4 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700 italic flex items-center gap-2">
                                     <Shield size={14} /> This review has been submitted and is read-only.

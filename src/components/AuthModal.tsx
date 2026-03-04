@@ -154,15 +154,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 onClick={onClose}
             />
 
-            <div className="relative bg-[#F9F7F2] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gold/20 animate-fade-in">
+            <div className="relative bg-[#F9F7F2] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gold/20 animate-fade-in max-h-[90vh] flex flex-col my-auto">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-charcoal/40 hover:text-charcoal transition-colors z-10"
+                    className="absolute top-4 right-4 text-charcoal/40 hover:text-charcoal transition-colors z-10 bg-[#F9F7F2] rounded-full p-1"
                 >
                     <X size={20} />
                 </button>
 
-                <div className="p-8">
+                <div className="p-8 overflow-y-auto">
                     {showSuccess ? (
                         <div className="text-center py-8 animate-fade-in">
                             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gold/10 flex items-center justify-center">

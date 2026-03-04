@@ -17,10 +17,10 @@ const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ isOpen, onClose, review }) 
 
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-sm">
-            <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+            <div className="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden max-h-[90vh] flex flex-col">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
-                <div className="flex justify-between items-center mb-6 relative z-10">
+                <div className="flex justify-between items-center mb-6 relative z-10 flex-shrink-0">
                     <div>
                         <h2 className="font-serif text-2xl text-charcoal">Treatment Review</h2>
                         <p className="text-xs text-charcoal/40 uppercase font-black tracking-widest mt-1">Feedback from {review.booking.guest_name || review.booking.user_email}</p>
@@ -30,7 +30,7 @@ const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ isOpen, onClose, review }) 
                     </button>
                 </div>
 
-                <div className="space-y-6 relative z-10">
+                <div className="space-y-6 relative z-10 overflow-y-auto custom-scrollbar pr-2">
                     {/* Current Review */}
                     <div className="bg-gold/5 p-6 rounded-2xl border border-gold/10">
                         <div className="flex justify-between items-center mb-3">
