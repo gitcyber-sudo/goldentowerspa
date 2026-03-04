@@ -93,7 +93,7 @@ const AdminDashboard: React.FC = () => {
     const fetchTherapists = useCallback(async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase.from('therapists').select('*').is('deleted_at', null);
+            const { data, error } = await supabase.from('therapists').select('*').is('deleted_at', null).order('name');
             if (error) throw error;
             if (data) setTherapists(data as any);
         } catch (err) {
@@ -111,16 +111,17 @@ const AdminDashboard: React.FC = () => {
                 const sorted = [...data].sort((a, b) => {
                     const aTitle = a.title.toUpperCase();
                     const bTitle = b.title.toUpperCase();
-                    const aIsSignature = a.category === 'signature' || aTitle.includes('SIGNATURE');
-                    const bIsSignature = b.category === 'signature' || bTitle.includes('SIGNATURE');
-                    const aIsPackage = aTitle.includes('PACKAGE');
-                    const bIsPackage = bTitle.includes('PACKAGE');
-
-                    if (aIsSignature && !bIsSignature) return -1;
-                    if (!aIsSignature && bIsSignature) return 1;
-                    if (aIsPackage && !bIsPackage) return 1;
-                    if (!aIsPackage && bIsPackage) return -1;
-                    if (aIsPackage && bIsPackage) return aTitle.localeCompare(bTitle, undefined, { numeric: true });
+                    const getPriority = (item: any, title: string) => {
+                        if (title.includes('COMBINATION')) return 0;
+                        if (item.category === 'signature' || title.includes('SIGNATURE')) return 1;
+                        if (title.includes('PACKAGE')) return 4;
+                        if (item.category === 'express' || title.includes('EXPRESS')) return 3;
+                        return 2;
+                    };
+                    const pA = getPriority(a, aTitle);
+                    const pB = getPriority(b, bTitle);
+                    if (pA !== pB) return pA - pB;
+                    if (pA === 4) return aTitle.localeCompare(bTitle, undefined, { numeric: true });
                     return aTitle.localeCompare(bTitle);
                 });
                 setServices(sorted as any);
@@ -167,7 +168,7 @@ const AdminDashboard: React.FC = () => {
         }
     }, [activeTab, fetchBookings, fetchTherapists]);
 
-    const updateStatus = useCallback(async (id: string, newStatus: string, therapistId?: string, completionTime?: string, tipAmount?: number, tipRecipient?: 'management' | 'therapist' | null, paymentMethod?: 'cash' | 'gcash') => {
+    const updateStatus = useCallback(async (id: string, newStatus: string, therapistId?: string, completionTime?: string, tipAmount?: number, tipRecipient?: 'management' | 'therapist' | null, paymentMethod?: 'cash' | 'gcash' | 'bank') => {
         const booking = bookings.find(b => b.id === id);
         if (!booking) return;
 

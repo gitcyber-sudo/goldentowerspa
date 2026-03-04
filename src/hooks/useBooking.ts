@@ -98,6 +98,7 @@ export const useBooking = (initialServiceId?: string, isOpen?: boolean) => {
                 const aTitle = a.title.toUpperCase();
                 const bTitle = b.title.toUpperCase();
                 const getPriority = (item: Service, title: string) => {
+                    if (title.includes('COMBINATION')) return 0;
                     if (item.category === 'signature' || title.includes('SIGNATURE')) return 1;
                     if (title.includes('PACKAGE')) return 4;
                     if (item.category === 'express' || title.includes('EXPRESS')) return 3;

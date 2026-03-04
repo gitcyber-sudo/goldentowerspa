@@ -248,42 +248,38 @@ const BookingsTab: React.FC<BookingsTabProps> = React.memo(({
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <div className="flex justify-end gap-2">
+                                        <div className="flex justify-end gap-2 flex-wrap">
                                             {/* Quick Actions */}
                                             {b.status === 'pending' && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); !b.therapist_id ? setAssigningBooking(b) : onUpdateStatus(b.id, 'confirmed'); }}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                                    title="Confirm Booking"
+                                                    className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-[11px] font-bold uppercase tracking-wide hover:bg-blue-600 transition-colors flex items-center gap-1.5"
                                                 >
-                                                    <CheckCircle2 size={18} />
+                                                    <CheckCircle2 size={14} /> Click to Confirm Booking
                                                 </button>
                                             )}
                                             {b.status === 'confirmed' && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onUpdateStatus(b.id, 'completed'); }}
-                                                    className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                                                    title="Mark as Completed"
+                                                    className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-[11px] font-bold uppercase tracking-wide hover:bg-emerald-600 transition-colors flex items-center gap-1.5"
                                                 >
-                                                    <Check size={18} />
+                                                    <Check size={14} /> Click to Complete Booking
                                                 </button>
                                             )}
                                             {(b.status === 'pending' || b.status === 'confirmed') && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onEdit(b); }}
-                                                    className="p-2 text-gold hover:bg-gold/10 rounded-lg transition-colors"
-                                                    title="Edit Booking"
+                                                    className="px-3 py-1.5 bg-gold/10 text-gold rounded-lg text-[11px] font-bold uppercase tracking-wide hover:bg-gold/20 transition-colors flex items-center gap-1.5"
                                                 >
-                                                    <Edit3 size={18} />
+                                                    <Edit3 size={14} /> Edit
                                                 </button>
                                             )}
                                             {b.status === 'completed' && feedbacks[b.id] && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onViewReview({ booking: b, feedback: feedbacks[b.id] }); }}
-                                                    className="p-2 text-gold hover:bg-gold/10 rounded-lg transition-colors group relative"
-                                                    title="View Review"
+                                                    className="px-3 py-1.5 bg-gold/10 text-gold rounded-lg text-[11px] font-bold uppercase tracking-wide hover:bg-gold/20 transition-colors flex items-center gap-1.5 relative"
                                                 >
-                                                    <Star size={18} fill={feedbacks[b.id].rating >= 4 ? 'currentColor' : 'none'} />
+                                                    <Star size={14} fill={feedbacks[b.id].rating >= 4 ? 'currentColor' : 'none'} /> View Review
                                                     {feedbacks[b.id].edit_count > 0 && (
                                                         <span className="absolute -top-1 -right-1 flex h-3 w-3">
                                                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75"></span>

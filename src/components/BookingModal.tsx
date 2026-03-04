@@ -92,11 +92,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                 ref={modalRef}
                 className="modal-content relative bg-cream w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl border border-gold/20 my-auto"
             >
-                {/* ... Close Button ... */}
+                {/* ... Close Button - Sticky ... */}
                 <button
                     ref={closeButtonRef}
                     onClick={onClose}
-                    className="absolute top-4 right-4 md:top-6 md:right-6 text-charcoal/50 hover:text-gold transition-colors z-50 p-1"
+                    className="sticky top-0 float-right text-charcoal/50 hover:text-gold transition-colors z-50 p-2 m-2 md:m-4 bg-cream/80 backdrop-blur-sm rounded-full"
                     aria-label="Close booking modal"
                 >
                     <X size={24} aria-hidden="true" />
@@ -246,7 +246,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialSer
                                                 title: s.title,
                                                 subtitle: s.category === 'signature' ? 'Signature Treatment' : undefined,
                                                 description: s.description,
-                                                imageUrl: s.image_url,
                                                 price: s.price,
                                                 duration: s.duration
                                             }))}

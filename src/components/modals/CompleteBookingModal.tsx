@@ -8,7 +8,7 @@ import CustomTimePicker from '../ui/CustomTimePicker';
 interface CompleteBookingModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (completionTime: string, tipAmount: number, tipRecipient: 'management' | 'therapist' | null, paymentMethod: 'cash' | 'gcash') => void;
+    onConfirm: (completionTime: string, tipAmount: number, tipRecipient: 'management' | 'therapist' | null, paymentMethod: 'cash' | 'gcash' | 'bank') => void;
     bookingDate: string;
     bookingTime?: string;
     duration?: number;
@@ -57,7 +57,7 @@ const CompleteBookingModal: React.FC<CompleteBookingModalProps> = ({ isOpen, onC
     const [time, setTime] = useState(initialState.time);
     const [tipAmount, setTipAmount] = useState<number | ''>('');
     const [tipRecipient, setTipRecipient] = useState<'management' | 'therapist'>('management');
-    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'gcash'>('cash');
+    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'gcash' | 'bank'>('cash');
 
     const totalAmount = useMemo(() => {
         const tip = typeof tipAmount === 'number' ? tipAmount : 0;
@@ -156,7 +156,7 @@ const CompleteBookingModal: React.FC<CompleteBookingModalProps> = ({ isOpen, onC
                             <label className="block text-sm font-bold text-charcoal/80">
                                 Payment Method
                             </label>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-3 gap-3">
                                 <button
                                     onClick={() => setPaymentMethod('cash')}
                                     className={`py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${paymentMethod === 'cash' ? 'bg-charcoal text-white shadow-lg scale-[1.02]' : 'bg-charcoal/5 text-charcoal/40 hover:bg-charcoal/10'}`}
@@ -168,6 +168,12 @@ const CompleteBookingModal: React.FC<CompleteBookingModalProps> = ({ isOpen, onC
                                     className={`py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${paymentMethod === 'gcash' ? 'bg-blue-600 text-white shadow-lg scale-[1.02]' : 'bg-charcoal/5 text-charcoal/40 hover:bg-charcoal/10'}`}
                                 >
                                     GCash
+                                </button>
+                                <button
+                                    onClick={() => setPaymentMethod('bank')}
+                                    className={`py-3 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${paymentMethod === 'bank' ? 'bg-emerald-600 text-white shadow-lg scale-[1.02]' : 'bg-charcoal/5 text-charcoal/40 hover:bg-charcoal/10'}`}
+                                >
+                                    Bank
                                 </button>
                             </div>
                         </div>
