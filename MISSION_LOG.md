@@ -16,6 +16,14 @@
 - [x] Optimized Live Shift Timeline visibility.
 - [x] Standardized Full Automation & Browser Restriction.
 - [x] Fixed mobile visibility for Commission Payout History.
+- [x] Fixed About page visibility & redesign.
+
+### [2026-03-11 15:25] About Page Visibility Fix & Redesign
+- **Action Taken**:
+  - Root cause: CSS `.reveal` class (opacity: 0, waits for `is-visible` via IntersectionObserver) conflicted with GSAP `ScrollTrigger` animations in `About.tsx`. GSAP's `from({opacity:0})` captured the CSS-computed `0` as its "to" value, leaving all content invisible.
+  - Fix: Replaced `reveal` with `about-reveal` class + inline `style={{ opacity: 0 }}`. Converted all `gsap.from()` to `gsap.fromTo()` with explicit `opacity: 1` targets.
+  - Added "Visit Us" section with location, hours, and contact info.
+- **Result/Lesson**: Never mix CSS transition-based reveal classes with GSAP on the same elements — they fight over the same properties. Use one animation system per element.
 
 ### [2026-02-24 09:05] Commission History Mobility Alignment
 - **Action Taken**: 
