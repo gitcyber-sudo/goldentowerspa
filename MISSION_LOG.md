@@ -18,6 +18,14 @@
 - [x] Fixed mobile visibility for Commission Payout History.
 - [x] Fixed About page visibility & redesign.
 
+### [2026-03-16 17:35] Security Fix — Resend API Key Remediation
+- **Action Taken**: Removed hardcoded Resend API key (`re_3b3HMFeH_...`) from `supabase/functions/log-error/index.ts` line 70. The fallback value was replaced with strict `Deno.env.get('RESEND_API_KEY')` and a `console.warn` if missing. Deployed updated Edge Function v8 to Supabase.
+- **Result/Lesson**: Never use hardcoded API keys as fallback values — even in Edge Functions. Always use environment secrets. The exposed key must be rotated on Resend's dashboard since it was committed to Git history.
+
+### [2026-03-16 17:20] Security Audit — Exposed API Keys Scan
+- **Action Taken**: Full project scan for exposed API keys, secrets, and credentials across all source files, scripts, config, git tracking, and git history.
+- **Result/Lesson**: `.env.local` is properly gitignored and never committed. However, 7 utility scripts (e.g., `resetPasswords.cjs`, `verify_cors.cjs`) are tracked in git, exposing a hardcoded default password `0000-GTS` and the Supabase project ref. Recommended adding these to `.gitignore` and running `git rm --cached`.
+
 ### [2026-03-11 15:25] About Page Visibility Fix & Redesign
 - **Action Taken**:
   - Root cause: CSS `.reveal` class (opacity: 0, waits for `is-visible` via IntersectionObserver) conflicted with GSAP `ScrollTrigger` animations in `About.tsx`. GSAP's `from({opacity:0})` captured the CSS-computed `0` as its "to" value, leaving all content invisible.

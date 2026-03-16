@@ -67,8 +67,10 @@ serve(async (req) => {
         }
 
         // 3. Send Email Notification
-        const resendApiKey = Deno.env.get('RESEND_API_KEY') || 're_3b3HMFeH_GdvT4GmnroXWsRu9v2zXFsLh';
-        if (resendApiKey) {
+        const resendApiKey = Deno.env.get('RESEND_API_KEY');
+        if (!resendApiKey) {
+            console.warn('RESEND_API_KEY not set — skipping email notification.');
+        } else {
             const res = await fetch('https://api.resend.com/emails', {
                 method: 'POST',
                 headers: {
