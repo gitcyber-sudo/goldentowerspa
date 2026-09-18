@@ -42,7 +42,8 @@ const Footer: React.FC = () => {
             <ul className="space-y-6 font-light text-white/80">
               <li className="flex items-start">
                 <MapPin className="mr-4 text-gold mt-1 flex-shrink-0" size={18} />
-                <span>#1 C2 Road 9, Project 6,<br />Quezon City, Philippines</span>
+                {/* Updated physical location */}
+                <span>No. 25 Pontiac Street, Fairview,<br />Quezon City</span>
               </li>
               <li className="flex items-center">
                 <Mail className="mr-4 text-gold flex-shrink-0" size={18} />

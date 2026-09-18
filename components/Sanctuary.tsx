@@ -86,9 +86,10 @@ const Sanctuary: React.FC = () => {
                                 <MapPin className="text-gold" size={28} />
                                 Our Location
                             </h3>
+                            {/* Updated physical location */}
                             <p className="text-xl text-charcoal-light leading-relaxed font-light pl-10">
-                                #1 C2 Road 9, Project 6,<br />
-                                Quezon City, 1100 Philippines
+                                No. 25 Pontiac Street, Fairview,<br />
+                                Quezon City
                             </p>
                             <div className="pt-4 pl-0 md:pl-10 w-full">
                                 <a
