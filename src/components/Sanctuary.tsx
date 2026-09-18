@@ -93,8 +93,9 @@ const Sanctuary: React.FC = () => {
                                 Quezon City
                             </p>
                             <div className="pt-4 pl-0 md:pl-10 w-full">
+                                {/* Updated directions destination URL */}
                                 <a
-                                    href="https://www.google.com/maps/dir/?api=1&destination=Golden+Tower+Spa+Project+6+Quezon+City"
+                                    href="https://www.google.com/maps/dir/?api=1&destination=No.+25+Pontiac+Street,+Fairview,+Quezon+City"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-full md:w-auto flex items-center gap-4 bg-gradient-to-r from-charcoal to-charcoal/90 text-white py-4 px-6 rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-gold/20 transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden border border-gold/10"

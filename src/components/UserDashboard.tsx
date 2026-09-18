@@ -536,7 +536,7 @@ const UserDashboard: React.FC = () => {
                         <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-all"><Phone className="text-emerald-600" size={18} /></div>
                         <div className="text-left"><p className="font-bold text-charcoal text-sm">Call Us</p><p className="text-[10px] text-charcoal/40">0922 826 2336</p></div>
                     </a>
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=Golden+Tower+Spa+Project+6+Quezon+City" target="_blank" rel="noopener noreferrer" className="bg-white p-3.5 rounded-xl border border-gold/20 hover:border-gold/30 hover:shadow-md transition-all flex items-center gap-4 group" aria-label="Get directions to Golden Tower Spa">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=No.+25+Pontiac+Street,+Fairview,+Quezon+City" target="_blank" rel="noopener noreferrer" className="bg-white p-3.5 rounded-xl border border-gold/20 hover:border-gold/30 hover:shadow-md transition-all flex items-center gap-4 group" aria-label="Get directions to Golden Tower Spa">
                         <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-all"><MapPin className="text-blue-600" size={18} /></div>
                         <div className="text-left"><p className="font-bold text-charcoal text-sm">Find Us</p><p className="text-[10px] text-charcoal/40">Get directions</p></div>
                     </a>

@@ -61,11 +61,12 @@
 
 ## September 18, 2026
 
-### Task: Address Migration Maintenance
-- **Objective:** Update primary facility address across client-facing components (`Footer.tsx`, `Sanctuary.tsx`) from `#1 C2 Road 9, Project 6, Quezon City, 1100 Philippines` to `No. 25 Pontiac Street, Fairview, Quezon City`.
+### Task: Address & Google Maps Direction Link Maintenance
+- **Objective:** 
+  1. Update primary facility address across all client-facing components (`src/components/Footer.tsx`, `src/components/Sanctuary.tsx`, `src/pages/ServicesPage.tsx`, `src/components/UserDashboard.tsx`) from `#1 C2 Road 9, Project 6, Quezon City, 1100 Philippines` to `No. 25 Pontiac Street, Fairview, Quezon City`.
+  2. Update all Google Maps direction navigation links from `destination=Golden+Tower+Spa+Project+6+Quezon+City` to `destination=No.+25+Pontiac+Street,+Fairview,+Quezon+City`.
 - **Status:** Completed 🟢
-- **Verification:** Verified all occurrences updated with appropriate source code safety comments.
-=======
+- **Verification:** Source files updated under `src/components/` and `src/pages/` with safety comments. Build tested via Vite.
 ## Status: 🤖 AUTO MODE ACTIVE
 **Last Sync**: [2026-02-21 21:33] Enable Full Automation
 - **Action Taken**: Activated `// turbo-all` workflow. All subsequent terminal commands will be set to `SafeToAutoRun: true`.
@@ -103,5 +104,4 @@
   - Implemented card-based fallback for `payouts` ledger in `CommissionsTab.tsx`.
   - Statically defined breakpoints to swap `<table>` for stacked `<div>` cards on mobile.
 - **Result/Lesson**: Improved accessibility for administrators on the go. Stacking data vertically is superior to horizontal scrolling for financial ledgers on small screens.
->>>>>>> c6b95b62c08865c47bde1d054d82c6b5f56a6770
 

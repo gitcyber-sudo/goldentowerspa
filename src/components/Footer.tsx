@@ -43,7 +43,8 @@ const Footer: React.FC = () => {
                 <a href="https://wa.me/639228262336" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-white/10 text-white/40 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all duration-300" aria-label="Message us on WhatsApp">
                   <MessageCircle size={20} />
                 </a>
-                <a href="https://www.google.com/maps/dir/?api=1&destination=Golden+Tower+Spa+Project+6+Quezon+City" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-white/10 text-white/40 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all duration-300" aria-label="Find us on Maps">
+                {/* Updated directions link query */}
+                <a href="https://www.google.com/maps/dir/?api=1&destination=No.+25+Pontiac+Street,+Fairview,+Quezon+City" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-white/10 text-white/40 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all duration-300" aria-label="Find us on Maps">
                   <MapPin size={20} />
                 </a>
               </div>
@@ -75,7 +76,7 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <MapPin size={16} className="text-gold flex-shrink-0 mt-0.5" />
-                  <span>#1 C2 Road 9, Project 6, Quezon City, 1100 Philippines</span>
+                  <span>No. 25 Pontiac Street, Fairview, Quezon City</span>
                 </li>
               </ul>
             </div>

@@ -41,7 +41,7 @@ const faqs: FAQItem[] = [
     },
     {
         question: "Where exactly is Golden Tower Spa located?",
-        answer: "Golden Tower Spa is located at #1 C2 Road 9, Project 6, Quezon City, 1100 Philippines. We are easily accessible from major roads in Quezon City and the rest of Metro Manila. Click 'Get Directions' on our homepage for Google Maps navigation."
+        answer: "Golden Tower Spa is located at No. 25 Pontiac Street, Fairview, Quezon City. We are easily accessible from major roads in Quezon City and the rest of Metro Manila. Click 'Get Directions' on our homepage for Google Maps navigation."
     },
     {
         question: "What is traditional Hilot massage?",
